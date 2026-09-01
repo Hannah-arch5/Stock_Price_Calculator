@@ -4,6 +4,20 @@ function replayAllAnimations() {
     document.body.offsetHeight; // trigger reflow
     document.body.classList.remove('disable-animations');
 }
+// Market detection helper
+function getMarketInfo(symbol) {
+    if (!symbol) return { currency: '¥', upColor: '#ff453a', downColor: '#32d74b', market: 'cn' };
+    const s = symbol.trim().toUpperCase();
+    // A-share: 6-digit number
+    if (/^\d{6}$/.test(s)) return { currency: '¥', upColor: '#ff453a', downColor: '#32d74b', market: 'cn' };
+    // HK stock: 5-digit number (e.g. 00700)
+    if (/^\d{5}$/.test(s)) return { currency: 'HK$', upColor: '#32d74b', downColor: '#ff453a', market: 'hk' };
+    // SH/SZ prefix A-share
+    if (/^(SH|SZ)\d/.test(s)) return { currency: '¥', upColor: '#ff453a', downColor: '#32d74b', market: 'cn' };
+    // US stock: letters only (or letters + digits like BRK.B)
+    return { currency: '$', upColor: '#32d74b', downColor: '#ff453a', market: 'us' };
+}
+
 // Global state
 let currentCurrency = '¥';
 let historyRecords = [];
@@ -373,7 +387,11 @@ function renderHistory(scrollToSymbol = null) {
             let tagText = group.symbol;
             if (group.name) {
                 const cleanName = group.name.replace(/\s+/g, '');
-                tagText = cleanName.length <= 3 ? cleanName : cleanName.substring(0, 2);
+                const hasChinese = /[\u4e00-\u9fa5]/.test(cleanName);
+                if (hasChinese) {
+                    tagText = cleanName.length <= 3 ? cleanName : cleanName.substring(0, 2);
+                }
+                // For non-Chinese (US/HK stocks), keep the symbol as-is
             }
             tag.textContent = tagText;
             
@@ -429,6 +447,12 @@ function renderHistory(scrollToSymbol = null) {
         const groupEl = document.createElement('div');
         groupEl.className = 'history-group';
         groupEl.dataset.symbol = group.symbol;
+        
+        // Auto-detect market and apply per-card color variables
+        const mktInfo = getMarketInfo(group.symbol);
+        groupEl.style.setProperty('--up-color', mktInfo.upColor);
+        groupEl.style.setProperty('--down-color', mktInfo.downColor);
+        groupEl.dataset.market = mktInfo.market;
         
         const baseDelay = 0.3 + groupIndex * 0.15;
         groupEl.draggable = true;
@@ -526,10 +550,19 @@ function renderHistory(scrollToSymbol = null) {
                 makeEditable(codeSpan, group.symbol, (newVal) => {
                     newVal = newVal.trim().toUpperCase();
                     if (newVal && newVal !== group.symbol) {
+                        const oldSymbol = group.symbol;
                         group.symbol = newVal;
-                        group.records.forEach(r => r.symbol = newVal);
+                        group.records.forEach(r => {
+                            r.symbol = newVal;
+                            // Auto-update currency based on new symbol
+                            r.currency = getMarketInfo(newVal).currency;
+                        });
                         group.name = '';
                         group.nameFetched = false;
+                        
+                        // Clear news cache for both old and new symbol so it reloads fresh
+                        delete NEWS_CACHE[oldSymbol];
+                        delete NEWS_CACHE[newVal];
                         
                         const existingGroupIndex = historyRecords.findIndex(g => g !== group && g.symbol === newVal);
                         if (existingGroupIndex !== -1) {
@@ -567,7 +600,10 @@ function renderHistory(scrollToSymbol = null) {
                                 const tagEl = document.getElementById('quick-tags')?.querySelector(`[data-symbol="${group.symbol}"]`);
                                 if (tagEl) {
                                     const cleanName = newVal.replace(/\s+/g, '');
-                                    tagEl.textContent = cleanName.length <= 3 ? cleanName : cleanName.substring(0, 2);
+                                    const hasChinese = /[\u4e00-\u9fa5]/.test(cleanName);
+                                    tagEl.textContent = hasChinese
+                                        ? (cleanName.length <= 3 ? cleanName : cleanName.substring(0, 2))
+                                        : group.symbol;
                                 }
                             } else {
                                 nameSpan.textContent = group.name || '';
@@ -588,7 +624,10 @@ function renderHistory(scrollToSymbol = null) {
                         const tagEl = document.getElementById('quick-tags')?.querySelector(`[data-symbol="${group.symbol}"]`);
                         if (tagEl) {
                             const cleanName = name.replace(/\s+/g, '');
-                            tagEl.textContent = cleanName.length <= 3 ? cleanName : cleanName.substring(0, 2);
+                            const hasChinese = /[\u4e00-\u9fa5]/.test(cleanName);
+                            tagEl.textContent = hasChinese
+                                ? (cleanName.length <= 3 ? cleanName : cleanName.substring(0, 2))
+                                : group.symbol;
                         }
                     }
                 });
@@ -666,7 +705,42 @@ function renderHistory(scrollToSymbol = null) {
         headerActions.appendChild(deleteGroupBtn);
         
         headerEl.appendChild(titleEl);
-        headerEl.appendChild(headerActions);
+    
+    const statsEl = document.createElement('div');
+    statsEl.className = 'group-stats';
+    
+    
+    
+    
+    
+    statsEl.innerHTML = `
+        <span style="margin-left:10px;">C:</span>
+        <input type="text" placeholder="--" class="stat-input group-cost-input" value="${group.cost || ''}" />
+        <span style="margin-left:10px;">Q:</span>
+        <input type="text" placeholder="--" class="stat-input group-qty-input" value="${group.qty || ''}" />
+    `;
+    headerEl.insertBefore(statsEl, titleEl.nextSibling); // Insert right after titleEl
+
+    const costInput = statsEl.querySelector('.group-cost-input');
+    const qtyInput = statsEl.querySelector('.group-qty-input');
+
+    costInput.addEventListener('input', (e) => {
+        group.cost = e.target.value;
+        saveState();
+    });
+    qtyInput.addEventListener('input', (e) => {
+        group.qty = e.target.value;
+        saveState();
+    });
+
+    // Pause drag during input hover
+    const pauseDrag = () => { groupEl.setAttribute('draggable', 'false'); };
+    const resumeDrag = () => { groupEl.setAttribute('draggable', 'true'); };
+    
+    statsEl.addEventListener('mouseenter', pauseDrag);
+    statsEl.addEventListener('mouseleave', resumeDrag);
+    
+    headerEl.appendChild(headerActions);
             
         const listEl = document.createElement('div');
         listEl.className = 'group-list';
@@ -1297,6 +1371,12 @@ function updateArrayFromDOM() {
         const originalGroup = historyRecords.find(g => g.symbol === symbol) || {};
         
         const memoArea = groupEl.querySelector('.group-memo-area');
+    if (memoArea) {
+        memoArea.addEventListener('mouseenter', () => groupEl.setAttribute('draggable', 'false'));
+        memoArea.addEventListener('mouseleave', () => groupEl.setAttribute('draggable', 'true'));
+    }
+    memoArea.addEventListener('mouseenter', () => groupEl.setAttribute('draggable', 'false'));
+    memoArea.addEventListener('mouseleave', () => groupEl.setAttribute('draggable', 'true'));
         const note = memoArea ? memoArea.querySelector('textarea').value : originalGroup.note || '';
         const tf_w = memoArea ? memoArea.querySelector('[data-tf="tf_w"]').value : originalGroup.tf_w || '';
         const tf_d = memoArea ? memoArea.querySelector('[data-tf="tf_d"]').value : originalGroup.tf_d || '';
@@ -1453,15 +1533,17 @@ savePercentageBtn.addEventListener('click', () => {
     const final = parseFloat(finalPriceInput.value);
     if (isNaN(initial) || isNaN(final) || initial === 0) return;
 
+    const sym2 = stockSymbol2Input.value.trim().toUpperCase();
+    const recCur2 = getMarketInfo(sym2).currency;
     addRecordToHistory({
         type: 'Percentage Delta',
         mode: 'percentage',
-        symbol: stockSymbol2Input.value.trim().toUpperCase(),
-        details: `<span>Base: ${currentCurrency}${initial}</span><span>Target: ${currentCurrency}${final}</span>`,
+        symbol: sym2,
+        details: `<span>Base: ${recCur2}${initial}</span><span>Target: ${recCur2}${final}</span>`,
         result: `${Math.abs(currentPercentage).toFixed(2)}%`,
         isUp: currentPercentage > 0,
         inputs: { initial, final },
-        currency: currentCurrency
+        currency: recCur2
     });
 });
 
@@ -1505,6 +1587,35 @@ function populateForm(record, symbol) {
             if (finalMatch) finalPriceInput.value = finalMatch[1];
         }
         handleInput();
+    }
+
+    // Auto-switch calculator currency & colors based on the stock symbol
+    const popSymbol = symbol || record.symbol || '';
+    if (popSymbol) {
+        const mkt = getMarketInfo(popSymbol);
+        currentCurrency = mkt.currency;
+        
+        // Update radio buttons
+        if (mkt.currency === '¥') {
+            document.getElementById('currency-cny').checked = true;
+        } else {
+            document.getElementById('currency-usd').checked = true;
+        }
+        
+        // Update nav toggle
+        const navToggle = document.getElementById('nav-currency-toggle');
+        if (navToggle) navToggle.textContent = mkt.currency === '¥' ? 'CNY' : 'USD';
+        
+        // Update global colors for the calculator panel
+        document.documentElement.style.setProperty('--up-color', mkt.upColor);
+        document.documentElement.style.setProperty('--down-color', mkt.downColor);
+        
+        // Update currency symbols in the calculator
+        currencySymbols.forEach(s => { s.textContent = mkt.currency; });
+        
+        calculateTargetPrice();
+        calculatePercentage();
+        saveState();
     }
 }
 
@@ -1731,7 +1842,100 @@ async function loadStockNews(symbol, groupIndex) {
     
     const match = symbol.match(/\d{4,6}/);
     if (!match) {
-        panel.innerHTML = '<div style="font-size: 0.7rem; color: var(--fg-dim);">No news available.</div>';
+        if (window.electronAPI && window.electronAPI.fetchYahoo) {
+            try {
+                const yahooData = await window.electronAPI.fetchYahoo(symbol);
+                if (yahooData.error) throw new Error(yahooData.error);
+                
+                const cal = yahooData.quoteSummary?.calendarEvents?.earnings;
+                const fin = yahooData.quoteSummary?.financialData;
+                
+                const sum = yahooData.quoteSummary?.summaryDetail;
+                
+                let earningsDateHtml = '<div style="font-size: 0.8rem; color: var(--fg-dim); padding-bottom: 0.3rem;">未找到财报发布日期。 (No earnings date available)</div>';
+                if (cal && cal.earningsDate && cal.earningsDate.length > 0) {
+                    const dates = cal.earningsDate.map(d => new Date(d).toLocaleDateString()).join(' - ');
+                    earningsDateHtml = `<div style="font-size: 0.85rem; color: var(--fg); padding-bottom: 0.3rem; font-weight: 500;">下次财报日期 (Next Earnings): ${dates}</div>`;
+                }
+                
+                let researchHtml = '<div style="font-size: 0.7rem; color: var(--fg-dim); padding: 0.5rem 0;">未找到财务数据。 (No financial data available)</div>';
+                if (fin) {
+                    const formatPct = (val) => val != null ? (val * 100).toFixed(2) + '%' : 'N/A';
+                    const formatNum = (val) => val != null ? val.toFixed(2) : 'N/A';
+                    const formatLarge = (val) => {
+                        if (!val) return 'N/A';
+                        if (val >= 1e12) return (val / 1e12).toFixed(2) + 'T';
+                        if (val >= 1e9) return (val / 1e9).toFixed(2) + 'B';
+                        if (val >= 1e6) return (val / 1e6).toFixed(2) + 'M';
+                        return val.toLocaleString();
+                    };
+                    
+                    const revGrowth = formatPct(fin.revenueGrowth);
+                    const earnGrowth = formatPct(fin.earningsGrowth);
+                    const profitMargin = formatPct(fin.profitMargins);
+                    const roe = formatPct(fin.returnOnEquity);
+                    const debtToEquity = fin.debtToEquity ? fin.debtToEquity.toFixed(2) : 'N/A';
+                    const analystRecom = fin.recommendationKey ? fin.recommendationKey.toUpperCase() : 'N/A';
+                    const meanTarget = fin.targetMeanPrice ? fin.targetMeanPrice.toFixed(2) : 'N/A';
+                    const pe = sum && sum.trailingPE ? sum.trailingPE.toFixed(2) : 'N/A';
+                    const fwdPe = sum && sum.forwardPE ? sum.forwardPE.toFixed(2) : 'N/A';
+                    const mktCap = sum && sum.marketCap ? formatLarge(sum.marketCap) : 'N/A';
+                    const divYield = sum && sum.dividendYield ? formatPct(sum.dividendYield) : 'N/A';
+
+                    // Report period label from defaultKeyStatistics
+                    const keyStats = yahooData.quoteSummary?.defaultKeyStatistics;
+                    let reportPeriodHtml = '';
+                    if (keyStats && keyStats.mostRecentQuarter) {
+                        const qDate = new Date(keyStats.mostRecentQuarter);
+                        const qMonth = qDate.getMonth() + 1;
+                        const qYear = qDate.getFullYear();
+                        let qLabel = 'Q' + Math.ceil(qMonth / 3) + ' ' + qYear;
+                        reportPeriodHtml = `<div style="font-size: 0.7rem; color: var(--fg-dim); margin-bottom: 0.3rem;">最新财报: ${qLabel} (TTM Data)</div>`;
+                    }
+
+                    researchHtml = `
+                        ${reportPeriodHtml}
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; font-size: 0.75rem; color: var(--fg); margin-top: 0.3rem;">
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">市值 (Mkt Cap)</span><br><strong>${mktCap}</strong></div>
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">营收增长 (Rev)</span><br><strong style="color:${fin.revenueGrowth >= 0 ? 'var(--up-color)' : 'var(--down-color)'}">${revGrowth}</strong></div>
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">盈利增长 (Earn)</span><br><strong style="color:${fin.earningsGrowth >= 0 ? 'var(--up-color)' : 'var(--down-color)'}">${earnGrowth}</strong></div>
+
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">利润率 (Margin)</span><br><strong>${profitMargin}</strong></div>
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">ROE</span><br><strong>${roe}</strong></div>
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">债务股本 (D/E)</span><br><strong>${debtToEquity}</strong></div>
+
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">市盈率 (P/E)</span><br><strong>${pe}</strong></div>
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">预测PE (Fwd)</span><br><strong>${fwdPe}</strong></div>
+                            <div><span style="color:var(--fg-dim); font-size:0.7rem;">股息率 (Yield)</span><br><strong>${divYield}</strong></div>
+
+                            <div style="grid-column: span 3;"><span style="color:var(--fg-dim); font-size:0.7rem;">分析师目标价 (Target Price)</span><br><strong>$${meanTarget} (${analystRecom})</strong></div>
+                        </div>
+                    `;
+                }
+
+                const finalHtml = `
+                    <div class="news-tabs">
+                        <div class="news-tab active" data-target="tab-earnings-${symbol}">Earnings & Analysis (财报与分析)</div>
+                    </div>
+                    <div class="news-content-area active" id="tab-earnings-${symbol}">
+                        <div style="padding-top: 0.3rem;">
+                            ${earningsDateHtml}
+                            <hr style="border: 0; border-bottom: 1px dashed var(--border); margin: 0.3rem 0;">
+                            ${researchHtml}
+                        </div>
+                    </div>
+                `;
+                
+                panel.innerHTML = finalHtml;
+                NEWS_CACHE[symbol] = finalHtml;
+                attachTabs();
+            } catch (err) {
+                panel.innerHTML = '<div style="font-size: 0.7rem; color: var(--fg-dim);">Failed to load Yahoo News.</div>';
+                console.error(err);
+            }
+        } else {
+            panel.innerHTML = '<div style="font-size: 0.7rem; color: var(--fg-dim);">No news available.</div>';
+        }
         return;
     }
     const code = match[0];
@@ -1778,7 +1982,7 @@ async function loadStockNews(symbol, groupIndex) {
                 noticesHtml += `
                     <a href="${link}" class="news-item" target="_blank">
                         <span class="news-tag">【${tag}】</span>
-                        <span class="news-text event-text">${title}</span>
+                        <span class="news-text event-text">${title}<button class="send-to-chat-icon" title="Send to Chat" onclick="attachNewsToChat('${encodeURIComponent(title)}', '${encodeURIComponent(link)}'); event.preventDefault(); event.stopPropagation();">↗</button></span>
                         <span class="news-date">${noticeDate}</span>
                     </a>
                 `;
@@ -1884,7 +2088,7 @@ async function loadStockNews(symbol, groupIndex) {
                 eventsHtml += `
                     <a href="${event.link}" class="news-item" target="_blank">
                         <span class="news-tag">【${event.tag}】</span>
-                        <span class="news-text event-text">${event.text}</span>
+                        <span class="news-text event-text">${event.text}<button class="send-to-chat-icon" title="Send to Chat" onclick="attachNewsToChat('${encodeURIComponent(event.text)}', '${encodeURIComponent(event.link)}'); event.preventDefault(); event.stopPropagation();">↗</button></span>
                         <span class="news-date">${event.date}</span>
                     </a>
                 `;
@@ -1926,7 +2130,7 @@ async function loadStockNews(symbol, groupIndex) {
                         indReportsHtml += `
                             <a href="${event.link}" class="news-item" target="_blank">
                                 <span class="news-tag">【${event.tag}】</span>
-                                <span class="news-text event-text">${event.text}</span>
+                                <span class="news-text event-text">${event.text}<button class="send-to-chat-icon" title="Send to Chat" onclick="attachNewsToChat('${encodeURIComponent(event.text)}', '${encodeURIComponent(event.link)}'); event.preventDefault(); event.stopPropagation();">↗</button></span>
                                 <span class="news-date">${event.date}</span>
                             </a>
                         `;
@@ -1941,12 +2145,84 @@ async function loadStockNews(symbol, groupIndex) {
             indReportsHtml = '<div style="font-size: 0.7rem; color: var(--fg-dim);">Industry reports not available.</div>';
         }
 
+        // Build 财报与分析 tab from already-fetched data
+        let cnEarningsHtml = '<div style="font-size: 0.7rem; color: var(--fg-dim); padding-bottom: 0.3rem;">未找到财务数据。</div>';
+        try {
+            const f10Data = JSON.parse(f10JsonStr);
+            const forecastData = JSON.parse(forecastJsonStr);
+
+            // Latest earnings date from forecast
+            let earningsDateHtml = '';
+            if (forecastData && forecastData.result && forecastData.result.data && forecastData.result.data.length > 0) {
+                const latest = forecastData.result.data[0];
+                const d = latest.NOTICE_DATE ? latest.NOTICE_DATE.substring(0, 10) : '';
+                const type = latest.PREDICT_TYPE || '业绩预告';
+                if (d) earningsDateHtml = `<div style="font-size: 0.85rem; color: var(--fg); padding-bottom: 0.3rem; font-weight: 500;">最新业绩预告 (${type}): ${d}</div>`;
+            }
+
+            // Financial metrics from f10
+            let metricsHtml = '<div style="font-size: 0.7rem; color: var(--fg-dim);">暂无详细财务数据。</div>';
+            if (f10Data && f10Data.data && f10Data.data.length > 0) {
+                const r = f10Data.data[0]; // most recent report
+
+                const formatPct = (val) => val != null ? (val > 0 ? '+' : '') + parseFloat(val).toFixed(2) + '%' : 'N/A';
+                const formatLarge = (val) => {
+                    if (val == null) return 'N/A';
+                    const n = parseFloat(val);
+                    if (Math.abs(n) >= 1e8) return (n / 1e8).toFixed(2) + '亿';
+                    if (Math.abs(n) >= 1e4) return (n / 1e4).toFixed(2) + '万';
+                    return n.toFixed(2);
+                };
+
+                const reportName = r.REPORT_DATE_NAME || '最新财报';
+                const revenue = formatLarge(r.TOTALOPERATEREVE);
+                const revGrowth = formatPct(r.TOTALOPERATEREVETZ);
+                const netProfit = formatLarge(r.PARENTNETPROFIT);
+                const netGrowth = formatPct(r.PARENTNETPROFITTZ);
+                const roe = r.ROEJQ != null ? parseFloat(r.ROEJQ).toFixed(2) + '%' : 'N/A';
+                const grossMargin = r.XSMLL != null ? parseFloat(r.XSMLL).toFixed(2) + '%' : 'N/A';
+                const eps = r.BASICEPS != null ? '¥' + parseFloat(r.BASICEPS).toFixed(3) : 'N/A';
+                // Additional fields
+                const debtRatio = r.ZCFZL != null ? parseFloat(r.ZCFZL).toFixed(2) + '%' : 'N/A';
+                const bvps = r.MGJZC != null ? '¥' + parseFloat(r.MGJZC).toFixed(3) : 'N/A';
+                const netMargin = r.XSJLL != null ? parseFloat(r.XSJLL).toFixed(2) + '%' : 'N/A';
+
+                metricsHtml = `
+                    <div style="font-size: 0.7rem; color: var(--fg-dim); margin-bottom: 0.3rem;">${reportName}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; font-size: 0.75rem; color: var(--fg); margin-top: 0.3rem;">
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">营业收入</span><br><strong>${revenue}</strong></div>
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">营收增长</span><br><strong style="color:${r.TOTALOPERATEREVETZ >= 0 ? 'var(--up-color)' : 'var(--down-color)'}">${revGrowth}</strong></div>
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">净利润增长</span><br><strong style="color:${r.PARENTNETPROFITTZ >= 0 ? 'var(--up-color)' : 'var(--down-color)'}">${netGrowth}</strong></div>
+
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">毛利率</span><br><strong>${grossMargin}</strong></div>
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">净利率</span><br><strong>${netMargin}</strong></div>
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">ROE</span><br><strong>${roe}</strong></div>
+
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">资产负债率</span><br><strong>${debtRatio}</strong></div>
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">每股净资产 (BVPS)</span><br><strong>${bvps}</strong></div>
+                        <div><span style="color:var(--fg-dim); font-size:0.7rem;">每股收益 (EPS)</span><br><strong>${eps}</strong></div>
+
+                        <div style="grid-column: span 3;"><span style="color:var(--fg-dim); font-size:0.7rem;">净利润</span><br><strong>${netProfit}</strong></div>
+                    </div>
+                `;
+            }
+
+            cnEarningsHtml = `
+                ${earningsDateHtml}
+                ${earningsDateHtml ? '<hr style="border: 0; border-bottom: 1px dashed var(--border); margin: 0.3rem 0;">' : ''}
+                ${metricsHtml}
+            `;
+        } catch(e) {
+            cnEarningsHtml = '<div style="font-size: 0.7rem; color: var(--fg-dim);">财务数据加载失败。</div>';
+        }
+
         let html = `
             <div class="news-section">
                 <div class="news-tabs">
                     <div class="news-tab active" data-target="events-content-${symbol}">Events</div>
                     <div class="news-tab" data-target="industry-content-${symbol}">${industryName}</div>
                     <div class="news-tab" data-target="notices-content-${symbol}">最新公告</div>
+                    <div class="news-tab" data-target="earnings-content-${symbol}">财报与分析</div>
                 </div>
                 
                 <div class="news-content-area active" id="events-content-${symbol}">
@@ -1964,6 +2240,12 @@ async function loadStockNews(symbol, groupIndex) {
                 <div class="news-content-area hidden" id="notices-content-${symbol}">
                     <div class="news-list">
                         ${noticesHtml}
+                    </div>
+                </div>
+
+                <div class="news-content-area hidden" id="earnings-content-${symbol}">
+                    <div style="padding-top: 0.3rem;">
+                        ${cnEarningsHtml}
                     </div>
                 </div>
             </div>

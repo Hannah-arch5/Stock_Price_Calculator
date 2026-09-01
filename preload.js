@@ -4,7 +4,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     toggleWindowSize: () => ipcRenderer.send('toggle-window-size'),
     recordSize: (index) => ipcRenderer.send('record-size', index),
     fetchFinancialData: (url) => ipcRenderer.invoke('fetch-financial-data', url),
+    
     fetchYahoo: (symbol) => ipcRenderer.invoke('fetch-yahoo', symbol),
+    translateText: (text, targetLang) => ipcRenderer.invoke('translate-text', text, targetLang),
     queryZotero: (dbPath, action, collectionId) => ipcRenderer.invoke('query-zotero', { dbPath, action, collectionId }),
     loadData: () => ipcRenderer.invoke('load-data'),
     saveData: (dataStr) => ipcRenderer.send('save-data', dataStr),

@@ -136,11 +136,26 @@ ipcMain.on('open-external', (event, url) => {
 const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance();
 
+
+ipcMain.handle('translate-text', async (event, text, targetLang) => {
+    try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await require("electron").net.fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } });
+        const data = await res.json();
+        if (data && data[0]) {
+            return data[0].map(x => x[0]).join('');
+        }
+        return '';
+    } catch (e) {
+        console.error('Translation error:', e);
+        return '';
+    }
+});
+
 ipcMain.handle('fetch-yahoo', async (event, symbol) => {
     try {
-        const result = await yahooFinance.quoteSummary(symbol, { modules: ['calendarEvents', 'summaryDetail', 'financialData', 'price'] });
-        const news = await yahooFinance.search(symbol, { newsCount: 5 });
-        return { quoteSummary: result, news: news.news };
+        const result = await yahooFinance.quoteSummary(symbol, { modules: ['calendarEvents', 'summaryDetail', 'financialData', 'price', 'defaultKeyStatistics'] });
+        return { quoteSummary: result };
     } catch (e) {
         console.error('[main] fetch-yahoo error:', e);
         return { error: e.message };
