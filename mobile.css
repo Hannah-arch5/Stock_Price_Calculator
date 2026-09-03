@@ -881,14 +881,32 @@ html, body {
   color: var(--down-color);
 }
 
-.record-left.calc-load-trigger {
+.calc-load-btn {
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--fg-subtle);
+  border-radius: 50%;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.15s ease;
+  padding: 0;
 }
 
-.record-left.calc-load-trigger:active {
-  opacity: 0.65;
+.calc-load-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.calc-load-btn:active {
+  transform: scale(0.88);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .sheet-action-secondary-btn {
