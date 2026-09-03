@@ -68,7 +68,7 @@
     const quickTagsContainer = document.getElementById('mobile-quick-tags');
     const records = appState.historyRecords || [];
 
-    // 1. Dynamic Market Tabs: ALL, US (if has US), A股 (if has CN), HK (if has HK)
+    // 1. Dynamic Market Tabs: ALL, US (if has US), A股 (if has CN), HK (if has HK), 收藏
     if (marketTabsContainer) {
       const hasUS = records.some(g => getMarketInfo(g.symbol).market === 'US');
       const hasCN = records.some(g => getMarketInfo(g.symbol).market === 'CN');
@@ -88,6 +88,7 @@
       if (hasHK) {
         tabsHtml += `<button class="filter-tab ${currentMarketFilter === 'HK' ? 'active' : ''}" data-filter="HK">HK</button>`;
       }
+      tabsHtml += `<button class="filter-tab ${currentMarketFilter === 'FAV' ? 'active' : ''}" data-filter="FAV">♥ 收藏</button>`;
       marketTabsContainer.innerHTML = tabsHtml;
     }
 
@@ -99,6 +100,7 @@
       }
 
       const visibleGroups = records.filter(group => {
+        if (currentMarketFilter === 'FAV') return group.isFavorite === true;
         if (currentMarketFilter === 'all') return true;
         return getMarketInfo(group.symbol).market === currentMarketFilter;
       });
@@ -353,8 +355,10 @@
     const filtered = records.filter(group => {
       const marketInfo = getMarketInfo(group.symbol);
       
-      // Market filter
-      if (currentMarketFilter !== 'all' && marketInfo.market !== currentMarketFilter) {
+      // Market & Favorite filter
+      if (currentMarketFilter === 'FAV') {
+        if (!group.isFavorite) return false;
+      } else if (currentMarketFilter !== 'all' && marketInfo.market !== currentMarketFilter) {
         return false;
       }
 
@@ -2108,6 +2112,41 @@
   let currentResearchStock = null;
   let currentAiHistory = [];
 
+  function showToast(msg) {
+    let toast = document.getElementById('mobile-toast-notification');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'mobile-toast-notification';
+      toast.className = 'mobile-toast hidden';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      toast.classList.add('visible');
+    });
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+      toast.classList.remove('visible');
+      setTimeout(() => toast.classList.add('hidden'), 300);
+    }, 2200);
+  }
+
+  function updateFavButtonUI(isFav) {
+    const favBtn = document.getElementById('res-modal-favorite-btn');
+    const favSvg = document.getElementById('res-modal-fav-svg');
+    if (!favBtn) return;
+    if (isFav) {
+      favBtn.classList.add('is-favorited');
+      favBtn.title = '取消收藏';
+      if (favSvg) favSvg.setAttribute('fill', '#ff453a');
+    } else {
+      favBtn.classList.remove('is-favorited');
+      favBtn.title = '收藏股票';
+      if (favSvg) favSvg.setAttribute('fill', 'none');
+    }
+  }
+
   function setupGlobalStockResearchAndSearch() {
     const searchInput = document.getElementById('mobile-search-input');
     const dropdown = document.getElementById('search-autocomplete-dropdown');
@@ -2116,13 +2155,83 @@
     const modal = document.getElementById('stock-research-modal');
     const backdrop = document.getElementById('research-modal-backdrop');
     const closeBtn = document.getElementById('res-modal-close');
-    const addBtn = document.getElementById('res-modal-add-btn');
+    const addCardBtn = document.getElementById('res-modal-add-card-btn');
+    const favBtn = document.getElementById('res-modal-favorite-btn');
     const openAiBtn = document.getElementById('res-modal-open-ai-btn');
     const calendarBtn = document.getElementById('res-modal-calendar-btn');
 
     const aiHistoryEl = document.getElementById('res-ai-chat-history');
     const aiInput = document.getElementById('res-ai-input');
     const aiSendBtn = document.getElementById('res-ai-send-btn');
+
+    // ➕ Add Stock Card to Homepage Ledger
+    if (addCardBtn) {
+      addCardBtn.onclick = function () {
+        if (!currentResearchStock) return;
+        const sym = currentResearchStock.symbol || currentResearchStock.rawCode;
+        const name = currentResearchStock.name || '';
+        const exists = (appState.historyRecords || []).some(g => g.symbol.toUpperCase() === sym.toUpperCase());
+        if (exists) {
+          showToast(`${sym} 已在首页看板列表中`);
+          return;
+        }
+        const newCard = {
+          symbol: sym,
+          name: name,
+          cost: '',
+          qty: '',
+          tf_w: '',
+          tf_d: '',
+          tf_30: '',
+          note: '',
+          isFavorite: false,
+          records: []
+        };
+        appState.historyRecords.unshift(newCard);
+        appState.lastUpdated = new Date().toISOString();
+        saveToCache(appState);
+        renderApp();
+        pushDataToServer(appState);
+        showToast(`已将 ${sym} 加入首页看板列表`);
+      };
+    }
+
+    // ❤️ Favorite Stock Toggle
+    if (favBtn) {
+      favBtn.onclick = function () {
+        if (!currentResearchStock) return;
+        const sym = currentResearchStock.symbol || currentResearchStock.rawCode;
+        const name = currentResearchStock.name || '';
+        let group = (appState.historyRecords || []).find(g => g.symbol.toUpperCase() === sym.toUpperCase());
+
+        if (!group) {
+          group = {
+            symbol: sym,
+            name: name,
+            cost: '',
+            qty: '',
+            tf_w: '',
+            tf_d: '',
+            tf_30: '',
+            note: '',
+            isFavorite: true,
+            records: []
+          };
+          appState.historyRecords.unshift(group);
+          updateFavButtonUI(true);
+          showToast(`已收藏 ${sym} 并加入看板列表`);
+        } else {
+          group.isFavorite = !group.isFavorite;
+          updateFavButtonUI(group.isFavorite);
+          showToast(group.isFavorite ? `已收藏 ${sym}` : `已取消收藏 ${sym}`);
+        }
+
+        appState.lastUpdated = new Date().toISOString();
+        saveToCache(appState);
+        renderApp();
+        pushDataToServer(appState);
+      };
+    }
 
     if (!searchInput || !dropdown) return;
 
@@ -2452,6 +2561,13 @@
 
       const data = await res.json();
       currentResearchStock = data;
+
+      // Sync Favorite Button State
+      const existingGroup = (appState.historyRecords || []).find(g =>
+        g.symbol.toUpperCase() === (data.symbol || '').toUpperCase() ||
+        g.symbol.toUpperCase() === (data.rawCode || '').toUpperCase()
+      );
+      updateFavButtonUI(existingGroup ? !!existingGroup.isFavorite : false);
 
       // Populate Header
       if (symEl) symEl.textContent = data.symbol;
