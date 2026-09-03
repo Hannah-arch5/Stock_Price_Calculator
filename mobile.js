@@ -1070,7 +1070,10 @@
 
     const chipsHtml = customLabels.map((l, idx) => `
       <button type="button" class="calc-chip" data-index="${idx}">${escapeHtml(l)}</button>
-    `).join('');
+    `).join('') + `
+      <button type="button" class="calc-chip calc-chip-add" title="Add New Label">+</button>
+      <button type="button" class="calc-chips-pencil-btn edit-pencil-btn ${isChipsEditMode ? 'active' : ''}" title="Edit Labels">✎</button>
+    `;
 
     if (targetChipsEl) {
       targetChipsEl.innerHTML = chipsHtml;
@@ -1080,14 +1083,6 @@
       deltaChipsEl.innerHTML = chipsHtml;
       deltaChipsEl.classList.toggle('chips-edit-mode', isChipsEditMode);
     }
-
-    const editBtns = [document.getElementById('m-target-edit-chips-btn'), document.getElementById('m-delta-edit-chips-btn')];
-    editBtns.forEach(btn => {
-      if (btn) {
-        btn.textContent = isChipsEditMode ? 'DONE' : 'EDIT';
-        btn.classList.toggle('active', isChipsEditMode);
-      }
-    });
   }
 
   function handleAddChip() {
@@ -1111,17 +1106,6 @@
 
   function setupPart1Calculators() {
     renderPart1Chips();
-
-    // Bind Add & Edit Label Buttons
-    const addBtns = [document.getElementById('m-target-add-chip-btn'), document.getElementById('m-delta-add-chip-btn')];
-    addBtns.forEach(btn => {
-      if (btn) btn.onclick = handleAddChip;
-    });
-
-    const editBtns = [document.getElementById('m-target-edit-chips-btn'), document.getElementById('m-delta-edit-chips-btn')];
-    editBtns.forEach(btn => {
-      if (btn) btn.onclick = handleToggleEditChips;
-    });
 
     // 1. Mode Switcher
     const modeTargetBtn = document.getElementById('m-mode-target');
@@ -1246,6 +1230,17 @@
     const targetChipsRow = document.getElementById('m-target-chips-container');
     if (targetChipsRow) {
       targetChipsRow.addEventListener('click', (e) => {
+        const addBtn = e.target.closest('.calc-chip-add');
+        if (addBtn) {
+          handleAddChip();
+          return;
+        }
+        const editBtn = e.target.closest('.calc-chips-pencil-btn');
+        if (editBtn) {
+          handleToggleEditChips();
+          return;
+        }
+
         const chip = e.target.closest('.calc-chip');
         if (!chip) return;
         const idx = parseInt(chip.getAttribute('data-index'), 10);
@@ -1477,6 +1472,17 @@
     const deltaChipsRow = document.getElementById('m-delta-chips-container');
     if (deltaChipsRow) {
       deltaChipsRow.addEventListener('click', (e) => {
+        const addBtn = e.target.closest('.calc-chip-add');
+        if (addBtn) {
+          handleAddChip();
+          return;
+        }
+        const editBtn = e.target.closest('.calc-chips-pencil-btn');
+        if (editBtn) {
+          handleToggleEditChips();
+          return;
+        }
+
         const chip = e.target.closest('.calc-chip');
         if (!chip) return;
         const idx = parseInt(chip.getAttribute('data-index'), 10);
