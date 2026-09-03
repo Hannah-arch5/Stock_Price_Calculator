@@ -992,7 +992,7 @@
         e.stopPropagation();
         const container = document.querySelector('.mobile-container');
         if (container) {
-          smoothScrollContainer(container, 0, 950);
+          smoothScrollContainer(container, 0, 1150);
         }
         return;
       }
