@@ -2313,14 +2313,6 @@
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
 
-    const activePanel = isPercentage ? panelDelta : panelTarget;
-    if (activePanel) {
-      activePanel.classList.remove('card-highlight-flash');
-      void activePanel.offsetWidth;
-      activePanel.classList.add('card-highlight-flash');
-      setTimeout(() => activePanel.classList.remove('card-highlight-flash'), 2000);
-    }
-
     showToast(`已将 ${sym} [${record.type || '测算'}] 导回上方计算器`);
   }
 
