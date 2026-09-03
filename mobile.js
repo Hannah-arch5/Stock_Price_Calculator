@@ -832,23 +832,23 @@
     }
   }
 
-  // Physics-based luxury smooth scroll matching desktop Studio Noir (Snappy Takeoff + Silky Deceleration)
-  function smoothScrollContainer(container, targetY, duration = 850) {
+  // Physics-based luxury smooth scroll matching desktop Studio Noir (Snappy Takeoff + Prolonged Velvety Landing)
+  function smoothScrollContainer(container, targetY, duration = 1150) {
     const startY = container.scrollTop;
     const difference = targetY - startY;
     if (Math.abs(difference) < 2) return;
 
     const startTime = performance.now();
 
-    // Ease-Out Cubic: Instant responsive takeoff, smooth luxurious deceleration
-    function easeOutCubic(t) {
-      return 1 - Math.pow(1 - t, 3);
+    // Studio Noir Quintic Ease-Out: Instant initial surge, followed by a long, slow, feather-soft coasting landing
+    function easeOutStudioNoir(t) {
+      return 1 - Math.pow(1 - t, 4.5);
     }
 
     function step(now) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const ease = easeOutCubic(progress);
+      const ease = easeOutStudioNoir(progress);
 
       container.scrollTop = startY + difference * ease;
 
@@ -946,7 +946,7 @@
             const topClearance = 110;
             const targetScroll = container.scrollTop + (cardRect.top - containerRect.top) - topClearance;
 
-            smoothScrollContainer(container, Math.max(0, targetScroll), 850);
+            smoothScrollContainer(container, Math.max(0, targetScroll), 1150);
 
             card.classList.remove('card-highlight-flash');
             void card.offsetWidth; // Force reflow
