@@ -332,21 +332,23 @@ html, body {
 }
 
 .calc-primary-btn {
-  background: #ffffff;
-  color: #000000;
-  border: none;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
   border-radius: 6px;
   font-family: inherit;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 8px 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 7px 11px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
 }
 .calc-primary-btn:active {
-  background: #cccccc;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
   transform: scale(0.96);
 }
 

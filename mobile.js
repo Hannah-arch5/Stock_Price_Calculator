@@ -1280,16 +1280,28 @@
 
     function calcDeltaLive() {
       updateDeltaCur();
+      const sym = (deltaSymInput ? deltaSymInput.value.trim() : '');
+      const isChina = detectMarket(sym).market === 'A';
       const init = parseFloat(deltaInitialInput ? deltaInitialInput.value : 0) || 0;
       const fin = parseFloat(deltaFinalInput ? deltaFinalInput.value : 0) || 0;
 
       if (init <= 0 || fin <= 0) {
-        if (deltaResEl) deltaResEl.textContent = `0.00%`;
+        if (deltaResEl) {
+          deltaResEl.textContent = `0.00%`;
+          deltaResEl.style.color = '#ffffff';
+        }
         return;
       }
 
       const diff = ((fin - init) / init) * 100;
-      if (deltaResEl) deltaResEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
+      if (deltaResEl) {
+        deltaResEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
+        if (isChina) {
+          deltaResEl.style.color = diff >= 0 ? '#ff453a' : '#32d74b';
+        } else {
+          deltaResEl.style.color = diff >= 0 ? '#32d74b' : '#ff453a';
+        }
+      }
     }
 
     if (deltaSymInput) deltaSymInput.addEventListener('input', calcDeltaLive);

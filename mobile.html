@@ -46,11 +46,11 @@
                 <div id="m-panel-target" class="calc-sub-panel">
                     <div class="calc-grid-row">
                         <div class="calc-input-wrap">
-                            <span class="calc-label">SYMBOL 代码</span>
+                            <span class="calc-label">SYMBOL</span>
                             <input type="text" id="m-target-symbol" class="calc-input mono" placeholder="e.g. 300775 / AAPL" autocomplete="off" autocorrect="off" autocapitalize="characters" />
                         </div>
                         <div class="calc-input-wrap">
-                            <span class="calc-label">ENTRY PRICE 入场价</span>
+                            <span class="calc-label">ENTRY PRICE</span>
                             <div class="calc-cur-input-box">
                                 <span id="m-target-cur" class="calc-cur-sym">¥</span>
                                 <input type="number" inputmode="decimal" id="m-target-base" class="calc-input mono" placeholder="0.00" step="any" />
@@ -60,7 +60,7 @@
 
                     <div class="calc-grid-row">
                         <div class="calc-input-wrap">
-                            <span class="calc-label">MOVEMENT 涨跌幅</span>
+                            <span class="calc-label">MOVEMENT</span>
                             <div class="calc-perc-wrap">
                                 <button type="button" id="m-target-dir-btn" class="calc-dir-btn is-up" data-dir="up">▲ UP</button>
                                 <div class="calc-perc-inner">
@@ -70,7 +70,7 @@
                             </div>
                         </div>
                         <div class="calc-input-wrap">
-                            <span class="calc-label">LABEL 标签</span>
+                            <span class="calc-label">LABEL</span>
                             <input type="text" id="m-target-type" class="calc-input" placeholder="D买点1" />
                         </div>
                     </div>
@@ -95,11 +95,11 @@
                 <div id="m-panel-delta" class="calc-sub-panel hidden">
                     <div class="calc-grid-row">
                         <div class="calc-input-wrap">
-                            <span class="calc-label">SYMBOL 代码</span>
+                            <span class="calc-label">SYMBOL</span>
                             <input type="text" id="m-delta-symbol" class="calc-input mono" placeholder="e.g. 300775 / AAPL" autocomplete="off" autocorrect="off" autocapitalize="characters" />
                         </div>
                         <div class="calc-input-wrap">
-                            <span class="calc-label">INITIAL PRICE 入场价</span>
+                            <span class="calc-label">INITIAL PRICE</span>
                             <div class="calc-cur-input-box">
                                 <span id="m-delta-cur-1" class="calc-cur-sym">¥</span>
                                 <input type="number" inputmode="decimal" id="m-delta-initial" class="calc-input mono" placeholder="0.00" step="any" />
@@ -109,14 +109,14 @@
 
                     <div class="calc-grid-row">
                         <div class="calc-input-wrap">
-                            <span class="calc-label">FINAL PRICE 目标价</span>
+                            <span class="calc-label">FINAL PRICE</span>
                             <div class="calc-cur-input-box">
                                 <span id="m-delta-cur-2" class="calc-cur-sym">¥</span>
                                 <input type="number" inputmode="decimal" id="m-delta-final" class="calc-input mono" placeholder="0.00" step="any" />
                             </div>
                         </div>
                         <div class="calc-input-wrap">
-                            <span class="calc-label">LABEL 标签</span>
+                            <span class="calc-label">LABEL</span>
                             <input type="text" id="m-delta-type" class="calc-input" placeholder="D卖点1" />
                         </div>
                     </div>
@@ -209,44 +209,44 @@
         <div class="sheet-body">
             <div class="sheet-row-dual">
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">SYMBOL 代码</label>
+                    <label class="sheet-label">SYMBOL</label>
                     <input id="stock-edit-symbol" type="text" class="sheet-input mono" placeholder="300775" />
                 </div>
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">NAME 股票名称</label>
+                    <label class="sheet-label">NAME</label>
                     <input id="stock-edit-name" type="text" class="sheet-input" placeholder="三角防务" />
                 </div>
             </div>
 
             <div class="sheet-row-dual">
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">COST 成本价</label>
+                    <label class="sheet-label">COST</label>
                     <input id="stock-edit-cost" type="number" inputmode="decimal" class="sheet-input mono" placeholder="36.215" step="0.001" />
                 </div>
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">QTY 持股数量</label>
+                    <label class="sheet-label">QTY</label>
                     <input id="stock-edit-qty" type="number" inputmode="numeric" class="sheet-input mono" placeholder="2400" />
                 </div>
             </div>
 
             <div class="sheet-field-group">
-                <label class="sheet-label">W 周线便签</label>
-                <input id="stock-edit-tf-w" type="text" class="sheet-input" placeholder="例如：等待回0轴低点，RSI进入可买回区域" />
+                <label class="sheet-label">W</label>
+                <input id="stock-edit-tf-w" type="text" class="sheet-input" placeholder="W time-frame notes..." />
             </div>
 
             <div class="sheet-field-group">
-                <label class="sheet-label">D 日线便签</label>
-                <input id="stock-edit-tf-d" type="text" class="sheet-input" placeholder="例如：已涨马上回0轴" />
+                <label class="sheet-label">D</label>
+                <input id="stock-edit-tf-d" type="text" class="sheet-input" placeholder="D time-frame notes..." />
             </div>
 
             <div class="sheet-field-group">
-                <label class="sheet-label">30 30分钟便签</label>
-                <input id="stock-edit-tf-30" type="text" class="sheet-input" placeholder="例如：等RSI触底线" />
+                <label class="sheet-label">30</label>
+                <input id="stock-edit-tf-30" type="text" class="sheet-input" placeholder="30m time-frame notes..." />
             </div>
 
             <div class="sheet-field-group flex-grow-notes">
                 <label class="sheet-label">STRATEGY &amp; TRADING NOTES</label>
-                <textarea id="stock-edit-note" class="sheet-textarea large-note-textarea" placeholder="填写操盘纪律、核心逻辑与长篇备忘录..."></textarea>
+                <textarea id="stock-edit-note" class="sheet-textarea large-note-textarea" placeholder="Strategy & trading notes..."></textarea>
             </div>
         </div>
         <div class="sheet-footer">
@@ -265,8 +265,8 @@
         </div>
         <div class="sheet-body">
             <div class="sheet-field-group">
-                <label class="sheet-label">TYPE LABEL 小标题 / 标签</label>
-                <input id="calc-edit-type" type="text" class="sheet-input mono" placeholder="选择下方标签或直接输入" />
+                <label class="sheet-label">TYPE LABEL</label>
+                <input id="calc-edit-type" type="text" class="sheet-input mono" placeholder="Select tag or type custom label" />
                 <div id="calc-chips-container" class="chips-scroll-row">
                     <!-- Dynamic custom labels from appState -->
                 </div>
@@ -274,18 +274,18 @@
 
             <div class="sheet-row-dual">
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">BASE PRICE 基准价</label>
+                    <label class="sheet-label">BASE PRICE</label>
                     <input id="calc-edit-base" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
                 </div>
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">TARGET PRICE 目标价</label>
+                    <label class="sheet-label">TARGET PRICE</label>
                     <input id="calc-edit-target" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
                 </div>
             </div>
 
             <div class="sheet-row-dual">
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">DIRECTION &amp; PERC 涨跌幅</label>
+                    <label class="sheet-label">MOVEMENT</label>
                     <div class="sheet-perc-row">
                         <button id="calc-edit-dir-btn" class="dir-toggle-btn" data-dir="up">▲ UP</button>
                         <input id="calc-edit-perc" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.0" step="0.1" />
@@ -293,14 +293,14 @@
                     </div>
                 </div>
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">SHARES 股数</label>
-                    <input id="calc-edit-shares" type="number" inputmode="numeric" class="sheet-input mono" placeholder="可选填股数" />
+                    <label class="sheet-label">SHARES</label>
+                    <input id="calc-edit-shares" type="number" inputmode="numeric" class="sheet-input mono" placeholder="Optional shares" />
                 </div>
             </div>
 
             <div class="sheet-field-group">
                 <div class="sheet-toggle-row">
-                    <label class="sheet-label" style="margin: 0;">HIGHLIGHT 高亮突出显示</label>
+                    <label class="sheet-label" style="margin: 0;">HIGHLIGHT</label>
                     <input id="calc-edit-highlight" type="checkbox" class="noir-checkbox" />
                 </div>
             </div>
