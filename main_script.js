@@ -1712,6 +1712,18 @@ async function initializeData() {
 
 initializeData();
 
+if (window.electronAPI && window.electronAPI.onSyncDataUpdated) {
+    window.electronAPI.onSyncDataUpdated((data) => {
+        if (data && data.historyRecords) {
+            console.log('[SYNC] Desktop received live update from mobile, items:', data.historyRecords.length);
+            historyRecords = data.historyRecords;
+            if (data.customLabels) customLabels = data.customLabels;
+            renderHistory();
+            renderQuickTags();
+        }
+    });
+}
+
 // Auto-select text in input fields on focus
 document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
     input.addEventListener('focus', function() {
