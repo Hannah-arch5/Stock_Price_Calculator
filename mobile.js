@@ -70,9 +70,9 @@
 
     // 1. Dynamic Market Tabs: ALL, US (if has US), A股 (if has CN), HK (if has HK), 收藏
     if (marketTabsContainer) {
-      const hasUS = records.some(g => getMarketInfo(g.symbol).market === 'US');
-      const hasCN = records.some(g => getMarketInfo(g.symbol).market === 'CN');
-      const hasHK = records.some(g => getMarketInfo(g.symbol).market === 'HK');
+      const hasUS = records.some(g => g.inLedger !== false && getMarketInfo(g.symbol).market === 'US');
+      const hasCN = records.some(g => g.inLedger !== false && getMarketInfo(g.symbol).market === 'CN');
+      const hasHK = records.some(g => g.inLedger !== false && getMarketInfo(g.symbol).market === 'HK');
 
       if (currentMarketFilter === 'US' && !hasUS) currentMarketFilter = 'all';
       if (currentMarketFilter === 'CN' && !hasCN) currentMarketFilter = 'all';
@@ -101,6 +101,7 @@
 
       const visibleGroups = records.filter(group => {
         if (currentMarketFilter === 'FAV') return group.isFavorite === true;
+        if (group.inLedger === false) return false;
         if (currentMarketFilter === 'all') return true;
         return getMarketInfo(group.symbol).market === currentMarketFilter;
       });
@@ -226,7 +227,7 @@
           if (currentMarketFilter === 'FAV') {
             matches = (group.isFavorite === true);
           } else {
-            matches = (getMarketInfo(group.symbol).market === currentMarketFilter);
+            matches = (group.inLedger !== false && getMarketInfo(group.symbol).market === currentMarketFilter);
           }
           if (matches) {
             targetIndices.push(idx);
@@ -260,83 +261,54 @@
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
-      draggingTag = tag;
+      draggedTag = tag;
       isDragging = false;
-      hasMoved = false;
-
-      // 180ms hold to activate dragging
-      dragHoldTimer = setTimeout(() => {
-        if (draggingTag) {
-          isDragging = true;
-          draggingTag.classList.add('dragging-tag');
-          if (navigator.vibrate) {
-            try { navigator.vibrate(20); } catch (_) {}
-          }
-        }
-      }, 180);
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
-      if (!draggingTag) return;
+      if (!draggedTag) return;
       const touch = e.touches[0];
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
 
-      // If user moves finger BEFORE long-press completes, cancel drag timer immediately to allow natural vertical scrolling
-      if (!isDragging) {
-        if (deltaX > 7 || deltaY > 7) {
-          if (dragHoldTimer) {
-            clearTimeout(dragHoldTimer);
-            dragHoldTimer = null;
-          }
-          draggingTag = null; // Yield completely to native page scrolling
-          return;
-        }
-      } else {
-        // Silky smooth sibling reorder
-        if (e.cancelable) e.preventDefault();
-        hasMoved = true;
+      if (!isDragging && (deltaX > 8 || deltaY > 8)) {
+        isDragging = true;
+        draggedTag.classList.add('dragging-tag');
+        if (navigator.vibrate) navigator.vibrate(12);
+      }
+
+      if (isDragging) {
+        e.preventDefault();
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
-        smoothMove(container, draggingTag, afterElement);
+        smoothMove(container, draggedTag, afterElement);
       }
     }, { passive: false });
 
-    container.addEventListener('touchend', (e) => {
-      if (dragHoldTimer) {
-        clearTimeout(dragHoldTimer);
-        dragHoldTimer = null;
-      }
-      if (isDragging && draggingTag) {
-        draggingTag.classList.remove('dragging-tag');
-        draggingTag = null;
-        isDragging = false;
-        if (hasMoved) {
+    container.addEventListener('touchend', () => {
+      if (draggedTag) {
+        draggedTag.classList.remove('dragging-tag');
+        if (isDragging) {
           commitReorderedTags();
         }
-      } else {
-        if (draggingTag) draggingTag.classList.remove('dragging-tag');
-        draggingTag = null;
-        isDragging = false;
       }
-    });
-
-    container.addEventListener('touchcancel', () => {
-      if (dragHoldTimer) {
-        clearTimeout(dragHoldTimer);
-        dragHoldTimer = null;
-      }
-      if (draggingTag) draggingTag.classList.remove('dragging-tag');
-      draggingTag = null;
+      draggedTag = null;
       isDragging = false;
     });
 
-    // Desktop Drag & Drop Support
+    container.addEventListener('touchcancel', () => {
+      if (draggedTag) {
+        draggedTag.classList.remove('dragging-tag');
+      }
+      draggedTag = null;
+      isDragging = false;
+    });
+
+    // Desktop Mouse Drag & Drop
     container.addEventListener('dragstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
       tag.classList.add('dragging-tag');
       e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', tag.getAttribute('data-symbol'));
     });
 
     container.addEventListener('dragover', (e) => {
@@ -387,9 +359,12 @@
       
       // Market & Favorite filter
       if (currentMarketFilter === 'FAV') {
-        if (!group.isFavorite) return false;
-      } else if (currentMarketFilter !== 'all' && marketInfo.market !== currentMarketFilter) {
-        return false;
+        if (group.isFavorite !== true) return false;
+      } else {
+        if (group.inLedger === false) return false;
+        if (currentMarketFilter !== 'all' && marketInfo.market !== currentMarketFilter) {
+          return false;
+        }
       }
 
       // Search filter
@@ -2207,39 +2182,48 @@
     const aiInput = document.getElementById('res-ai-input');
     const aiSendBtn = document.getElementById('res-ai-send-btn');
 
-    // ➕ Add Stock Card to Homepage Ledger
+    // ➕ Add Stock Card to Homepage Ledger (ALL / US / A股 / HK)
     if (addCardBtn) {
       addCardBtn.onclick = function () {
         if (!currentResearchStock) return;
         const sym = currentResearchStock.symbol || currentResearchStock.rawCode;
         const name = currentResearchStock.name || '';
-        const exists = (appState.historyRecords || []).some(g => g.symbol.toUpperCase() === sym.toUpperCase());
-        if (exists) {
-          showToast(`${sym} 已在首页看板列表中`);
-          return;
+        let group = (appState.historyRecords || []).find(g => g.symbol.toUpperCase() === sym.toUpperCase());
+
+        if (!group) {
+          const newCard = {
+            symbol: sym,
+            name: name,
+            cost: '',
+            qty: '',
+            tf_w: '',
+            tf_d: '',
+            tf_30: '',
+            note: '',
+            inLedger: true,
+            isFavorite: false,
+            records: []
+          };
+          appState.historyRecords.unshift(newCard);
+          showToast(`已将 ${sym} 加入首页看板列表`);
+        } else {
+          if (group.inLedger === false) {
+            group.inLedger = true;
+            showToast(`已将 ${sym} 加入首页看板列表`);
+          } else {
+            showToast(`${sym} 已在首页看板列表中`);
+            return;
+          }
         }
-        const newCard = {
-          symbol: sym,
-          name: name,
-          cost: '',
-          qty: '',
-          tf_w: '',
-          tf_d: '',
-          tf_30: '',
-          note: '',
-          isFavorite: false,
-          records: []
-        };
-        appState.historyRecords.unshift(newCard);
+
         appState.lastUpdated = new Date().toISOString();
         saveToCache(appState);
         renderApp();
         pushDataToServer(appState);
-        showToast(`已将 ${sym} 加入首页看板列表`);
       };
     }
 
-    // ❤️ Favorite Stock Toggle
+    // ❤️ Favorite Stock Toggle (ONLY in Favorite Tab, NOT in ALL / US / A股)
     if (favBtn) {
       favBtn.onclick = function () {
         if (!currentResearchStock) return;
@@ -2257,16 +2241,17 @@
             tf_d: '',
             tf_30: '',
             note: '',
+            inLedger: false, // Favorite ONLY, NOT in ALL/US/A股 ledger!
             isFavorite: true,
             records: []
           };
           appState.historyRecords.unshift(group);
           updateFavButtonUI(true);
-          showToast(`已收藏 ${sym} 并加入看板列表`);
+          showToast(`已将 ${sym} 加入收藏夹`);
         } else {
           group.isFavorite = !group.isFavorite;
           updateFavButtonUI(group.isFavorite);
-          showToast(group.isFavorite ? `已收藏 ${sym}` : `已取消收藏 ${sym}`);
+          showToast(group.isFavorite ? `已将 ${sym} 加入收藏夹` : `已从收藏夹移除 ${sym}`);
         }
 
         appState.lastUpdated = new Date().toISOString();

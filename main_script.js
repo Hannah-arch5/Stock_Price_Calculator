@@ -380,6 +380,7 @@ function renderHistory(scrollToSymbol = null) {
         historyListEl.innerHTML = '';
         
         historyRecords.forEach((group, groupIndex) => {
+        if (group.inLedger === false) return;
         if (tagsEl) {
             const tag = document.createElement('button');
             tag.className = 'quick-tag mono';
