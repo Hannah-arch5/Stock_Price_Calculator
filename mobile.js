@@ -503,6 +503,24 @@
     // Setup record double-tap highlight & hold-to-drag reorder
     setupRecordRowsInteractions();
 
+    // Direct binding for calc-load-btn to guarantee 100% responsiveness on mobile
+    document.querySelectorAll('.calc-load-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (btn.blur) btn.blur();
+        const symbol = btn.getAttribute('data-symbol');
+        const recordIdxStr = btn.getAttribute('data-record');
+        const recordIdx = recordIdxStr !== null ? parseInt(recordIdxStr, 10) : null;
+        if (symbol && recordIdx !== null && !isNaN(recordIdx)) {
+          const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+          if (group && group.records && group.records[recordIdx]) {
+            populateMobileCalculator(group.records[recordIdx], symbol);
+          }
+        }
+      };
+    });
+
     // Check alerts
     checkTargetAlerts();
   }
@@ -2289,8 +2307,20 @@
     // Smooth scroll to top of mobile page to show calculator
     const mainContainer = document.querySelector('.mobile-container');
     if (mainContainer) {
-      smoothScrollContainer(mainContainer, 0, 850);
+      smoothScrollContainer(mainContainer, 0, 750);
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    const activePanel = isPercentage ? panelDelta : panelTarget;
+    if (activePanel) {
+      activePanel.classList.remove('card-highlight-flash');
+      void activePanel.offsetWidth;
+      activePanel.classList.add('card-highlight-flash');
+      setTimeout(() => activePanel.classList.remove('card-highlight-flash'), 2000);
+    }
+
     showToast(`已将 ${sym} [${record.type || '测算'}] 导回上方计算器`);
   }
 
