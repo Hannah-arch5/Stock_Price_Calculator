@@ -1868,3 +1868,158 @@ html, body {
 .ai-send-btn:active {
   background: rgba(255, 255, 255, 0.7);
 }
+
+/* ==========================================================================
+   Wind App Style Deep Research Article Layout
+   ========================================================================== */
+.wind-article-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wind-section-loading {
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+  padding: 6px 0;
+  font-style: italic;
+}
+
+.wind-headline {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.wind-subhead {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+.wind-bullet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wind-bullet-item {
+  position: relative;
+  padding-left: 14px;
+  font-size: 0.74rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: justify;
+}
+
+.wind-bullet-item::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #777777;
+  font-size: 0.9rem;
+}
+
+.wind-inst-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.wind-inst-block:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.wind-inst-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+.wind-inst-body {
+  font-size: 0.74rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: justify;
+}
+
+/* News Brief Items */
+.wind-news-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.wind-news-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.wind-news-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.wind-news-title {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+.wind-news-date {
+  font-size: 0.62rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--fg-dim);
+  flex-shrink: 0;
+}
+
+.wind-news-summary {
+  font-size: 0.7rem;
+  color: var(--fg-dim);
+  line-height: 1.5;
+}
+
+/* Technical Analysis Grid */
+.wind-tech-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.wind-tech-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wind-tech-label {
+  font-size: 0.62rem;
+  color: var(--fg-dim);
+}
+
+.wind-tech-val {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+}

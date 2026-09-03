@@ -2419,6 +2419,103 @@
       if (indEl) indEl.textContent = `细分: ${prof.industry || '一般行业'}`;
       if (sumEl) sumEl.textContent = prof.summary || '暂无详细业务介绍';
 
+      // 1. Investment Logic (Wind Style)
+      const logicEl = document.getElementById('res-m-investment-logic');
+      if (logicEl && data.investmentLogic) {
+        const il = data.investmentLogic;
+        let html = '';
+        if (il.coreHeadline) html += `<div class="wind-headline">${escapeHtml(il.coreHeadline)}</div>`;
+        if (il.coreBullets && il.coreBullets.length) {
+          html += `<div class="wind-bullet-list">`;
+          il.coreBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          html += `</div>`;
+        }
+        if (il.shortTermHeadline) html += `<div class="wind-subhead">${escapeHtml(il.shortTermHeadline)}</div>`;
+        if (il.shortTermBullets && il.shortTermBullets.length) {
+          html += `<div class="wind-bullet-list">`;
+          il.shortTermBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          html += `</div>`;
+        }
+        if (il.longTermHeadline) html += `<div class="wind-subhead">${escapeHtml(il.longTermHeadline)}</div>`;
+        if (il.longTermBullets && il.longTermBullets.length) {
+          html += `<div class="wind-bullet-list">`;
+          il.longTermBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          html += `</div>`;
+        }
+        if (il.valuationHeadline) html += `<div class="wind-subhead">${escapeHtml(il.valuationHeadline)}</div>`;
+        if (il.valuationBullets && il.valuationBullets.length) {
+          html += `<div class="wind-bullet-list">`;
+          il.valuationBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          html += `</div>`;
+        }
+        logicEl.innerHTML = html;
+      }
+
+      // 2. News Brief
+      const newsEl = document.getElementById('res-m-news-brief');
+      if (newsEl && data.newsBrief) {
+        let html = '';
+        data.newsBrief.forEach(n => {
+          html += `
+            <div class="wind-news-item">
+              <div class="wind-news-title-row">
+                <span class="wind-news-title">${escapeHtml(n.title)}</span>
+                <span class="wind-news-date">${escapeHtml(n.time || '')}</span>
+              </div>
+              <div class="wind-news-summary">${escapeHtml(n.summary || '')}</div>
+            </div>
+          `;
+        });
+        newsEl.innerHTML = html;
+      }
+
+      // 3. Institutional View
+      const instEl = document.getElementById('res-m-institutional-view');
+      if (instEl && data.institutionalView) {
+        let html = '';
+        data.institutionalView.forEach(v => {
+          html += `
+            <div class="wind-inst-block">
+              <div class="wind-inst-title">${escapeHtml(v.title)}</div>
+              <div class="wind-inst-body">${escapeHtml(v.body || '')}</div>
+            </div>
+          `;
+        });
+        instEl.innerHTML = html;
+      }
+
+      // 4. Technical Analysis
+      const techEl = document.getElementById('res-m-technical-analysis');
+      if (techEl && data.technicalAnalysis) {
+        const ta = data.technicalAnalysis;
+        let html = `
+          <div class="wind-tech-grid">
+            <div class="wind-tech-card">
+              <span class="wind-tech-label">关键支撑区间</span>
+              <span class="wind-tech-val">${escapeHtml(ta.supportBand || '--')}</span>
+            </div>
+            <div class="wind-tech-card">
+              <span class="wind-tech-label">第一阻力区间</span>
+              <span class="wind-tech-val">${escapeHtml(ta.resistanceBand || '--')}</span>
+            </div>
+            <div class="wind-tech-card">
+              <span class="wind-tech-label">中期趋势信号</span>
+              <span class="wind-tech-val" style="font-size:0.75rem;">${escapeHtml(ta.trendSignal || '--')}</span>
+            </div>
+            <div class="wind-tech-card">
+              <span class="wind-tech-label">RSI 强弱状态</span>
+              <span class="wind-tech-val" style="font-size:0.75rem;">${escapeHtml(ta.rsiStatus || '--')}</span>
+            </div>
+          </div>
+        `;
+        if (ta.bullets && ta.bullets.length) {
+          html += `<div class="wind-bullet-list">`;
+          ta.bullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          html += `</div>`;
+        }
+        techEl.innerHTML = html;
+      }
+
     } catch (err) {
       console.error('[Research] Load error:', err);
       if (nameEl) nameEl.textContent = `检索失败: ${err.message}`;

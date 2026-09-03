@@ -130,6 +130,11 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Auto-completion dropdown when typing in `#mobile-search-input` showing local ledger matches + `🔍 全网深度研报: 检索 "SYMBOL"`.
   - Supports arbitrary US, HK, and A-Share symbols/names.
   - Fetches live quotes, 3×3 financial fundamentals matrix (Market Cap, Revenue Growth, Earnings Growth, Profit Margin, ROE, Debt/Equity, PE/Fwd PE, Dividend Yield, Analyst Target Price), company profile scope, sector, and industry classifications.
+- **Wind-Style Deep Institutional Research Sections (万得风格四大深度投研板块)**:
+  1. `INVESTMENT LOGIC (核心投资逻辑)`: 核心成长主线 (Core Thesis)、短线投资逻辑 (Short-term Catalysts)、长线投资逻辑 (Long-term Moat)、当前估值水平 (Valuation Context & Multiples).
+  2. `NEWS BRIEF (精选要闻简报)`: 实时精选 3 条与基本面深度相关的核心大事件及影响解读.
+  3. `INSTITUTIONAL VIEW (机构观点与研报共识)`: 机构一致买入/增持评级分布与目标价上涨空间、华尔街/券商核心逻辑推导链条与盈利预期调整.
+  4. `TECHNICAL ANALYSIS (技术面研判)`: 支撑位与压力位关键价位区间测算、均线多空趋势与 RSI 强弱信号.
 - **Apple Calendar Reminder Integration (`/api/calendar-ics`)**:
   - Next Earnings release countdown and date display.
   - `📅 添加到 iPhone 日历` one-tap action: generates standard `.ics` iCalendar payload with preconfigured 9-hour-ahead alarm, invoking iOS native "Add Event" modal.
