@@ -1464,94 +1464,223 @@
     return text;
   }
 
-  function buildWordHtmlReport(isStock, stock) {
-    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
+  function escapeXml(unsafe) {
+    if (!unsafe) return '';
+    return String(unsafe).replace(/[<>&'"]/g, function (c) {
+      switch (c) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '&': return '&amp;';
+        case '\'': return '&apos;';
+        case '"': return '&quot;';
+      }
+    });
+  }
+
+  function buildWordDocumentXml(isStock, stock) {
     const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
     const title = isStock ? `${stock?.symbol || 'STOCK'} 深度投研研报` : `Ticker 投资策略账本`;
+    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
 
-    return `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    const lines = plainText.split('\n');
+    let xmlBody = '';
+
+    lines.forEach(line => {
+      const clean = line.trim();
+      if (!clean) {
+        xmlBody += '<w:p/>';
+        return;
+      }
+      const isHeader = clean.startsWith('【') || clean.startsWith('===');
+      const isBullet = clean.startsWith('•') || clean.startsWith('-') || clean.startsWith('[');
+      
+      if (isHeader) {
+        xmlBody += `
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="180" w:after="60"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:b/>
+                <w:sz w:val="26"/>
+                <w:color w:val="000000"/>
+              </w:rPr>
+              <w:t>${escapeXml(line)}</w:t>
+            </w:r>
+          </w:p>
+        `;
+      } else if (isBullet) {
+        xmlBody += `
+          <w:p>
+            <w:pPr>
+              <w:ind w:left="240"/>
+              <w:spacing w:before="30" w:after="30"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:sz w:val="22"/>
+                <w:color w:val="222222"/>
+              </w:rPr>
+              <w:t>${escapeXml(line)}</w:t>
+            </w:r>
+          </w:p>
+        `;
+      } else {
+        xmlBody += `
+          <w:p>
+            <w:pPr>
+              <w:spacing w:before="30" w:after="30"/>
+            </w:pPr>
+            <w:r>
+              <w:rPr>
+                <w:sz w:val="22"/>
+                <w:color w:val="333333"/>
+              </w:rPr>
+              <w:t>${escapeXml(line)}</w:t>
+            </w:r>
+          </w:p>
+        `;
+      }
+    });
+
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?mso-application progid="Word.Document"?>
+<w:wordDocument xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:sl="http://schemas.microsoft.com/schemaLibrary/2003/core" xmlns:aml="http://schemas.microsoft.com/aml/2001/core" xmlns:wx="http://schemas.microsoft.com/office/word/2003/auxHint" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882" w:macrosPresent="no" w:embeddedObjPresent="no" w:ocxPresent="no" xml:space="preserve">
+  <w:body>
+    <w:p>
+      <w:pPr>
+        <w:jc w:val="center"/>
+        <w:spacing w:after="100"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:b/>
+          <w:sz w:val="34"/>
+          <w:color w:val="000000"/>
+        </w:rPr>
+        <w:t>${escapeXml(title)}</w:t>
+      </w:r>
+    </w:p>
+    <w:p>
+      <w:pPr>
+        <w:jc w:val="center"/>
+        <w:spacing w:after="200"/>
+      </w:pPr>
+      <w:r>
+        <w:rPr>
+          <w:sz w:val="18"/>
+          <w:color w:val="666666"/>
+        </w:rPr>
+        <w:t>生成平台: Ticker Pocket | 日期: ${escapeXml(dateStr)}</w:t>
+      </w:r>
+    </w:p>
+    ${xmlBody}
+  </w:body>
+</w:wordDocument>`;
+  }
+
+  function copyTextToClipboard(text) {
+    let ok = false;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+    const t = document.createElement('textarea');
+    t.value = text;
+    t.setAttribute('readonly', '');
+    t.style.position = 'fixed';
+    t.style.top = '10px';
+    t.style.left = '10px';
+    t.style.width = '2em';
+    t.style.height = '2em';
+    t.style.padding = '0';
+    t.style.border = 'none';
+    t.style.outline = 'none';
+    t.style.boxShadow = 'none';
+    t.style.background = 'transparent';
+    document.body.appendChild(t);
+    t.focus();
+    t.select();
+    t.setSelectionRange(0, 999999);
+    try {
+      ok = document.execCommand('copy');
+    } catch (e) {}
+    document.body.removeChild(t);
+    return ok;
+  }
+
+  function buildPdfHtmlReport(isStock, stock) {
+    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
+    const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
+    const title = isStock ? `${stock?.symbol || 'STOCK'}_深度投研报告` : `Ticker_投资测算与策略账本`;
+
+    return `<!DOCTYPE html>
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>${escapeHtml(title)}</title>
-<!--[if gte mso 9]>
-<xml>
-  <w:WordDocument>
-    <w:View>Print</w:View>
-    <w:Zoom>100</w:Zoom>
-    <w:DoNotOptimizeForBrowser/>
-  </w:WordDocument>
-</xml>
-<![endif]-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>${title}</title>
 <style>
-  body { font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #111111; margin: 20pt; }
-  h1 { font-size: 18pt; font-weight: bold; border-bottom: 2pt solid #000000; padding-bottom: 6pt; margin-bottom: 8pt; color: #000000; }
-  .meta-tag { font-size: 9pt; color: #666666; margin-bottom: 16pt; }
-  pre { white-space: pre-wrap; font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.65; color: #222222; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 800px; margin: 0 auto; padding: 18px 20px; background: #ffffff; }
+  
+  .pdf-top-bar {
+    position: sticky;
+    top: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #0d0d0d;
+    color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    z-index: 1000;
+  }
+  .pdf-top-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pdf-top-btn:active { opacity: 0.75; transform: scale(0.97); }
+  .pdf-btn-close { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
+  .pdf-btn-export { background: #ffffff; color: #000000; font-weight: 700; }
+  .pdf-bar-title { font-size: 13px; font-weight: 700; color: #ffffff; letter-spacing: 0.05em; }
+
+  h1 { font-size: 22px; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
+  .header-meta { font-size: 12px; color: #666; margin-bottom: 24px; }
+  pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 13.5px; line-height: 1.65; background: #f9f9fb; border: 1px solid #e1e4e8; border-radius: 6px; padding: 18px; }
+  
+  @media print {
+    .no-print { display: none !important; }
+    body { max-width: 100%; margin: 0; padding: 10mm; background: #ffffff; color: #000000; }
+    pre { border: none; background: transparent; padding: 0; font-size: 11pt; }
+  }
 </style>
 </head>
 <body>
-  <h1>${escapeHtml(title)}</h1>
-  <div class="meta-tag">生成平台: Ticker Pocket &bull; 生成时间: ${dateStr}</div>
+  <div class="pdf-top-bar no-print">
+    <button type="button" class="pdf-top-btn pdf-btn-close" onclick="if(window.history.length > 1){window.history.back();}else{window.close();}">✕ 返回</button>
+    <div class="pdf-bar-title">PDF 导出与打印预览</div>
+    <button type="button" class="pdf-top-btn pdf-btn-export" onclick="window.print()">⎙ 存储为 PDF / 打印</button>
+  </div>
+
+  <h1>${title.replace(/_/g, ' ')}</h1>
+  <div class="header-meta">Generated by Ticker Pocket &bull; ${dateStr}</div>
   <pre>${escapeHtml(plainText)}</pre>
 </body>
 </html>`;
-  }
-
-  function copyToClipboardFallback(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(() => {
-        showAlert('已完整复制至剪贴板，可直接粘贴到备忘录', 'success');
-      }).catch(() => {
-        execCommandCopy(text);
-      });
-    } else {
-      execCommandCopy(text);
-    }
-  }
-
-  function execCommandCopy(text) {
-    try {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.left = '-9999px';
-      textarea.style.top = '0';
-      document.body.appendChild(textarea);
-      textarea.focus();
-      textarea.select();
-      const success = document.execCommand('copy');
-      document.body.removeChild(textarea);
-      if (success) {
-        showAlert('已完整复制至剪贴板，可直接粘贴到备忘录', 'success');
-      } else {
-        showAlert('复制失败，请手动长按复制', 'error');
-      }
-    } catch (e) {
-      showAlert('复制失败，请手动长按复制', 'error');
-    }
-  }
-
-  function openPdfPreviewModal(isStock, stock) {
-    const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
-    const title = isStock ? `${stock?.symbol || 'STOCK'} 深度投研研报` : `Ticker 投资策略账本`;
-    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
-
-    const renderedContainer = document.getElementById('pdf-rendered-content');
-    const titleEl = document.getElementById('pdf-preview-title');
-    const modal = document.getElementById('pdf-preview-modal');
-
-    if (titleEl) titleEl.textContent = `${title} (预览)`;
-    if (renderedContainer) {
-      renderedContainer.innerHTML = `
-        <div class="pdf-doc-title">${escapeHtml(title)}</div>
-        <div class="pdf-doc-meta">生成平台: Ticker Pocket &bull; 日期: ${dateStr}</div>
-        <div class="pdf-doc-text">${escapeHtml(plainText)}</div>
-      `;
-    }
-
-    if (modal) {
-      modal.classList.remove('hidden');
-    }
   }
 
   function handleExportAction(type) {
@@ -1563,30 +1692,20 @@
     closeExportSheet();
 
     if (type === 'notes') {
-      let shared = false;
+      copyTextToClipboard(plainText);
+      showAlert('已将全部研报内容复制至剪贴板！可直接在 iPhone 打开「备忘录」粘贴', 'success');
+
       if (navigator.share) {
         try {
           navigator.share({
             title: title,
             text: plainText
-          }).then(() => {
-            showAlert('已打开备忘录/系统分享面板', 'success');
-          }).catch((err) => {
-            if (err && err.name !== 'AbortError') {
-              copyToClipboardFallback(plainText);
-            }
-          });
-          shared = true;
-        } catch (e) {
-          shared = false;
-        }
-      }
-      if (!shared) {
-        copyToClipboardFallback(plainText);
+          }).catch(() => {});
+        } catch (e) {}
       }
     } else if (type === 'word') {
-      const html = buildWordHtmlReport(isStock, stock);
-      const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+      const xmlDoc = buildWordDocumentXml(isStock, stock);
+      const blob = new Blob(['\ufeff', xmlDoc], { type: 'application/msword;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -1595,9 +1714,16 @@
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      showAlert(`已开始下载 Word 研报文档: ${title}.doc`, 'success');
+      showAlert(`已生成并下载 Word 研报文档: ${title}.doc`, 'success');
     } else if (type === 'pdf') {
-      openPdfPreviewModal(isStock, stock);
+      const html = buildPdfHtmlReport(isStock, stock);
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      const win = window.open(blobUrl, '_blank');
+      if (!win) {
+        window.location.href = blobUrl;
+      }
+      showAlert('已打开 PDF 预览页面，点击顶部按钮可随时返回或存储为 PDF', 'success');
     }
   }
 
@@ -2645,22 +2771,6 @@
         if (type) handleExportAction(type);
       };
     });
-
-    // ─── PDF Preview Modal Controls ───────────────────────────
-    const pdfCloseBtn = document.getElementById('pdf-preview-close-btn');
-    if (pdfCloseBtn) {
-      pdfCloseBtn.onclick = () => {
-        const modal = document.getElementById('pdf-preview-modal');
-        if (modal) modal.classList.add('hidden');
-      };
-    }
-
-    const pdfPrintBtn = document.getElementById('pdf-preview-print-btn');
-    if (pdfPrintBtn) {
-      pdfPrintBtn.onclick = () => {
-        window.print();
-      };
-    }
   }
 
   // ─── Populate Mobile Calculator from Ledger Record ─────────────
