@@ -136,26 +136,23 @@
             </div>
 
             <div class="sheet-field-group">
-                <label class="sheet-label">TIMEFRAME 便签 (W / D / 30)</label>
-                <div class="tf-inputs-row">
-                    <div class="tf-input-wrap">
-                        <span class="tf-prefix mono">W</span>
-                        <input id="stock-edit-tf-w" type="text" class="sheet-input tf-input" placeholder="周线策略" />
-                    </div>
-                    <div class="tf-input-wrap">
-                        <span class="tf-prefix mono">D</span>
-                        <input id="stock-edit-tf-d" type="text" class="sheet-input tf-input" placeholder="日线策略" />
-                    </div>
-                    <div class="tf-input-wrap">
-                        <span class="tf-prefix mono">30</span>
-                        <input id="stock-edit-tf-30" type="text" class="sheet-input tf-input" placeholder="30分策略" />
-                    </div>
-                </div>
+                <label class="sheet-label">W 周线便签</label>
+                <input id="stock-edit-tf-w" type="text" class="sheet-input" placeholder="例如：等待回0轴低点，RSI进入可买回区域" />
             </div>
 
             <div class="sheet-field-group">
+                <label class="sheet-label">D 日线便签</label>
+                <input id="stock-edit-tf-d" type="text" class="sheet-input" placeholder="例如：已涨马上回0轴" />
+            </div>
+
+            <div class="sheet-field-group">
+                <label class="sheet-label">30 30分钟便签</label>
+                <input id="stock-edit-tf-30" type="text" class="sheet-input" placeholder="例如：等RSI触底线" />
+            </div>
+
+            <div class="sheet-field-group flex-grow-notes">
                 <label class="sheet-label">STRATEGY &amp; TRADING NOTES</label>
-                <textarea id="stock-edit-note" class="sheet-textarea" placeholder="填写操盘纪律、核心逻辑与备忘录..."></textarea>
+                <textarea id="stock-edit-note" class="sheet-textarea large-note-textarea" placeholder="填写操盘纪律、核心逻辑与长篇备忘录..."></textarea>
             </div>
         </div>
         <div class="sheet-footer">
