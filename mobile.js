@@ -482,7 +482,7 @@
         `;
       }).join('');
 
-      // Notes section (Always render STRATEGY & TRADING NOTES title)
+      // Notes section (STRATEGY & TRADING NOTES)
       const hasNote = group.note && group.note.trim().length > 0;
       const noteContentHtml = hasNote ? escapeHtml(group.note) : '<span class="note-empty-hint">暂无策略备忘 (点击右上角✎编辑)</span>';
       const noteHtml = `
@@ -494,6 +494,23 @@
             <span>STRATEGY & TRADING NOTES</span>
           </button>
           <div id="note-${groupIdx}" class="note-content">${noteContentHtml}</div>
+        </div>
+      `;
+
+      // Research Highlights & Clippings section (RESEARCH & CLIPPINGS)
+      const hasResearchNotes = group.research_notes && group.research_notes.trim().length > 0;
+      const resNoteContentHtml = hasResearchNotes
+        ? escapeHtml(group.research_notes).replace(/\n/g, '<br>')
+        : '<span class="note-empty-hint">暂无研报剪藏 (在个股研报长句后点击➕自动摘录)</span>';
+      const researchNotesHtml = `
+        <div class="note-accordion research-notes-accordion">
+          <button class="note-toggle" data-target="res-note-${groupIdx}">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <span>RESEARCH HIGHLIGHTS & CLIPPINGS</span>
+          </button>
+          <div id="res-note-${groupIdx}" class="note-content">${resNoteContentHtml}</div>
         </div>
       `;
 
@@ -530,6 +547,7 @@
           </div>
 
           ${noteHtml}
+          ${researchNotesHtml}
         </article>
       `;
     }).join('');
@@ -807,6 +825,7 @@
     const tfDEl = document.getElementById('stock-edit-tf-d');
     const tf30El = document.getElementById('stock-edit-tf-30');
     const noteEl = document.getElementById('stock-edit-note');
+    const resNotesEl = document.getElementById('stock-edit-research-notes');
 
     function updateSymInputWidth(input) {
       if (!input) return;
@@ -826,6 +845,7 @@
     if (tfDEl) tfDEl.value = group.tf_d || '';
     if (tf30El) tf30El.value = group.tf_30 || '';
     if (noteEl) noteEl.value = group.note || '';
+    if (resNotesEl) resNotesEl.value = group.research_notes || '';
 
     // Bind dynamic symbol change -> auto resolve stock name
     if (symEl && !symEl.dataset.listenerBound) {
@@ -891,6 +911,7 @@
     const newTfD = (document.getElementById('stock-edit-tf-d').value || '').trim();
     const newTf30 = (document.getElementById('stock-edit-tf-30').value || '').trim();
     const newNote = (document.getElementById('stock-edit-note').value || '').trim();
+    const newResNotes = (document.getElementById('stock-edit-research-notes') ? document.getElementById('stock-edit-research-notes').value : '').trim();
     const saveBtn = document.getElementById('stock-save-btn');
 
     if (!newSymbol) {
@@ -912,6 +933,7 @@
     group.tf_d = newTfD;
     group.tf_30 = newTf30;
     group.note = newNote;
+    group.research_notes = newResNotes;
 
     // Update records symbol if changed
     (group.records || []).forEach(r => {
@@ -2944,6 +2966,125 @@
         }
       });
     }
+
+    // Sentence Action Buttons (➕ Add to notes & ⤤ Quote to AI)
+    const researchSheet = document.getElementById('stock-research-modal');
+    if (researchSheet && !researchSheet.dataset.sentenceActionsBound) {
+      researchSheet.dataset.sentenceActionsBound = 'true';
+      researchSheet.addEventListener('click', (e) => {
+        const clipBtn = e.target.closest('.sentence-clip-btn');
+        if (clipBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const snippet = clipBtn.getAttribute('data-snippet');
+          clipSentenceToNotes(snippet);
+          clipBtn.classList.add('clipped');
+          setTimeout(() => clipBtn.classList.remove('clipped'), 1500);
+          return;
+        }
+
+        const quoteBtn = e.target.closest('.sentence-quote-btn');
+        if (quoteBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          const snippet = quoteBtn.getAttribute('data-snippet');
+          quoteSentenceToAi(snippet);
+          return;
+        }
+      });
+    }
+  }
+
+  function formatSentenceWithActions(text) {
+    if (!text || !text.trim()) return '';
+    const cleanText = text.trim();
+    return `
+      <span class="research-text-content">${escapeHtml(cleanText)}</span>
+      <span class="sentence-actions-group">
+        <button type="button" class="sentence-clip-btn" data-snippet="${escapeHtml(cleanText)}" title="保存至研报剪藏备忘录 (Add to Notes)">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button type="button" class="sentence-quote-btn" data-snippet="${escapeHtml(cleanText)}" title="引用并向 AI 提问 (Attach to AI Chat)">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M17 7H7M17 7V17"/>
+          </svg>
+        </button>
+      </span>
+    `;
+  }
+
+  async function clipSentenceToNotes(text) {
+    if (!text || !text.trim()) return;
+    const cleanText = text.trim();
+    const sym = (currentResearchStock && currentResearchStock.symbol) ? currentResearchStock.symbol.toUpperCase() : null;
+    if (!sym) return;
+
+    let group = (appState.historyRecords || []).find(g => g.symbol.toUpperCase() === sym);
+    if (!group) {
+      const stockName = (currentResearchStock && currentResearchStock.name) ? currentResearchStock.name : '';
+      group = {
+        symbol: sym,
+        name: stockName,
+        cost: '',
+        qty: '',
+        tf_w: '',
+        tf_d: '',
+        tf_30: '',
+        note: '',
+        research_notes: '',
+        records: []
+      };
+      if (!appState.historyRecords) appState.historyRecords = [];
+      appState.historyRecords.unshift(group);
+    }
+
+    if (!group.research_notes || !group.research_notes.trim()) {
+      group.research_notes = cleanText;
+    } else {
+      group.research_notes = `${group.research_notes.trim()}\n\n- - - - - - - - - - - - - - - -\n\n${cleanText}`;
+    }
+
+    saveToCache(appState);
+    renderApp();
+    await pushDataToServer(appState);
+
+    showAlert(`已将该段落保存至 [${sym}] 研报剪藏`, 'success');
+  }
+
+  function quoteSentenceToAi(text) {
+    if (!text || !text.trim()) return;
+    const cleanText = text.trim();
+
+    const researchBody = document.querySelector('.research-sheet-body');
+    const aiSection = document.getElementById('res-section-ai');
+    const aiInput = document.getElementById('res-ai-input');
+    const navTabsContainer = document.getElementById('res-nav-tabs');
+
+    // 1. Scroll smoothly to AI section
+    if (aiSection && researchBody) {
+      const targetY = aiSection.offsetTop - researchBody.offsetTop - 55;
+      smoothScrollContainer(researchBody, Math.max(0, targetY), 850);
+    }
+
+    // 2. Set active tab
+    if (navTabsContainer) {
+      navTabsContainer.querySelectorAll('.res-nav-tab').forEach(b => {
+        if (b.getAttribute('data-target') === 'res-section-ai') b.classList.add('active');
+        else b.classList.remove('active');
+      });
+    }
+
+    // 3. Populate AI input with quote and focus
+    if (aiInput) {
+      aiInput.value = `[引用研报]: "${cleanText}"\n请分析: `;
+      aiInput.focus();
+      aiInput.selectionStart = aiInput.selectionEnd = aiInput.value.length;
+    }
+
+    showAlert('已引用该段落至 AI 提问框', 'success');
   }
 
   function commitReorderedResearchTabs() {
@@ -3120,16 +3261,16 @@
       if (bizEl && data.businessIndustry) {
         const bi = data.businessIndustry;
         let html = '';
-        if (bi.coreHeadline) html += `<div class="wind-headline">${escapeHtml(bi.coreHeadline)}</div>`;
+        if (bi.coreHeadline) html += `<div class="wind-headline">${formatSentenceWithActions(bi.coreHeadline)}</div>`;
         if (bi.coreBullets && bi.coreBullets.length) {
           html += `<div class="wind-bullet-list">`;
-          bi.coreBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          bi.coreBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
-        if (bi.industryHeadline) html += `<div class="wind-subhead">${escapeHtml(bi.industryHeadline)}</div>`;
+        if (bi.industryHeadline) html += `<div class="wind-subhead">${formatSentenceWithActions(bi.industryHeadline)}</div>`;
         if (bi.industryBullets && bi.industryBullets.length) {
           html += `<div class="wind-bullet-list">`;
-          bi.industryBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          bi.industryBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
         bizEl.innerHTML = html;
@@ -3140,28 +3281,28 @@
       if (logicEl && data.investmentLogic) {
         const il = data.investmentLogic;
         let html = '';
-        if (il.coreHeadline) html += `<div class="wind-headline">${escapeHtml(il.coreHeadline)}</div>`;
+        if (il.coreHeadline) html += `<div class="wind-headline">${formatSentenceWithActions(il.coreHeadline)}</div>`;
         if (il.coreBullets && il.coreBullets.length) {
           html += `<div class="wind-bullet-list">`;
-          il.coreBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          il.coreBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
-        if (il.shortTermHeadline) html += `<div class="wind-subhead">${escapeHtml(il.shortTermHeadline)}</div>`;
+        if (il.shortTermHeadline) html += `<div class="wind-subhead">${formatSentenceWithActions(il.shortTermHeadline)}</div>`;
         if (il.shortTermBullets && il.shortTermBullets.length) {
           html += `<div class="wind-bullet-list">`;
-          il.shortTermBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          il.shortTermBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
-        if (il.longTermHeadline) html += `<div class="wind-subhead">${escapeHtml(il.longTermHeadline)}</div>`;
+        if (il.longTermHeadline) html += `<div class="wind-subhead">${formatSentenceWithActions(il.longTermHeadline)}</div>`;
         if (il.longTermBullets && il.longTermBullets.length) {
           html += `<div class="wind-bullet-list">`;
-          il.longTermBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          il.longTermBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
-        if (il.valuationHeadline) html += `<div class="wind-subhead">${escapeHtml(il.valuationHeadline)}</div>`;
+        if (il.valuationHeadline) html += `<div class="wind-subhead">${formatSentenceWithActions(il.valuationHeadline)}</div>`;
         if (il.valuationBullets && il.valuationBullets.length) {
           html += `<div class="wind-bullet-list">`;
-          il.valuationBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          il.valuationBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
         logicEl.innerHTML = html;
@@ -3178,7 +3319,7 @@
                 <span class="wind-news-title">${escapeHtml(n.title)}</span>
                 <span class="wind-news-date">${escapeHtml(n.time || '')}</span>
               </div>
-              <div class="wind-news-summary">${escapeHtml(n.summary || '')}</div>
+              <div class="wind-news-summary">${formatSentenceWithActions(n.summary)}</div>
             </div>
           `;
         });
@@ -3193,7 +3334,7 @@
           html += `
             <div class="wind-inst-block">
               <div class="wind-inst-title">${escapeHtml(v.title)}</div>
-              <div class="wind-inst-body">${escapeHtml(v.body || '')}</div>
+              <div class="wind-inst-body">${formatSentenceWithActions(v.body)}</div>
             </div>
           `;
         });
@@ -3226,7 +3367,7 @@
         `;
         if (ta.bullets && ta.bullets.length) {
           html += `<div class="wind-bullet-list">`;
-          ta.bullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          ta.bullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
         techEl.innerHTML = html;

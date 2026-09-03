@@ -2158,6 +2158,82 @@ html, body {
   text-align: justify;
 }
 
+/* Research sentences action buttons (+ and quote arrow) */
+.sentence-actions-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  vertical-align: middle;
+  transform: translateY(-1px);
+}
+
+.sentence-clip-btn,
+.sentence-quote-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--fg-dim);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.sentence-clip-btn:hover,
+.sentence-quote-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.sentence-clip-btn:active,
+.sentence-quote-btn:active {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(0.86);
+  color: #ffffff;
+}
+
+.sentence-clip-btn.clipped {
+  background: #32d74b !important;
+  color: #000000 !important;
+  border-color: #32d74b !important;
+}
+
+.sentence-clip-btn svg,
+.sentence-clip-btn path,
+.sentence-quote-btn svg,
+.sentence-quote-btn path {
+  pointer-events: none;
+}
+
+/* Research Highlights & Clippings accordion styling on Stock Card */
+.research-notes-accordion {
+  margin-top: 6px !important;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08) !important;
+  padding-top: 6px !important;
+}
+.research-notes-accordion .note-toggle {
+  color: var(--fg-dim);
+}
+.research-notes-accordion .note-toggle span {
+  letter-spacing: 0.04em;
+}
+.research-notes-accordion .note-content {
+  color: #cccccc;
+  font-size: 0.74rem;
+  line-height: 1.6;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .wind-bullet-item::before {
   content: "•";
   position: absolute;
