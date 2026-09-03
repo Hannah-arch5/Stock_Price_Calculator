@@ -783,7 +783,7 @@
     function updateSymInputWidth(input) {
       if (!input) return;
       const len = (input.value || '').length || 4;
-      input.style.width = `calc(${Math.max(4, len)}ch + 24px)`;
+      input.style.width = `${Math.max(3, len) + 0.6}ch`;
     }
 
     if (symEl) {

@@ -1289,7 +1289,7 @@ html, body {
 .sheet-symbol-title-row {
   display: flex;
   align-items: baseline;
-  gap: 12px;
+  gap: 10px;
   margin-top: 4px;
 }
 .sheet-symbol-title-input {
@@ -1297,20 +1297,22 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.04em;
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 6px;
-  padding: 3px 10px;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.35) !important;
+  border-radius: 0 !important;
+  padding: 1px 2px 2px 0;
   margin: 0;
-  min-width: 96px;
-  outline: none;
-  transition: all 0.2s ease;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: border-color 0.2s ease;
   -webkit-appearance: none;
-  box-sizing: border-box;
+  box-sizing: content-box;
 }
 .sheet-symbol-title-input:focus {
-  border-color: rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid #ffffff !important;
+  background: transparent !important;
+  outline: none !important;
 }
 .sheet-name-title-display {
   font-size: 0.95rem;
