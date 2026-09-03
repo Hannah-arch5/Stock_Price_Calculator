@@ -678,38 +678,49 @@ html, body {
 .urgency-dots {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  margin-right: 2px;
+  gap: 9px;
+  margin-right: 14px;
 }
 
 .urgency-dot {
-  width: 9px;
-  height: 9px;
+  position: relative;
+  width: 12.5px;
+  height: 12.5px;
   border-radius: 50% !important;
   border: none;
   cursor: pointer;
-  background-color: #282828;
+  background-color: #262626;
   transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   padding: 0;
   flex-shrink: 0;
 }
 
+/* Expanded invisible hit-area for effortless, accurate finger tapping */
+.urgency-dot::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  left: -5px;
+  right: -5px;
+}
+
 .urgency-dot:active {
-  transform: scale(1.3);
+  transform: scale(1.25);
 }
 
 .urgency-dot.green.selected {
   background-color: #32d74b;
-  box-shadow: 0 0 6px rgba(50, 215, 75, 0.45);
+  box-shadow: 0 0 8px rgba(50, 215, 75, 0.55);
 }
 .urgency-dot.orange.selected {
   background-color: #ff9f0a;
-  box-shadow: 0 0 6px rgba(255, 159, 10, 0.45);
+  box-shadow: 0 0 8px rgba(255, 159, 10, 0.55);
 }
 .urgency-dot.red.selected {
   background-color: #ff453a;
-  box-shadow: 0 0 6px rgba(255, 69, 58, 0.45);
+  box-shadow: 0 0 8px rgba(255, 69, 58, 0.55);
 }
 
 /* Cost & Shares Info */
