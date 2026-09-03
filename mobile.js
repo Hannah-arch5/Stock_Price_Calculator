@@ -1,6 +1,6 @@
 /**
  * Ticker Mobile - Studio Noir Mobile PWA Client
- * Real-time SSE synchronization + LocalStorage Offline Persistence
+ * Real-time SSE synchronization + LocalStorage Offline Persistence + Cloud Edit
  */
 
 (function () {
@@ -14,8 +14,9 @@
   let searchQuery = '';
   let eventSource = null;
 
-  // Cache Key
+  // Cache Keys
   const CACHE_KEY = 'ticker_mobile_cache_v1';
+  const GDRIVE_CACHE_KEY = 'ticker_gdrive_url_v1';
 
   // Market Detection matching desktop Ticker
   function getMarketInfo(symbol) {
@@ -134,7 +135,7 @@
       if (group.qty) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Qty:</span> <span class="meta-val-highlight mono">${group.qty}</span></span>`);
 
       // Calculations Ledger Rows
-      const recordsHtml = (group.records || []).map(r => {
+      const recordsHtml = (group.records || []).map((r, rIdx) => {
         const isUp = r.isUp !== false;
         const colorClass = isUp ? 'is-up' : 'is-down';
         const formulaStr = cleanDetails(r.details, r);
@@ -148,8 +149,9 @@
               <div class="record-formula mono">${escapeHtml(formulaStr)}</div>
               ${sharesHtml}
             </div>
-            <div class="record-right">
+            <div class="record-right" style="display: flex; align-items: center; gap: 8px;">
               <div class="record-result mono ${colorClass}">${escapeHtml(r.result || '--')}</div>
+              <button class="edit-pencil-btn" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="Edit target">✎</button>
             </div>
           </div>
         `;
@@ -177,7 +179,10 @@
                 <span class="stock-symbol mono">${escapeHtml(group.symbol)}</span>
                 ${group.name ? `<span class="stock-name">${escapeHtml(group.name)}</span>` : ''}
               </div>
-              <span class="market-tag">${marketInfo.label}</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="market-tag">${marketInfo.label}</span>
+                <button class="edit-pencil-btn" data-symbol="${escapeHtml(group.symbol)}" title="Edit stock note">✎</button>
+              </div>
             </div>
 
             ${costQtyItems.length > 0 ? `<div class="card-meta-row">${costQtyItems.join('')}</div>` : ''}
@@ -211,6 +216,207 @@
         }
       };
     });
+
+    // Attach edit pencil clicks
+    document.querySelectorAll('.edit-pencil-btn').forEach(btn => {
+      btn.onclick = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const symbol = this.getAttribute('data-symbol');
+        const recordIdxStr = this.getAttribute('data-record');
+        const recordIdx = recordIdxStr !== null ? parseInt(recordIdxStr, 10) : null;
+        openEditSheet(symbol, recordIdx);
+      };
+    });
+
+    // Check alerts
+    checkTargetAlerts();
+  }
+
+  // ─── Edit Bottom Sheet Logic ─────────────────────────────────
+  let editContext = {
+    symbol: null,
+    recordIdx: null
+  };
+
+  function openEditSheet(symbol, recordIdx) {
+    const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+    if (!group) return;
+
+    editContext.symbol = symbol;
+    editContext.recordIdx = recordIdx;
+
+    const sheet = document.getElementById('edit-bottom-sheet');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+    const symbolLabel = document.getElementById('sheet-symbol-label');
+    const recordTypeLabel = document.getElementById('sheet-record-type');
+    const editType = document.getElementById('edit-type');
+    const editBase = document.getElementById('edit-base');
+    const editPerc = document.getElementById('edit-perc');
+    const editDirBtn = document.getElementById('edit-dir-btn');
+    const editNote = document.getElementById('edit-note');
+    const baseGroup = document.getElementById('edit-base-group');
+    const percGroup = document.getElementById('edit-perc-group');
+
+    if (!sheet || !backdrop) return;
+
+    symbolLabel.textContent = `${group.symbol} ${group.name || ''}`.trim();
+    editNote.value = group.note || '';
+
+    if (recordIdx !== null && group.records && group.records[recordIdx]) {
+      const rec = group.records[recordIdx];
+      recordTypeLabel.textContent = `EDITING TARGET #${recordIdx + 1}`;
+      editType.value = rec.type || '';
+
+      if (rec.inputs && rec.inputs.base !== undefined) {
+        editBase.value = rec.inputs.base;
+        editPerc.value = rec.inputs.perc;
+        const isUp = rec.inputs.isUp !== false;
+        editDirBtn.setAttribute('data-dir', isUp ? 'up' : 'down');
+        editDirBtn.textContent = isUp ? '▲ UP' : '▼ DOWN';
+      } else {
+        editBase.value = '';
+        editPerc.value = '';
+      }
+      if (baseGroup) baseGroup.style.display = 'flex';
+      if (percGroup) percGroup.style.display = 'flex';
+    } else {
+      recordTypeLabel.textContent = `EDITING STOCK NOTES & METADATA`;
+      editType.value = '';
+      if (baseGroup) baseGroup.style.display = 'none';
+      if (percGroup) percGroup.style.display = 'none';
+    }
+
+    backdrop.classList.remove('hidden');
+    sheet.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      backdrop.classList.add('visible');
+      sheet.classList.add('visible');
+    });
+  }
+
+  function closeEditSheet() {
+    const sheet = document.getElementById('edit-bottom-sheet');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+    if (!sheet || !backdrop) return;
+    sheet.classList.remove('visible');
+    backdrop.classList.remove('visible');
+    setTimeout(() => {
+      sheet.classList.add('hidden');
+      backdrop.classList.add('hidden');
+      editContext = { symbol: null, recordIdx: null };
+    }, 300);
+  }
+
+  async function saveEditSheet() {
+    const { symbol, recordIdx } = editContext;
+    if (!symbol) return;
+
+    const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+    if (!group) return;
+
+    const editType = document.getElementById('edit-type');
+    const editBase = document.getElementById('edit-base');
+    const editPerc = document.getElementById('edit-perc');
+    const editDirBtn = document.getElementById('edit-dir-btn');
+    const editNote = document.getElementById('edit-note');
+    const saveBtn = document.getElementById('sheet-save-btn');
+
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'SAVING...';
+    }
+
+    // Update note
+    group.note = (editNote ? editNote.value : '').trim();
+
+    // Update record calculation if applicable
+    if (recordIdx !== null && group.records && group.records[recordIdx]) {
+      const rec = group.records[recordIdx];
+      if (editType && editType.value.trim()) rec.type = editType.value.trim();
+
+      const baseVal = editBase ? parseFloat(editBase.value) : NaN;
+      const percVal = editPerc ? parseFloat(editPerc.value) : NaN;
+      const isUp = editDirBtn ? editDirBtn.getAttribute('data-dir') === 'up' : true;
+
+      if (!isNaN(baseVal) && !isNaN(percVal)) {
+        rec.inputs = { base: baseVal, perc: percVal, isUp };
+        const factor = isUp ? (1 + percVal / 100) : (1 - percVal / 100);
+        const calcRes = baseVal * factor;
+        const marketInfo = getMarketInfo(symbol);
+        rec.result = `${marketInfo.currency}${calcRes.toFixed(2)}`;
+        rec.details = `<span>Base: ${marketInfo.currency}${baseVal}</span> ${isUp ? '▲' : '▼'} ${percVal}%`;
+      }
+    }
+
+    saveToCache(appState);
+
+    // Sync to Mac server & Google Drive
+    await pushDataToServer(appState);
+
+    if (saveBtn) {
+      saveBtn.textContent = 'SAVED!';
+      setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'SAVE & SYNC';
+        closeEditSheet();
+      }, 500);
+    }
+  }
+
+  async function pushDataToServer(data) {
+    const payloadStr = JSON.stringify(data);
+
+    // 1. Try local Mac server if on LAN
+    try {
+      await fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payloadStr,
+        signal: AbortSignal.timeout(2500)
+      });
+      console.log('[Mobile] Saved to local Mac server');
+    } catch(e) {
+      console.log('[Mobile] Local server unreachable, pushing to cloud...');
+    }
+
+    // 2. Also push to Google Drive Web App (works on 5G!)
+    const gdriveUrl = getGDriveUrl();
+    if (gdriveUrl) {
+      try {
+        await fetch(gdriveUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: payloadStr,
+          redirect: 'follow'
+        });
+        console.log('[Mobile] Saved to Google Drive Web App');
+      } catch(err) {
+        console.warn('[Mobile] Google Drive push failed:', err);
+      }
+    }
+  }
+
+  // ─── Target Alerts Check ─────────────────────────────────────
+  function checkTargetAlerts() {
+    const banner = document.getElementById('alert-banner');
+    const bannerText = document.getElementById('alert-banner-text');
+    if (!banner || !bannerText) return;
+
+    const alerts = [];
+    (appState.historyRecords || []).forEach(g => {
+      (g.records || []).forEach(r => {
+        if (r.highlighted || r.alertTriggered) {
+          alerts.push(`${g.symbol} 达到目标价 ${r.result || ''}`);
+        }
+      });
+    });
+
+    if (alerts.length > 0) {
+      bannerText.textContent = `🎯 ${alerts.slice(0, 2).join(' · ')}`;
+      banner.classList.remove('hidden');
+      requestAnimationFrame(() => banner.classList.add('visible'));
+    }
   }
 
   // Load from local storage cache
@@ -241,9 +447,6 @@
     }
   }
 
-  // Fetch full data from Server (home Wi-Fi) or Google Drive (5G/out-of-home)
-  const GDRIVE_CACHE_KEY = 'ticker_gdrive_url_v1';
-
   function getGDriveUrl() {
     return localStorage.getItem(GDRIVE_CACHE_KEY) || null;
   }
@@ -271,7 +474,6 @@
       if (res.ok) {
         const json = await res.json();
         saveToCache(json);
-        // Also cache the gdrive url returned by server if available
         try {
           const infoRes = await fetch('/api/server-info', { signal: AbortSignal.timeout(2000) });
           if (infoRes.ok) {
@@ -344,7 +546,6 @@
       eventSource.onerror = function () {
         updateStatus(false, 'CACHED');
         eventSource.close();
-        // Retry connection after 4 seconds
         setTimeout(setupEventStream, 4000);
       };
     } catch (e) {
@@ -385,6 +586,40 @@
         searchQuery = '';
         this.style.display = 'none';
         renderApp();
+      });
+    }
+
+    // Direction toggle in sheet
+    const editDirBtn = document.getElementById('edit-dir-btn');
+    if (editDirBtn) {
+      editDirBtn.addEventListener('click', function () {
+        const current = this.getAttribute('data-dir');
+        if (current === 'up') {
+          this.setAttribute('data-dir', 'down');
+          this.textContent = '▼ DOWN';
+        } else {
+          this.setAttribute('data-dir', 'up');
+          this.textContent = '▲ UP';
+        }
+      });
+    }
+
+    // Sheet buttons
+    const sheetCancelBtn = document.getElementById('sheet-cancel-btn');
+    const sheetSaveBtn = document.getElementById('sheet-save-btn');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+
+    if (sheetCancelBtn) sheetCancelBtn.addEventListener('click', closeEditSheet);
+    if (backdrop) backdrop.addEventListener('click', closeEditSheet);
+    if (sheetSaveBtn) sheetSaveBtn.addEventListener('click', saveEditSheet);
+
+    // Alert banner close
+    const alertCloseBtn = document.getElementById('alert-banner-close');
+    const alertBanner = document.getElementById('alert-banner');
+    if (alertCloseBtn && alertBanner) {
+      alertCloseBtn.addEventListener('click', () => {
+        alertBanner.classList.remove('visible');
+        setTimeout(() => alertBanner.classList.add('hidden'), 300);
       });
     }
   }

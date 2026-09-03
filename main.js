@@ -154,8 +154,30 @@ function startSyncServer() {
                 return;
             }
 
-            // REST Data Endpoint
-            if (pathname === '/api/data') {
+            // REST Data Endpoint (GET / POST)
+            if (pathname === '/api/data' || pathname === '/api/save') {
+                if (req.method === 'POST') {
+                    let body = '';
+                    req.on('data', chunk => { body += chunk.toString(); });
+                    req.on('end', () => {
+                        try {
+                            const parsed = JSON.parse(body);
+                            fs.writeFileSync(DATA_FILE, JSON.stringify(parsed, null, 2), 'utf8');
+                            if (mainWindow && !mainWindow.isDestroyed()) {
+                                mainWindow.webContents.send('sync-data-updated', parsed);
+                            }
+                            syncToGDrive(body);
+                            broadcastSyncData(parsed);
+                            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                            res.end(JSON.stringify({ success: true }));
+                        } catch(err) {
+                            res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                            res.end(JSON.stringify({ success: false, error: err.message }));
+                        }
+                    });
+                    return;
+                }
+
                 try {
                     if (fs.existsSync(DATA_FILE)) {
                         const content = fs.readFileSync(DATA_FILE, 'utf8');

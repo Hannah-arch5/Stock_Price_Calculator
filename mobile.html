@@ -87,12 +87,64 @@
             <div class="footer-line"></div>
             <div class="footer-info">
                 <span>STUDIO NOIR</span>
-                <span class="mono">TICKER MOBILE v5.2.0</span>
+                <span class="mono">TICKER MOBILE v5.3.0</span>
             </div>
         </footer>
     </div>
 
     <div class="safe-area-bottom"></div>
+
+    <!-- Alert Banner -->
+    <div id="alert-banner" class="alert-banner hidden">
+        <div class="alert-banner-inner">
+            <span class="alert-icon">◈</span>
+            <span id="alert-banner-text" class="alert-text mono"></span>
+            <button id="alert-banner-close" class="alert-close">×</button>
+        </div>
+    </div>
+
+    <!-- Edit Bottom Sheet -->
+    <div id="edit-sheet-backdrop" class="sheet-backdrop hidden"></div>
+    <div id="edit-bottom-sheet" class="bottom-sheet hidden">
+        <div class="sheet-handle-bar"></div>
+        <div class="sheet-header">
+            <div id="sheet-symbol-label" class="sheet-symbol mono">--</div>
+            <div id="sheet-record-type" class="sheet-record-type">--</div>
+        </div>
+        <div class="sheet-body">
+            <div class="sheet-field-group">
+                <label class="sheet-label">TYPE LABEL</label>
+                <input id="edit-type" type="text" class="sheet-input mono" placeholder="e.g. 目前30已涨" />
+            </div>
+            <div class="sheet-field-group" id="edit-base-group">
+                <label class="sheet-label">BASE PRICE</label>
+                <input id="edit-base" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
+            </div>
+            <div class="sheet-field-group" id="edit-perc-group">
+                <label class="sheet-label">TARGET %</label>
+                <div class="sheet-perc-row">
+                    <input id="edit-perc" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.0" step="0.1" />
+                    <button id="edit-dir-btn" class="dir-toggle-btn" data-dir="up">▲ UP</button>
+                </div>
+            </div>
+            <div class="sheet-field-group" id="edit-initial-group" style="display:none;">
+                <label class="sheet-label">INITIAL PRICE</label>
+                <input id="edit-initial" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
+            </div>
+            <div class="sheet-field-group" id="edit-final-group" style="display:none;">
+                <label class="sheet-label">TARGET PRICE</label>
+                <input id="edit-final" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
+            </div>
+            <div class="sheet-field-group">
+                <label class="sheet-label">STRATEGY &amp; TRADING NOTES</label>
+                <textarea id="edit-note" class="sheet-textarea" placeholder="Add notes..."></textarea>
+            </div>
+        </div>
+        <div class="sheet-footer">
+            <button id="sheet-cancel-btn" class="sheet-btn sheet-btn-cancel">CANCEL</button>
+            <button id="sheet-save-btn" class="sheet-btn sheet-btn-save">SAVE &amp; SYNC</button>
+        </div>
+    </div>
 
     <script src="mobile.js"></script>
 </body>

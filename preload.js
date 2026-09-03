@@ -17,5 +17,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     fetchZoteroAPI: (url) => ipcRenderer.invoke('fetch-zotero-api', url),
     getSyncServerInfo: () => ipcRenderer.invoke('get-sync-server-info'),
     getGDriveSyncUrl: () => ipcRenderer.invoke('get-gdrive-sync-url'),
-    saveGDriveSyncUrl: (url) => ipcRenderer.invoke('save-gdrive-sync-url', url)
+    saveGDriveSyncUrl: (url) => ipcRenderer.invoke('save-gdrive-sync-url', url),
+    onSyncDataUpdated: (callback) => ipcRenderer.on('sync-data-updated', (event, data) => callback(data))
 });
