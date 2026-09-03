@@ -973,6 +973,7 @@
       if (e.target.id === 'edit-sheet-backdrop') {
         closeStockEditSheet();
         closeCalcEditSheet();
+        closeAddLabelSheet();
         return;
       }
 
@@ -1085,18 +1086,50 @@
     }
   }
 
-  function handleAddChip() {
-    const name = prompt('Enter new label name:');
-    if (name && name.trim()) {
-      const cleanName = name.trim();
-      if (!appState.customLabels) appState.customLabels = [];
-      if (!appState.customLabels.includes(cleanName)) {
-        appState.customLabels.push(cleanName);
-        saveToCache(appState);
-        renderPart1Chips();
-        pushDataToServer(appState);
-      }
+  function openAddLabelSheet() {
+    const sheet = document.getElementById('add-label-sheet');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+    const input = document.getElementById('new-label-input');
+    if (sheet && backdrop) {
+      if (input) input.value = '';
+      sheet.classList.remove('hidden');
+      backdrop.classList.remove('hidden');
+      void sheet.offsetWidth;
+      sheet.classList.add('visible');
+      backdrop.classList.add('visible');
+      if (input) setTimeout(() => input.focus(), 300);
     }
+  }
+
+  function closeAddLabelSheet() {
+    const sheet = document.getElementById('add-label-sheet');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+    if (sheet && backdrop) {
+      sheet.classList.remove('visible');
+      backdrop.classList.remove('visible');
+      setTimeout(() => {
+        sheet.classList.add('hidden');
+        backdrop.classList.add('hidden');
+      }, 300);
+    }
+  }
+
+  function submitNewCustomLabel() {
+    const input = document.getElementById('new-label-input');
+    const name = input ? input.value.trim() : '';
+    if (!name) return;
+    if (!appState.customLabels) appState.customLabels = [];
+    if (!appState.customLabels.includes(name)) {
+      appState.customLabels.push(name);
+      saveToCache(appState);
+      renderPart1Chips();
+      pushDataToServer(appState);
+    }
+    closeAddLabelSheet();
+  }
+
+  function handleAddChip() {
+    openAddLabelSheet();
   }
 
   function handleToggleEditChips() {
@@ -1106,6 +1139,22 @@
 
   function setupPart1Calculators() {
     renderPart1Chips();
+
+    // Bind Add Label Sheet buttons
+    const addLabelCancelBtn = document.getElementById('add-label-cancel-btn');
+    const addLabelConfirmBtn = document.getElementById('add-label-confirm-btn');
+    const newLabelInput = document.getElementById('new-label-input');
+
+    if (addLabelCancelBtn) addLabelCancelBtn.onclick = closeAddLabelSheet;
+    if (addLabelConfirmBtn) addLabelConfirmBtn.onclick = submitNewCustomLabel;
+    if (newLabelInput) {
+      newLabelInput.onkeydown = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitNewCustomLabel();
+        }
+      };
+    }
 
     // 1. Mode Switcher
     const modeTargetBtn = document.getElementById('m-mode-target');

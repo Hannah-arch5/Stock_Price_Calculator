@@ -331,6 +331,25 @@
         </div>
     </div>
 
+    <!-- 3. Create Custom Label Sheet -->
+    <div id="add-label-sheet" class="bottom-sheet hidden">
+        <div class="sheet-handle-bar"></div>
+        <div class="sheet-header">
+            <div class="sheet-title-tag">CUSTOM LABELS</div>
+            <div class="sheet-symbol">ADD NEW LABEL</div>
+        </div>
+        <div class="sheet-body">
+            <div class="sheet-field-group">
+                <label class="sheet-label">LABEL NAME</label>
+                <input id="new-label-input" type="text" class="sheet-input" placeholder="e.g. 60买点1 / 止损位 / D买点3" autocomplete="off" autocorrect="off" />
+            </div>
+        </div>
+        <div class="sheet-footer">
+            <button id="add-label-cancel-btn" class="sheet-btn sheet-btn-cancel">CANCEL</button>
+            <button id="add-label-confirm-btn" class="sheet-btn sheet-btn-save">ADD LABEL</button>
+        </div>
+    </div>
+
     <script src="mobile.js"></script>
 </body>
 </html>
