@@ -1814,11 +1814,26 @@ html, body {
   font-family: inherit;
 }
 
-.res-nav-tab.active, .res-nav-tab:active {
+.res-nav-tab.active {
   background: #ffffff;
   color: #000000;
   border-color: #ffffff;
   font-weight: 700;
+}
+
+.res-nav-tab:active:not(.dragging-tab):not(.active) {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.res-nav-tab.dragging-tab {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border: 1px dashed rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.75);
+  opacity: 0.85 !important;
+  z-index: 100;
+  transform: scale(1.05);
 }
 
 /* Modal Floating Scroll-To-Top Button */

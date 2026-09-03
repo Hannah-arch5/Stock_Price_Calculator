@@ -2705,8 +2705,134 @@
     const researchBody = document.querySelector('.research-sheet-body');
     const modalScrollTopBtn = document.getElementById('res-modal-scroll-to-top-btn');
 
+    let resTabHoldTimer = null;
+    let resDraggedTab = null;
+    let isResDragging = false;
+    let hasResMoved = false;
+    let resTouchStartX = 0;
+    let resTouchStartY = 0;
+
+    function getDragAfterResTab(cont, x) {
+      const draggableElements = [...cont.querySelectorAll('.res-nav-tab:not(.dragging-tab)')];
+      for (const child of draggableElements) {
+        const box = child.getBoundingClientRect();
+        if (x < box.left + box.width / 2) {
+          return child;
+        }
+      }
+      return null;
+    }
+
     if (navTabsContainer && researchBody) {
+      // Long-press 280ms Drag & Drop for Research Tabs
+      navTabsContainer.addEventListener('touchstart', (e) => {
+        const tab = e.target.closest('.res-nav-tab');
+        if (!tab) return;
+
+        const touch = e.touches[0];
+        resTouchStartX = touch.clientX;
+        resTouchStartY = touch.clientY;
+        resDraggedTab = tab;
+        isResDragging = false;
+        hasResMoved = false;
+
+        if (resTabHoldTimer) clearTimeout(resTabHoldTimer);
+        resTabHoldTimer = setTimeout(() => {
+          if (resDraggedTab) {
+            isResDragging = true;
+            resDraggedTab.classList.add('dragging-tab');
+            if (navigator.vibrate) {
+              try { navigator.vibrate(25); } catch (_) {}
+            }
+          }
+        }, 280);
+      }, { passive: true });
+
+      navTabsContainer.addEventListener('touchmove', (e) => {
+        if (!resDraggedTab) return;
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - resTouchStartX);
+        const deltaY = Math.abs(touch.clientY - resTouchStartY);
+
+        if (!isResDragging) {
+          if (deltaX > 8 || deltaY > 8) {
+            if (resTabHoldTimer) {
+              clearTimeout(resTabHoldTimer);
+              resTabHoldTimer = null;
+            }
+            resDraggedTab = null;
+            return;
+          }
+        } else {
+          if (e.cancelable) e.preventDefault();
+          hasResMoved = true;
+          const afterElement = getDragAfterResTab(navTabsContainer, touch.clientX);
+          smoothMove(navTabsContainer, resDraggedTab, afterElement);
+        }
+      }, { passive: false });
+
+      navTabsContainer.addEventListener('touchend', () => {
+        if (resTabHoldTimer) {
+          clearTimeout(resTabHoldTimer);
+          resTabHoldTimer = null;
+        }
+        if (resDraggedTab) {
+          resDraggedTab.classList.remove('dragging-tab');
+          if (isResDragging && hasResMoved) {
+            commitReorderedResearchTabs();
+          }
+        }
+        resDraggedTab = null;
+        isResDragging = false;
+      });
+
+      navTabsContainer.addEventListener('touchcancel', () => {
+        if (resTabHoldTimer) {
+          clearTimeout(resTabHoldTimer);
+          resTabHoldTimer = null;
+        }
+        if (resDraggedTab) {
+          resDraggedTab.classList.remove('dragging-tab');
+        }
+        resDraggedTab = null;
+        isResDragging = false;
+        hasResMoved = false;
+      });
+
+      // Desktop Drag & Drop Support
+      const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      if (!isTouch) {
+        navTabsContainer.querySelectorAll('.res-nav-tab').forEach(tab => {
+          tab.setAttribute('draggable', 'true');
+        });
+
+        navTabsContainer.addEventListener('dragstart', (e) => {
+          const tab = e.target.closest('.res-nav-tab');
+          if (!tab) return;
+          tab.classList.add('dragging-tab');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        navTabsContainer.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          const dragging = navTabsContainer.querySelector('.dragging-tab');
+          if (!dragging) return;
+          const afterElement = getDragAfterResTab(navTabsContainer, e.clientX);
+          smoothMove(navTabsContainer, dragging, afterElement);
+        });
+
+        navTabsContainer.addEventListener('dragend', (e) => {
+          const tab = e.target.closest('.res-nav-tab');
+          if (tab) tab.classList.remove('dragging-tab');
+          commitReorderedResearchTabs();
+        });
+      }
+
       navTabsContainer.addEventListener('click', function (e) {
+        if (hasResMoved) {
+          hasResMoved = false;
+          return;
+        }
         const tabBtn = e.target.closest('.res-nav-tab');
         if (!tabBtn) return;
 
@@ -2738,15 +2864,9 @@
           }
         }
 
-        // ScrollSpy to highlight corresponding tab
-        const sections = [
-          'res-section-profile',
-          'res-section-logic',
-          'res-section-news',
-          'res-section-inst',
-          'res-section-tech',
-          'res-section-ai'
-        ];
+        // ScrollSpy to highlight corresponding tab based on dynamic tab sequence
+        const currentTabs = [...navTabsContainer.querySelectorAll('.res-nav-tab')];
+        const sections = currentTabs.map(t => t.getAttribute('data-target')).filter(Boolean);
         let currentSec = sections[0];
         for (const sId of sections) {
           const el = document.getElementById(sId);
@@ -2826,6 +2946,45 @@
     }
   }
 
+  function commitReorderedResearchTabs() {
+    const navTabsContainer = document.getElementById('res-nav-tabs');
+    if (!navTabsContainer) return;
+    const currentTabs = [...navTabsContainer.querySelectorAll('.res-nav-tab')];
+    const orderedTargets = currentTabs.map(t => t.getAttribute('data-target')).filter(Boolean);
+    if (orderedTargets.length === 0) return;
+
+    appState.researchTabOrder = orderedTargets;
+    saveToCache(appState);
+    pushDataToServer(appState);
+
+    applyResearchSectionsOrder(orderedTargets);
+  }
+
+  function applyResearchSectionsOrder(orderedTargets) {
+    const researchBody = document.querySelector('.research-sheet-body');
+    const navTabsContainer = document.getElementById('res-nav-tabs');
+    if (!researchBody) return;
+
+    const targets = orderedTargets || appState.researchTabOrder;
+    if (!targets || targets.length === 0) return;
+
+    // 1. Order tabs in navTabsContainer
+    if (navTabsContainer) {
+      targets.forEach(targetId => {
+        const tabEl = navTabsContainer.querySelector(`.res-nav-tab[data-target="${targetId}"]`);
+        if (tabEl) navTabsContainer.appendChild(tabEl);
+      });
+    }
+
+    // 2. Order sections in researchBody
+    targets.forEach(targetId => {
+      const secEl = document.getElementById(targetId);
+      if (secEl && secEl.parentElement === researchBody) {
+        researchBody.appendChild(secEl);
+      }
+    });
+  }
+
   async function openStockResearch(symbolOrQuery) {
     const modal = document.getElementById('stock-research-modal');
     const backdrop = document.getElementById('research-modal-backdrop');
@@ -2833,6 +2992,8 @@
 
     modal.classList.remove('hidden');
     backdrop.classList.remove('hidden');
+
+    applyResearchSectionsOrder();
 
     const researchBody = document.querySelector('.research-sheet-body');
     if (researchBody) researchBody.scrollTop = 0;
