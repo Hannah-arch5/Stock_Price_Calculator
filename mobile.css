@@ -651,6 +651,18 @@ html, body {
   flex-wrap: wrap;
 }
 
+.stock-research-trigger {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  user-select: none;
+}
+
+.stock-research-trigger:active {
+  opacity: 0.65;
+  transform: scale(0.98);
+}
+
 .stock-symbol {
   font-size: 1.4rem;
   font-weight: 800;

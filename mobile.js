@@ -449,7 +449,7 @@
         <article class="stock-card" data-symbol="${escapeHtml(group.symbol)}" style="--up-color: ${upColor}; --down-color: ${downColor};">
           <header class="card-header">
             <div class="card-title-row">
-              <div class="symbol-name-wrap">
+              <div class="symbol-name-wrap stock-research-trigger" data-symbol="${escapeHtml(group.symbol)}" title="查看全网深度投研与AI分析">
                 <span class="stock-symbol mono">${escapeHtml(group.symbol)}</span>
                 ${group.name ? `<span class="stock-name">${escapeHtml(group.name)}</span>` : ''}
               </div>
@@ -1305,6 +1305,19 @@
   function initListeners() {
     // 1. Top-Level Unified Click Delegation (works 100% on iOS PWA)
     document.addEventListener('click', function (e) {
+      // (a0) Stock Symbol/Name Click -> Open Deep Stock Research Modal
+      const researchTrigger = e.target.closest('.stock-research-trigger') || e.target.closest('.stock-symbol') || e.target.closest('.stock-name');
+      if (researchTrigger && !e.target.closest('.stock-edit-trigger') && !e.target.closest('.urgency-dot')) {
+        const card = researchTrigger.closest('.stock-card');
+        const sym = researchTrigger.getAttribute('data-symbol') || (card ? card.getAttribute('data-symbol') : null);
+        if (sym) {
+          e.preventDefault();
+          e.stopPropagation();
+          openStockResearch(sym);
+          return;
+        }
+      }
+
       // (a) Stock Edit Trigger
       const stockBtn = e.target.closest('.stock-edit-trigger');
       if (stockBtn) {
