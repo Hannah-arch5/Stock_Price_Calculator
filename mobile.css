@@ -263,13 +263,12 @@ html, body {
 
 @keyframes cardHighlightPulse {
   0% {
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3), 0 8px 32px rgba(255, 255, 255, 0.06);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25), 0 12px 36px rgba(0, 0, 0, 0.6);
   }
-  50% {
-    background: rgba(255, 255, 255, 0.04);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 4px 16px rgba(255, 255, 255, 0.02);
+  60% {
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 6px 18px rgba(0, 0, 0, 0.3);
   }
   100% {
     background: transparent;
@@ -278,7 +277,7 @@ html, body {
 }
 
 .card-highlight-flash {
-  animation: cardHighlightPulse 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cardHighlightPulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Feed & Cards Stack */
@@ -289,13 +288,15 @@ html, body {
 .cards-stack {
   display: flex;
   flex-direction: column;
-  gap: 32px; /* Exaggerated Studio Noir spacing */
+  gap: 28px; /* Exaggerated Studio Noir spacing */
 }
 
-/* Stock Holding Card */
+/* Stock Holding Card (with generous breathing room inside glow) */
 .stock-card {
   border-bottom: 1px solid var(--border);
-  padding-bottom: 24px;
+  padding: 12px 14px 22px;
+  margin: 0 -14px;
+  border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

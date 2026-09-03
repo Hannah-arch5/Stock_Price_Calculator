@@ -833,21 +833,21 @@
   }
 
   // Physics-based luxury smooth scroll matching desktop Studio Noir
-  function smoothScrollContainer(container, targetY, duration = 650) {
+  function smoothScrollContainer(container, targetY, duration = 950) {
     const startY = container.scrollTop;
     const difference = targetY - startY;
     if (Math.abs(difference) < 2) return;
 
     const startTime = performance.now();
 
-    function easeOutQuint(t) {
-      return 1 - Math.pow(1 - t, 4.5);
+    function easeOutQuart(t) {
+      return 1 - Math.pow(1 - t, 4);
     }
 
     function step(now) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const ease = easeOutQuint(progress);
+      const ease = easeOutQuart(progress);
 
       container.scrollTop = startY + difference * ease;
 
