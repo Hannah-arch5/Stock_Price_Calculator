@@ -430,14 +430,16 @@
           <div class="record-row ${highlightedClass}" data-symbol="${escapeHtml(group.symbol)}" data-record-idx="${rIdx}">
             <div class="record-left">
               <div class="record-type-badge">${escapeHtml(r.type || 'Projection')}</div>
-              <div class="record-formula mono">${escapeHtml(formulaStr)}</div>
+              <div class="record-formula-row">
+                <div class="record-formula mono">${escapeHtml(formulaStr)}</div>
+                <button class="calc-load-btn" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="导回上方计算器 (Load into Calculator)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                  </svg>
+                </button>
+              </div>
               ${sharesHtml}
             </div>
-            <button class="calc-load-btn" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="导回上方计算器 (Load into Calculator)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M7 17L17 7M17 7H7M17 7V17"/>
-              </svg>
-            </button>
             <div class="record-right">
               <div class="record-result mono ${colorClass}">${escapeHtml(r.result || '--')}</div>
               <button class="edit-pencil-btn calc-edit-trigger" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="Edit calculation">✎</button>

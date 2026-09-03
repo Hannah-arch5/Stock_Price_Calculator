@@ -850,9 +850,16 @@ html, body {
   letter-spacing: 0.02em;
 }
 
+.record-formula-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .record-formula {
   font-size: 0.7rem;
   color: var(--fg-dim);
+  line-height: 1.2;
 }
 
 .record-shares {
@@ -886,15 +893,14 @@ html, body {
   border: none;
   color: var(--fg-subtle);
   cursor: pointer;
-  padding: 4px;
-  display: flex;
+  padding: 0 4px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   transition: all 0.2s ease;
-  margin-left: 8px;
-  margin-right: auto;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 .calc-load-btn:hover {
