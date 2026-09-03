@@ -2152,38 +2152,55 @@ html, body {
 
 .ai-input-bar {
   display: flex;
-  gap: 6px;
+  align-items: flex-end;
+  gap: 8px;
+  position: relative;
 }
 
 .ai-text-input {
   flex: 1;
   background: #0f0f0f;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 0.76rem;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  line-height: 1.5;
   color: #ffffff;
   outline: none;
   font-family: inherit;
+  resize: none;
+  min-height: 62px;
+  max-height: 180px;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  overflow-y: auto;
 }
 
 .ai-text-input:focus {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .ai-send-btn {
   background: #ffffff;
   color: #000000;
   border: none;
-  border-radius: 6px;
-  padding: 0 14px;
-  font-size: 0.74rem;
+  border-radius: 8px;
+  padding: 0 16px;
+  height: 62px;
+  font-size: 0.76rem;
   font-weight: 700;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
 }
 
 .ai-send-btn:active {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.75);
+  transform: scale(0.96);
 }
 
 /* ==========================================================================

@@ -2960,8 +2960,20 @@
     }
 
     if (aiInput) {
+      const adjustAiInputHeight = () => {
+        aiInput.style.height = 'auto';
+        const newHeight = Math.min(180, Math.max(62, aiInput.scrollHeight));
+        aiInput.style.height = `${newHeight}px`;
+        if (aiSendBtn) {
+          aiSendBtn.style.height = `${newHeight}px`;
+        }
+      };
+
+      aiInput.addEventListener('input', adjustAiInputHeight);
+
       aiInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
           if (aiSendBtn) aiSendBtn.click();
         }
       });
@@ -3433,7 +3445,13 @@
     const attachmentBar = document.getElementById('res-ai-attachment-bar');
     if (attachmentBar) attachmentBar.classList.add('hidden');
     const aiInput = document.getElementById('res-ai-input');
-    if (aiInput) aiInput.placeholder = '向 AI 提问该公司的财报、护城河或估值...';
+    const aiSendBtn = document.getElementById('res-ai-send-btn');
+    if (aiInput) {
+      aiInput.value = '';
+      aiInput.style.height = '62px';
+      if (aiSendBtn) aiSendBtn.style.height = '62px';
+      aiInput.placeholder = '向 AI 提问该公司的财报、护城河或估值...';
+    }
 
     // Append user message
     const userMsg = document.createElement('div');
