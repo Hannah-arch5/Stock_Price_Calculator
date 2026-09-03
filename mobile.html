@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ticker</title>
+    
+    <!-- PWA & iOS Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ticker">
+    <meta name="theme-color" content="#030303">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+    <div class="safe-area-top"></div>
+
+    <div class="mobile-container">
+        <!-- Masthead -->
+        <header class="mobile-header">
+            <div class="brand-row">
+                <div class="brand-title">TICKER</div>
+                <div class="header-status">
+                    <div id="sync-indicator" class="status-pill status-offline">
+                        <span class="status-dot"></span>
+                        <span id="sync-text" class="status-text">CONNECTING</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="meta-row">
+                <div class="meta-item">
+                    <span class="meta-label">PORTFOLIO</span>
+                    <span id="total-symbols-count" class="meta-val mono">0</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">TARGETS</span>
+                    <span id="total-targets-count" class="meta-val mono">0</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">UPDATED</span>
+                    <span id="last-sync-time" class="meta-val mono">--:--</span>
+                </div>
+            </div>
+
+            <!-- Search & Market Filters -->
+            <div class="controls-row">
+                <div class="search-box">
+                    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="mobile-search-input" placeholder="Search symbol or name..." class="mono">
+                    <button id="clear-search-btn" class="clear-btn">&times;</button>
+                </div>
+                <div class="market-filter-tabs">
+                    <button class="filter-tab active" data-filter="all">ALL</button>
+                    <button class="filter-tab" data-filter="US">US</button>
+                    <button class="filter-tab" data-filter="CN">A股</button>
+                    <button class="filter-tab" data-filter="HK">HK</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="mobile-feed">
+            <div id="stocks-container" class="cards-stack">
+                <!-- Dynamic cards populated by mobile.js -->
+            </div>
+
+            <div id="empty-state" class="empty-state hidden">
+                <div class="empty-title">NO MATCHING SYMBOLS</div>
+                <div class="empty-desc">Check your search filter or add symbols on desktop.</div>
+            </div>
+        </main>
+
+        <footer class="mobile-footer">
+            <div class="footer-line"></div>
+            <div class="footer-info">
+                <span>STUDIO NOIR</span>
+                <span class="mono">TICKER MOBILE v5.2.0</span>
+            </div>
+        </footer>
+    </div>
+
+    <div class="safe-area-bottom"></div>
+
+    <script src="mobile.js"></script>
+</body>
+</html>

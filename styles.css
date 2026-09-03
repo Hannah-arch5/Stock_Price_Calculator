@@ -1816,3 +1816,125 @@ body.light-theme .macro-news-item.saved {
     opacity: 1;
     color: var(--fg);
 }
+
+/* Mobile Sync Modal (Studio Noir) */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-app-region: no-drag;
+}
+
+.modal-card {
+  background: #080808;
+  border: 1px solid var(--border);
+  width: 90%;
+  max-width: 440px;
+  padding: 24px;
+  border-radius: 6px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.9);
+  -webkit-app-region: no-drag;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--fg);
+  text-transform: uppercase;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--fg-dim);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+  color: var(--fg);
+}
+
+.sync-instruction {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--fg-dim);
+  margin-bottom: 16px;
+}
+
+.sync-instruction strong {
+  color: var(--fg);
+}
+
+.sync-url-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.sync-url {
+  font-size: 0.85rem;
+  color: #32d74b;
+  font-weight: 600;
+  user-select: all;
+}
+
+.copy-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sync-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: var(--fg-dim);
+}
+
+.status-indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #32d74b;
+  box-shadow: 0 0 6px rgba(50, 215, 75, 0.6);
+}
+

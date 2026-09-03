@@ -2,6 +2,7 @@ const { app, BrowserWindow, shell, ipcMain, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const http = require('http');
 const { exec } = require('child_process');
 
 nativeTheme.themeSource = 'dark';
@@ -13,8 +14,160 @@ app.setPath('userData', FIXED_USER_DATA);
 
 const DATA_FILE = path.join(FIXED_USER_DATA, 'app-data-v1.json');
 
+// --- Real-time Sync Server for iPhone (PWA) ---
+const SYNC_PORT = 7321;
+let sseClients = [];
+
+function getLanIp() {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+        if (name.startsWith('utun') || name.startsWith('lo') || name.startsWith('awdl') || name.startsWith('llw')) continue;
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal && !iface.address.startsWith('28.0.')) {
+                return iface.address;
+            }
+        }
+    }
+    return 'localhost';
+}
+
+function broadcastSyncData(dataObj) {
+    if (sseClients.length === 0) return;
+    const payload = `data: ${JSON.stringify({ type: 'sync', data: dataObj })}\n\n`;
+    sseClients.forEach(client => {
+        try {
+            client.write(payload);
+        } catch (e) {}
+    });
+}
+
+function startSyncServer() {
+    try {
+        const server = http.createServer((req, res) => {
+            const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+            const pathname = parsedUrl.pathname;
+
+            // CORS headers
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+            if (req.method === 'OPTIONS') {
+                res.writeHead(204);
+                res.end();
+                return;
+            }
+
+            // SSE Real-time Events
+            if (pathname === '/api/events') {
+                res.writeHead(200, {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                });
+                res.write('\n');
+                
+                // Send initial state immediately
+                try {
+                    if (fs.existsSync(DATA_FILE)) {
+                        const content = fs.readFileSync(DATA_FILE, 'utf8');
+                        const parsed = JSON.parse(content);
+                        res.write(`data: ${JSON.stringify({ type: 'sync', data: parsed })}\n\n`);
+                    }
+                } catch(e) {}
+
+                sseClients.push(res);
+                console.log(`[SyncServer] Client connected. Total clients: ${sseClients.length}`);
+
+                req.on('close', () => {
+                    sseClients = sseClients.filter(c => c !== res);
+                    console.log(`[SyncServer] Client disconnected. Total clients: ${sseClients.length}`);
+                });
+                return;
+            }
+
+            // REST Data Endpoint
+            if (pathname === '/api/data') {
+                try {
+                    if (fs.existsSync(DATA_FILE)) {
+                        const content = fs.readFileSync(DATA_FILE, 'utf8');
+                        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                        res.end(content);
+                        return;
+                    }
+                } catch(e) {}
+                res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                res.end(JSON.stringify({ historyRecords: [], customLabels: [] }));
+                return;
+            }
+
+            if (pathname === '/api/server-info') {
+                const ip = getLanIp();
+                res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                res.end(JSON.stringify({
+                    ip,
+                    port: SYNC_PORT,
+                    url: `http://${ip}:${SYNC_PORT}`,
+                    clientsCount: sseClients.length
+                }));
+                return;
+            }
+
+            // Static Files Serving
+            let filePath = '';
+            let contentType = 'text/plain';
+
+            if (pathname === '/' || pathname === '/index.html' || pathname === '/mobile.html') {
+                filePath = path.join(__dirname, 'mobile.html');
+                contentType = 'text/html; charset=utf-8';
+            } else if (pathname === '/mobile.css') {
+                filePath = path.join(__dirname, 'mobile.css');
+                contentType = 'text/css; charset=utf-8';
+            } else if (pathname === '/mobile.js') {
+                filePath = path.join(__dirname, 'mobile.js');
+                contentType = 'application/javascript; charset=utf-8';
+            } else if (pathname === '/manifest.json') {
+                filePath = path.join(__dirname, 'manifest.json');
+                contentType = 'application/json; charset=utf-8';
+            } else if (pathname === '/apple-touch-icon.png' || pathname === '/icon.png') {
+                const iconPath = path.join(__dirname, 'apple-touch-icon.png');
+                filePath = fs.existsSync(iconPath) ? iconPath : path.join(__dirname, 'build', 'icon.png');
+                contentType = 'image/png';
+            }
+
+            if (filePath && fs.existsSync(filePath)) {
+                res.writeHead(200, { 'Content-Type': contentType });
+                fs.createReadStream(filePath).pipe(res);
+            } else {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('Not Found');
+            }
+        });
+
+        server.listen(SYNC_PORT, '0.0.0.0', () => {
+            console.log(`[SyncServer] Ticker Mobile Sync Server running on http://${getLanIp()}:${SYNC_PORT}`);
+        });
+
+        server.on('error', (err) => {
+            console.error('[SyncServer] Server error:', err);
+        });
+    } catch(err) {
+        console.error('[SyncServer] Failed to start sync server:', err);
+    }
+}
+
 // Register ALL IPC handlers BEFORE the window is created
 // so they are ready when the renderer loads script.js
+
+ipcMain.handle('get-sync-server-info', () => {
+    const ip = getLanIp();
+    return {
+        ip,
+        port: SYNC_PORT,
+        url: `http://${ip}:${SYNC_PORT}`,
+        clientCount: sseClients.length
+    };
+});
 
 ipcMain.handle('load-data', () => {
     const backupFile = `${DATA_FILE}.bak`;
@@ -61,6 +214,12 @@ ipcMain.on('save-data', (event, dataStr) => {
         
         // 3. Atomically replace the old file with the new file
         fs.renameSync(tempFile, DATA_FILE);
+
+        // 4. Broadcast live update to mobile clients
+        try {
+            const parsed = JSON.parse(dataStr);
+            broadcastSyncData(parsed);
+        } catch(e) {}
     } catch(e) {
         console.error('[main] save-data error:', e);
     }
@@ -308,6 +467,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+    startSyncServer();
     createWindow();
 
     app.on('activate', () => {

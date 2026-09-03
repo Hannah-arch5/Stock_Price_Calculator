@@ -14,5 +14,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     openExternal: (url) => ipcRenderer.send('open-external', url),
     openPDFWindow: (pdfPath) => ipcRenderer.send('open-pdf-window', pdfPath),
     openPDFByKey: (key) => ipcRenderer.invoke('open-pdf-by-key', key),
-    fetchZoteroAPI: (url) => ipcRenderer.invoke('fetch-zotero-api', url)
+    fetchZoteroAPI: (url) => ipcRenderer.invoke('fetch-zotero-api', url),
+    getSyncServerInfo: () => ipcRenderer.invoke('get-sync-server-info')
 });

@@ -102,7 +102,7 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 - US Quick-Tags updated to show full stock symbols (e.g. `AAPL`) rather than 2-char Chinese abbreviations.
 - Translation integration explored and replaced due to network sandbox limitations.
 
-### v5.2.0: Earnings & Analysis Matrix & Full Market Auto-Detection (Current)
+### v5.2.0: Earnings & Analysis Matrix & Full Market Auto-Detection
 - **US Earnings & Fundamental Analysis**:
   - Replaced legacy Yahoo news feed with structured **Earnings & Analysis (财报与分析)** panel.
   - Next Earnings release reminder via `calendarEvents.earnings`.
@@ -116,6 +116,21 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Per-card independent color isolation.
   - Bidirectional calculator auto-switching.
 
+### v5.3.0: Ticker Mobile PWA & Real-Time Sync (Current)
+- **Built-in HTTP & SSE Sync Server**:
+  - Electron main process runs lightweight HTTP server on port `7321` serving PWA assets and REST API (`/api/data`, `/api/events`, `/api/server-info`).
+  - Automatic LAN IP discovery (`os.networkInterfaces()`) for frictionless connection.
+  - Real-time SSE push (`broadcastSyncData`): any save/update in Mac desktop instantly syncs to connected iPhones without refreshing.
+- **iPhone 14 Pro Max & iPhone 15 Studio Noir Mobile PWA**:
+  - Designed strictly to Studio Noir aesthetics: pure OLED black (`#030303`), high-contrast JetBrains Mono & Inter typography, 1px dividers, extreme negative whitespace.
+  - Native iOS Web Clip integration: standalone fullscreen mode (`apple-mobile-web-app-capable`, `black-translucent`), customized `apple-touch-icon.png` (with Apple standard padding).
+  - iOS Dynamic Island & Home indicator safe area adaptation (`env(safe-area-inset-top/bottom)`).
+  - Offline cache resilience: LocalStorage caching retains full ledger snapshot even when disconnected or outside LAN.
+  - Independent market color isolation: A-Share (red-up/green-down), US/HK (green-up/red-down).
+- **Mac Desktop Integration**:
+  - Added mobile sync icon button in top-right actions.
+  - Studio Noir sync modal displaying current LAN address (e.g. `http://192.168.71.146:7321`), one-click copy button, and real-time connection status.
+
 ---
 
 ## 6. Build & Deployment
@@ -125,4 +140,4 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   ```
 - **Git Workflow**:
   - Project repo uses `Hannah-arch5/Stock_Price_Calculator_Ticker`
-  - Release branches tagged (e.g., `v5.2.0`).
+  - Release branches tagged (e.g., `v5.3.0`).

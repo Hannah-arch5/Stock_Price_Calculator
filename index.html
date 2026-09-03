@@ -24,6 +24,12 @@
                     <line x1="3" y1="21" x2="10" y2="14"></line>
                 </svg>
             </button>
+            <button id="mobile-sync-btn" class="global-action-btn" title="iPhone Mobile Sync">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                </svg>
+            </button>
             <button id="theme-toggle-btn" class="global-action-btn" title="Toggle Theme">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="5"></circle>
@@ -414,6 +420,29 @@
                     
                     <button class="btn-minimal save-btn" id="save-settings-btn" style="margin-top: 2rem;">Save Settings</button>
                 </div>
+    </div>
+
+    <!-- Mobile Sync Modal (Studio Noir) -->
+    <div id="mobile-sync-modal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">IPHONE REAL-TIME SYNC</div>
+                <button id="close-sync-modal-btn" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="sync-instruction">
+                    用 iPhone 14 Pro Max / 15 的 Safari 浏览器访问下方地址，点击底部分享按钮选择<strong>「添加到主屏幕」</strong>，即可全屏独立使用 Ticker 移动版并实时同步：
+                </p>
+                <div class="sync-url-box">
+                    <span id="sync-url-text" class="mono sync-url">Loading...</span>
+                    <button id="copy-sync-url-btn" class="copy-btn">COPY</button>
+                </div>
+                <div class="sync-status-row">
+                    <span class="status-indicator-dot"></span>
+                    <span id="modal-connected-count" class="mono">Sync Service Active on Port 7321</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="notebook_tree.js"></script>

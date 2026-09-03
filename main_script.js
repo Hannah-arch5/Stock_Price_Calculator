@@ -1806,6 +1806,56 @@ if (sizeToggleBtn && window.electronAPI) {
     });
 }
 
+// Mobile Sync Modal Logic (Studio Noir)
+const mobileSyncBtn = document.getElementById('mobile-sync-btn');
+const mobileSyncModal = document.getElementById('mobile-sync-modal');
+const closeSyncModalBtn = document.getElementById('close-sync-modal-btn');
+const syncUrlText = document.getElementById('sync-url-text');
+const copySyncUrlBtn = document.getElementById('copy-sync-url-btn');
+const modalConnectedCount = document.getElementById('modal-connected-count');
+
+if (mobileSyncBtn && mobileSyncModal) {
+    mobileSyncBtn.addEventListener('click', async () => {
+        mobileSyncModal.style.display = 'flex';
+        if (window.electronAPI && window.electronAPI.getSyncServerInfo) {
+            try {
+                const info = await window.electronAPI.getSyncServerInfo();
+                if (info && info.url) {
+                    syncUrlText.textContent = info.url;
+                    modalConnectedCount.textContent = `Sync Server Active · ${info.clientCount || 0} device(s) connected`;
+                }
+            } catch (e) {
+                syncUrlText.textContent = 'http://localhost:7321';
+            }
+        }
+    });
+
+    if (closeSyncModalBtn) {
+        closeSyncModalBtn.addEventListener('click', () => {
+            mobileSyncModal.style.display = 'none';
+        });
+    }
+
+    mobileSyncModal.addEventListener('click', (e) => {
+        if (e.target === mobileSyncModal) {
+            mobileSyncModal.style.display = 'none';
+        }
+    });
+
+    if (copySyncUrlBtn && syncUrlText) {
+        copySyncUrlBtn.addEventListener('click', () => {
+            const url = syncUrlText.textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                const originalText = copySyncUrlBtn.textContent;
+                copySyncUrlBtn.textContent = 'COPIED!';
+                setTimeout(() => {
+                    copySyncUrlBtn.textContent = originalText;
+                }, 2000);
+            });
+        });
+    }
+}
+
 // Fetch and render stock news
 async function loadStockNews(symbol, groupIndex) {
     const panel = document.getElementById(`news-panel-${symbol}`);
