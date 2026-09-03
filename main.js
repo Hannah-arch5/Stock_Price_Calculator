@@ -42,7 +42,7 @@ function startCloudflareTunnel() {
 
     try {
         console.log('[Tunnel] Starting cloudflared tunnel for port', SYNC_PORT);
-        const proc = exec(`${cloudflaredBin} tunnel --url http://localhost:${SYNC_PORT}`);
+        const proc = exec(`${cloudflaredBin} tunnel --protocol http2 --url http://localhost:${SYNC_PORT}`);
         tunnelProcess = proc;
 
         const checkOutput = (data) => {
