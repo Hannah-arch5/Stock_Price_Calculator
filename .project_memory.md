@@ -10,6 +10,10 @@
 - **Purpose**: High-frequency financial research dashboard & stock target price calculator designed for intrinsic value calculations, multi-timeframe tracking, and real-time earnings/fundamental analysis.
 - **Tech Stack**: Electron 42, Node.js, Vanilla HTML5 / CSS3 / ES6+ JavaScript.
 
+### Version Naming Conventions
+- **Desktop Edition (电脑端版本)**: Any version name that does **NOT** contain `Ticker Pocket` or `Mobile Companion` strictly refers to the **Desktop Edition** (e.g., `v5.3.0`, `Ticker v5.3.0`).
+- **Mobile Edition (手机版本)**: Any version name containing **`Ticker Pocket`** or **`Mobile Companion`** strictly refers to the **Mobile Edition** (e.g., `Ticker Pocket v5.3.0`, `v5.3.0 (Mobile Companion)`).
+
 ---
 
 ## 2. Design & Architectural Philosophy: "Studio Noir"
