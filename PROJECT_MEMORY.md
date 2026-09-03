@@ -129,6 +129,7 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 - **Global Stock Deep Research (`/api/stock-research`)**:
   - Auto-completion dropdown when typing in `#mobile-search-input` showing local ledger matches + `🔍 全网深度研报: 检索 "SYMBOL"`.
   - Supports arbitrary US, HK, and A-Share symbols/names.
+  - **Homepage State Preservation**: When launching global research or closing the modal, search input and filter state automatically reset to show the full original ledger list without any disruption.
   - **Financial Matrix (English Labels)**: Market Cap, Revenue Growth (YoY), Earnings Growth (YoY), Net / Gross Margin, ROE, Debt / Equity Ratio, P/E (TTM / Forward), Dividend Yield, Analyst Target Price.
 - **Wind-Style 5 Deep Institutional Research Sections (万得风格五大深度投研板块，全英文术语注释)**:
   1. `BUSINESS & INDUSTRY (公司与行业洞察)`: 核心业务与商业模式 (Core Business & Monetization Model)、行业地位与竞争护城河 (Competitive Moat & Industry Standing)、SaaS模式、净留存率 (Net Retention Rate)、全产业链协同 (Full-Stack Synergy).

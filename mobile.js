@@ -2169,6 +2169,10 @@
         const q = this.value.trim();
         if (q) {
           dropdown.classList.add('hidden');
+          this.value = '';
+          if (clearBtn) clearBtn.style.display = 'none';
+          searchQuery = '';
+          renderApp();
           openStockResearch(q);
         }
       }
@@ -2198,6 +2202,10 @@
       } else if (action === 'search-global') {
         const q = item.getAttribute('data-query');
         dropdown.classList.add('hidden');
+        if (searchInput) searchInput.value = '';
+        if (clearBtn) clearBtn.style.display = 'none';
+        searchQuery = '';
+        renderApp();
         openStockResearch(q);
       }
     });
@@ -2584,6 +2592,16 @@
     if (modal) modal.classList.add('hidden');
     if (backdrop) backdrop.classList.add('hidden');
     currentResearchStock = null;
+
+    // Reset search input and search query so the homepage data list is always restored to full original state
+    const searchInput = document.getElementById('mobile-search-input');
+    const clearBtn = document.getElementById('clear-search-btn');
+    const dropdown = document.getElementById('search-autocomplete-dropdown');
+    if (searchInput) searchInput.value = '';
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (dropdown) dropdown.classList.add('hidden');
+    searchQuery = '';
+    renderApp();
   }
 
   async function sendResearchAiMessage(promptText) {
