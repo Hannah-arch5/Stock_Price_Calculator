@@ -134,42 +134,6 @@
     }
   }
 
-  // Soft Zero-Bounce FLIP Fluid Reordering (Pure Velvety Ease)
-  function animateFLIP(container, draggingEl, afterElement) {
-    if (!container || !draggingEl) return;
-    const currentNext = draggingEl.nextElementSibling;
-    if (currentNext === afterElement) return;
-
-    const children = [...container.children];
-    const firstPositions = new Map();
-    children.forEach(child => {
-      firstPositions.set(child, child.getBoundingClientRect());
-    });
-
-    if (afterElement == null) {
-      container.appendChild(draggingEl);
-    } else {
-      container.insertBefore(draggingEl, afterElement);
-    }
-
-    children.forEach(child => {
-      if (child === draggingEl) return;
-      const first = firstPositions.get(child);
-      if (!first) return;
-      const last = child.getBoundingClientRect();
-      const deltaX = first.left - last.left;
-      const deltaY = first.top - last.top;
-
-      if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
-        child.style.transition = 'none';
-        child.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
-        void child.offsetWidth; // Force reflow
-        child.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)';
-        child.style.transform = '';
-      }
-    });
-  }
-
   function setupQuickTagsDragAndDrop() {
     const container = document.getElementById('mobile-quick-tags');
     if (!container || container.dataset.dragInitialized) return;
@@ -223,7 +187,7 @@
       pushDataToServer(appState);
     }
 
-    // Touch Support for Mobile (Soft Zero-Bounce Fluid Dragging)
+    // Touch Support for Mobile (Stable, Zero-Bounce)
     container.addEventListener('touchstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
@@ -235,7 +199,7 @@
       isDragging = false;
       hasMoved = false;
 
-      // 200ms hold to activate dragging
+      // 180ms hold to activate dragging
       dragHoldTimer = setTimeout(() => {
         if (draggingTag) {
           isDragging = true;
@@ -244,18 +208,18 @@
             try { navigator.vibrate(20); } catch (_) {}
           }
         }
-      }, 200);
+      }, 180);
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
       if (!draggingTag) return;
       const touch = e.touches[0];
-      const deltaX = touch.clientX - touchStartX;
-      const deltaY = touch.clientY - touchStartY;
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      const deltaY = Math.abs(touch.clientY - touchStartY);
 
       // If user moves finger BEFORE long-press completes, cancel drag timer immediately to allow natural vertical scrolling
       if (!isDragging) {
-        if (Math.abs(deltaX) > 7 || Math.abs(deltaY) > 7) {
+        if (deltaX > 7 || deltaY > 7) {
           if (dragHoldTimer) {
             clearTimeout(dragHoldTimer);
             dragHoldTimer = null;
@@ -264,14 +228,17 @@
           return;
         }
       } else {
-        // Direct 1:1 finger follow + soft zero-bounce FLIP layout swap
+        // Stable, zero-displacement slot insertion
         if (e.cancelable) e.preventDefault();
         hasMoved = true;
-        draggingTag.style.transition = 'none';
-        draggingTag.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
-
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
-        animateFLIP(container, draggingTag, afterElement);
+        if (afterElement !== draggingTag && afterElement !== draggingTag.nextElementSibling) {
+          if (afterElement == null) {
+            container.appendChild(draggingTag);
+          } else {
+            container.insertBefore(draggingTag, afterElement);
+          }
+        }
       }
     }, { passive: false });
 
@@ -281,25 +248,14 @@
         dragHoldTimer = null;
       }
       if (isDragging && draggingTag) {
-        const tag = draggingTag;
+        draggingTag.classList.remove('dragging-tag');
         draggingTag = null;
         isDragging = false;
-
-        tag.style.transition = 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
-        tag.style.transform = '';
-
-        setTimeout(() => {
-          tag.classList.remove('dragging-tag');
-          tag.style.transition = '';
-          if (hasMoved) {
-            commitReorderedTags();
-          }
-        }, 180);
-      } else {
-        if (draggingTag) {
-          draggingTag.style.transform = '';
-          draggingTag.classList.remove('dragging-tag');
+        if (hasMoved) {
+          commitReorderedTags();
         }
+      } else {
+        if (draggingTag) draggingTag.classList.remove('dragging-tag');
         draggingTag = null;
         isDragging = false;
       }
@@ -310,10 +266,7 @@
         clearTimeout(dragHoldTimer);
         dragHoldTimer = null;
       }
-      if (draggingTag) {
-        draggingTag.style.transform = '';
-        draggingTag.classList.remove('dragging-tag');
-      }
+      if (draggingTag) draggingTag.classList.remove('dragging-tag');
       draggingTag = null;
       isDragging = false;
     });
@@ -332,10 +285,12 @@
       const dragging = container.querySelector('.dragging-tag');
       if (!dragging) return;
       const afterElement = getDragAfterTag(container, e.clientX, e.clientY);
-      if (afterElement == null) {
-        container.appendChild(dragging);
-      } else {
-        container.insertBefore(dragging, afterElement);
+      if (afterElement !== dragging && afterElement !== dragging.nextElementSibling) {
+        if (afterElement == null) {
+          container.appendChild(dragging);
+        } else {
+          container.insertBefore(dragging, afterElement);
+        }
       }
     });
 
