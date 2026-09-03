@@ -212,7 +212,7 @@ async function getStockResearchData(rawSymbol) {
             }
         }
 
-        return {
+        const cnResult = {
             symbol: emCode,
             rawCode: code,
             name: stockName,

@@ -2411,6 +2411,12 @@
       if (el) el.textContent = '...';
     });
 
+    // Reset 5 Wind research sections
+    ['business-industry', 'investment-logic', 'news-brief', 'institutional-view', 'technical-analysis'].forEach(s => {
+      const el = document.getElementById(`res-m-${s}`);
+      if (el) el.innerHTML = '<div class="wind-section-loading">正在提取深度研报数据...</div>';
+    });
+
     // Reset AI History
     currentAiHistory = [];
     const aiHistoryEl = document.getElementById('res-ai-chat-history');
