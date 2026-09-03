@@ -263,12 +263,16 @@ html, body {
 
 @keyframes cardHighlightPulse {
   0% {
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25), 0 12px 36px rgba(0, 0, 0, 0.6);
+    background: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35), 0 14px 44px rgba(0, 0, 0, 0.7);
   }
-  60% {
+  35% {
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 10px 32px rgba(0, 0, 0, 0.5);
+  }
+  70% {
     background: rgba(255, 255, 255, 0.02);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 6px 18px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 20px rgba(0, 0, 0, 0.3);
   }
   100% {
     background: transparent;
@@ -277,7 +281,7 @@ html, body {
 }
 
 .card-highlight-flash {
-  animation: cardHighlightPulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cardHighlightPulse 3.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Feed & Cards Stack */

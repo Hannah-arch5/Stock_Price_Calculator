@@ -833,21 +833,22 @@
   }
 
   // Physics-based luxury smooth scroll matching desktop Studio Noir
-  function smoothScrollContainer(container, targetY, duration = 950) {
+  function smoothScrollContainer(container, targetY, duration = 1400) {
     const startY = container.scrollTop;
     const difference = targetY - startY;
     if (Math.abs(difference) < 2) return;
 
     const startTime = performance.now();
 
-    function easeOutQuart(t) {
-      return 1 - Math.pow(1 - t, 4);
+    // Luxurious Ease-in-Out Cubic: gentle slow acceleration, velvety smooth cruise, graceful deceleration
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
 
     function step(now) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const ease = easeOutQuart(progress);
+      const ease = easeInOutCubic(progress);
 
       container.scrollTop = startY + difference * ease;
 
@@ -945,12 +946,12 @@
             const topClearance = 110;
             const targetScroll = container.scrollTop + (cardRect.top - containerRect.top) - topClearance;
 
-            smoothScrollContainer(container, Math.max(0, targetScroll), 650);
+            smoothScrollContainer(container, Math.max(0, targetScroll), 1400);
 
             card.classList.remove('card-highlight-flash');
             void card.offsetWidth; // Force reflow
             card.classList.add('card-highlight-flash');
-            setTimeout(() => card.classList.remove('card-highlight-flash'), 1700);
+            setTimeout(() => card.classList.remove('card-highlight-flash'), 3300);
           }
         }
         return;
