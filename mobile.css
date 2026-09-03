@@ -808,7 +808,7 @@ html, body {
 }
 
 .record-row:active:not(.dragging) {
-  background: rgba(255, 255, 255, 0.04);
+  background: transparent;
 }
 
 .record-row.highlighted {
@@ -908,7 +908,7 @@ html, body {
   -webkit-tap-highlight-color: transparent !important;
   user-select: none;
   -webkit-user-select: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), color 0.12s ease;
 }
 
 .calc-load-btn:focus,
@@ -933,8 +933,8 @@ html, body {
 }
 
 .calc-load-btn:active {
-  opacity: 0.4;
-  transform: scale(0.9);
+  color: #ffffff !important;
+  transform: scale(0.76) translateY(-1px);
 }
 
 .sheet-action-secondary-btn {
