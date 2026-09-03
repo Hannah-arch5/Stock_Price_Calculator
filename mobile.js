@@ -2163,30 +2163,47 @@
       renderApp();
     });
 
-    // Enter key
+    // Form submit listener (Mobile Keyboard "Search / Go / 前往")
+    const searchForm = document.getElementById('mobile-search-form');
+    if (searchForm) {
+      searchForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const q = (searchInput.value || '').trim();
+        if (q) {
+          dropdown.classList.add('hidden');
+          searchInput.blur();
+          openStockResearch(q);
+        }
+      });
+    }
+
+    // Enter key listener on input
     searchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
+        e.preventDefault();
         const q = this.value.trim();
         if (q) {
           dropdown.classList.add('hidden');
-          this.value = '';
-          if (clearBtn) clearBtn.style.display = 'none';
-          searchQuery = '';
-          renderApp();
+          this.blur();
           openStockResearch(q);
         }
       }
     });
 
-    // Dropdown clicks
-    dropdown.addEventListener('click', function (e) {
+    // Dropdown selection (support touch/pointerdown & click)
+    const handleDropdownSelect = function (e) {
       const item = e.target.closest('.dropdown-item');
       if (!item) return;
+      e.preventDefault();
+      e.stopPropagation();
 
       const action = item.getAttribute('data-action');
       if (action === 'select-local') {
         const sym = item.getAttribute('data-symbol');
-        if (searchInput) searchInput.value = sym;
+        if (searchInput) {
+          searchInput.value = sym;
+          searchInput.blur();
+        }
         searchQuery = sym;
         dropdown.classList.add('hidden');
         renderApp();
@@ -2202,17 +2219,17 @@
       } else if (action === 'search-global') {
         const q = item.getAttribute('data-query');
         dropdown.classList.add('hidden');
-        if (searchInput) searchInput.value = '';
-        if (clearBtn) clearBtn.style.display = 'none';
-        searchQuery = '';
-        renderApp();
+        if (searchInput) searchInput.blur();
         openStockResearch(q);
       }
-    });
+    };
+
+    dropdown.addEventListener('pointerdown', handleDropdownSelect);
+    dropdown.addEventListener('click', handleDropdownSelect);
 
     // Hide dropdown when tapping outside
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest('.search-box')) {
+    document.addEventListener('pointerdown', function (e) {
+      if (!e.target.closest('.search-box') && !e.target.closest('.search-form-wrap')) {
         dropdown.classList.add('hidden');
       }
     });
