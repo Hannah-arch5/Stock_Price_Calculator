@@ -833,7 +833,7 @@
   }
 
   // Physics-based luxury smooth scroll matching desktop Studio Noir
-  function smoothScrollContainer(container, targetY, duration = 1400) {
+  function smoothScrollContainer(container, targetY, duration = 1050) {
     const startY = container.scrollTop;
     const difference = targetY - startY;
     if (Math.abs(difference) < 2) return;
@@ -946,7 +946,7 @@
             const topClearance = 110;
             const targetScroll = container.scrollTop + (cardRect.top - containerRect.top) - topClearance;
 
-            smoothScrollContainer(container, Math.max(0, targetScroll), 1400);
+            smoothScrollContainer(container, Math.max(0, targetScroll), 1050);
 
             card.classList.remove('card-highlight-flash');
             void card.offsetWidth; // Force reflow
