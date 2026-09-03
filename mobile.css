@@ -805,13 +805,23 @@ html, body {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* Subtle dashed floating slot state (clearly distinct from solid bright highlighted state) */
-.record-row.dragging {
+/* Normal row dragging state */
+.record-row.dragging:not(.highlighted) {
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px dashed rgba(255, 255, 255, 0.25) !important;
   border-left: 2px dashed rgba(255, 255, 255, 0.35) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
   opacity: 0.85 !important;
+  z-index: 100;
+}
+
+/* Highlighted row dragging state: retain glowing highlight and solid white left bar */
+.record-row.highlighted.dragging {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.45) !important;
+  border-left: 3px solid #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25), 0 10px 28px rgba(0, 0, 0, 0.85) !important;
+  opacity: 0.95 !important;
   z-index: 100;
 }
 
