@@ -253,7 +253,7 @@
       pushDataToServer(appState);
     }
 
-    // Touch Support for Mobile (Stable & Silky Smooth)
+    // Touch Support for Mobile (Long-press 280ms to drag, normal touch/swipe allows effortless vertical page scroll)
     container.addEventListener('touchstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
@@ -263,6 +263,18 @@
       touchStartY = touch.clientY;
       draggedTag = tag;
       isDragging = false;
+      hasMoved = false;
+
+      if (dragHoldTimer) clearTimeout(dragHoldTimer);
+      dragHoldTimer = setTimeout(() => {
+        if (draggedTag) {
+          isDragging = true;
+          draggedTag.classList.add('dragging-tag');
+          if (navigator.vibrate) {
+            try { navigator.vibrate(25); } catch (_) {}
+          }
+        }
+      }, 280);
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
@@ -271,36 +283,52 @@
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
 
-      if (!isDragging && (deltaX > 8 || deltaY > 8)) {
-        isDragging = true;
-        draggedTag.classList.add('dragging-tag');
-        if (navigator.vibrate) navigator.vibrate(12);
-      }
-
-      if (isDragging) {
-        e.preventDefault();
+      if (!isDragging) {
+        // Finger moved before 280ms hold completed -> cancel hold to allow natural scrolling!
+        if (deltaX > 8 || deltaY > 8) {
+          if (dragHoldTimer) {
+            clearTimeout(dragHoldTimer);
+            dragHoldTimer = null;
+          }
+          draggedTag = null;
+          return;
+        }
+      } else {
+        // In active drag mode
+        if (e.cancelable) e.preventDefault();
+        hasMoved = true;
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
         smoothMove(container, draggedTag, afterElement);
       }
     }, { passive: false });
 
     container.addEventListener('touchend', () => {
+      if (dragHoldTimer) {
+        clearTimeout(dragHoldTimer);
+        dragHoldTimer = null;
+      }
       if (draggedTag) {
         draggedTag.classList.remove('dragging-tag');
-        if (isDragging) {
+        if (isDragging && hasMoved) {
           commitReorderedTags();
         }
       }
       draggedTag = null;
       isDragging = false;
+      hasMoved = false;
     });
 
     container.addEventListener('touchcancel', () => {
+      if (dragHoldTimer) {
+        clearTimeout(dragHoldTimer);
+        dragHoldTimer = null;
+      }
       if (draggedTag) {
         draggedTag.classList.remove('dragging-tag');
       }
       draggedTag = null;
       isDragging = false;
+      hasMoved = false;
     });
 
     // Desktop Mouse Drag & Drop
