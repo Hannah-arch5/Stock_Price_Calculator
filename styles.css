@@ -870,14 +870,35 @@ input[type=number] {
 
 .row-delete {
   flex-shrink: 0;
-  width: 24px;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 4px;
   margin-top: 1.4rem;
   opacity: 0;
   transition: opacity var(--transition-slow);
 }
 .list-row:hover .row-delete { opacity: 1; }
+
+.calc-load-btn {
+  background: transparent;
+  border: none;
+  color: var(--fg-dim);
+  cursor: pointer;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+.calc-load-btn:hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.1);
+}
+.calc-load-btn:active {
+  transform: scale(0.92);
+}
 
 .delete-btn {
   background: transparent;

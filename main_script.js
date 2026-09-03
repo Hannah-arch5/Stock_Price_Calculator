@@ -821,6 +821,11 @@ function renderHistory(scrollToSymbol = null) {
                         <input type="number" class="shares-inline-input mono" placeholder="Shares" value="${record.shares || ''}">
                     </div>
                     <div class="row-delete">
+                        <button class="calc-load-btn" title="导回上方计算器 (Load into Calculator)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                            </svg>
+                        </button>
                         <button class="delete-btn item-delete-btn" title="Delete">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1033,6 +1038,18 @@ function renderHistory(scrollToSymbol = null) {
                 item.classList.toggle('highlighted', record.highlighted);
                 saveState();
             });
+
+            const loadBtn = item.querySelector('.calc-load-btn');
+            if (loadBtn) {
+                loadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    populateForm(record, group.symbol);
+                    const topCalc = document.querySelector('.calculator-container') || document.querySelector('.main-calculator') || document.querySelector('.calc-card');
+                    if (topCalc) {
+                        topCalc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            }
 
             item.querySelector('.item-delete-btn').addEventListener('click', (e) => {
                 e.stopPropagation();

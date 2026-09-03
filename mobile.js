@@ -435,6 +435,11 @@
             </div>
             <div class="record-right">
               <div class="record-result mono ${colorClass}">${escapeHtml(r.result || '--')}</div>
+              <button class="calc-load-btn" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="导回上方计算器 (Load into Calculator)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                </svg>
+              </button>
               <button class="edit-pencil-btn calc-edit-trigger" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="Edit calculation">✎</button>
             </div>
           </div>
@@ -1363,6 +1368,23 @@
         return;
       }
 
+      // (b2) Load Calculation into Top Calculator Trigger
+      const loadBtn = e.target.closest('.calc-load-btn');
+      if (loadBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const symbol = loadBtn.getAttribute('data-symbol');
+        const recordIdxStr = loadBtn.getAttribute('data-record');
+        const recordIdx = recordIdxStr !== null ? parseInt(recordIdxStr, 10) : null;
+        if (symbol && recordIdx !== null && !isNaN(recordIdx)) {
+          const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+          if (group && group.records && group.records[recordIdx]) {
+            populateMobileCalculator(group.records[recordIdx], symbol);
+          }
+        }
+        return;
+      }
+
       // (c) Label Chip Click inside Calc Sheet
       const labelChip = e.target.closest('.label-chip');
       if (labelChip) {
@@ -2122,6 +2144,137 @@
         if (deltaResEl) deltaResEl.textContent = '0.00%';
       };
     }
+  }
+
+  // ─── Populate Mobile Calculator from Ledger Record ─────────────
+  function populateMobileCalculator(record, symbol) {
+    if (!record) return;
+    const sym = symbol || record.symbol || '';
+
+    let isPercentage = false;
+    if (record.mode === 'percentage') {
+      isPercentage = true;
+    } else if (record.inputs && (record.inputs.initial !== undefined || record.inputs.initialPrice !== undefined)) {
+      isPercentage = true;
+    } else if (record.result && record.result.includes('%')) {
+      isPercentage = true;
+    } else if (record.type === 'Percentage Delta' || record.type === 'Percentage Change') {
+      isPercentage = true;
+    }
+
+    const modeTargetBtn = document.getElementById('m-mode-target');
+    const modeDeltaBtn = document.getElementById('m-mode-delta');
+    const panelTarget = document.getElementById('m-panel-target');
+    const panelDelta = document.getElementById('m-panel-delta');
+
+    if (!isPercentage) {
+      // 1. Switch to Target Projection tab
+      if (modeTargetBtn) modeTargetBtn.classList.add('active');
+      if (modeDeltaBtn) modeDeltaBtn.classList.remove('active');
+      if (panelTarget) panelTarget.classList.remove('hidden');
+      if (panelDelta) panelDelta.classList.add('hidden');
+
+      const targetSymInput = document.getElementById('m-target-symbol');
+      const targetBaseInput = document.getElementById('m-target-base');
+      const targetPercInput = document.getElementById('m-target-perc');
+      const targetDirBtn = document.getElementById('m-target-dir-btn');
+      const targetTypeInput = document.getElementById('m-target-type');
+      const targetCurSym = document.getElementById('m-target-cur');
+      const targetResEl = document.getElementById('m-target-res-val');
+
+      if (targetSymInput) targetSymInput.value = sym;
+      if (targetTypeInput) targetTypeInput.value = record.type || '';
+
+      if (record.inputs && record.inputs.base !== undefined) {
+        if (targetBaseInput) targetBaseInput.value = record.inputs.base;
+        if (targetPercInput) targetPercInput.value = record.inputs.perc;
+        targetCalcDir = record.inputs.isUp !== false ? 'up' : 'down';
+      } else {
+        const baseMatch = (record.details || '').match(/Base:\s*([^\s\d]*)\s*([\d.]+)/);
+        const percMatch = (record.details || '').match(/(Up|Down|▲|▼|\+|-)\s*([\d.]+)%/i);
+        if (baseMatch && targetBaseInput) targetBaseInput.value = baseMatch[2];
+        if (percMatch && targetPercInput) {
+          targetPercInput.value = percMatch[2];
+          const isDown = /Down|▼|-/i.test(percMatch[1]);
+          targetCalcDir = isDown ? 'down' : 'up';
+        }
+      }
+
+      if (targetDirBtn) {
+        targetDirBtn.setAttribute('data-dir', targetCalcDir);
+        targetDirBtn.textContent = targetCalcDir === 'up' ? '▲ UP' : '▼ DOWN';
+        targetDirBtn.classList.toggle('is-up', targetCalcDir === 'up');
+        targetDirBtn.classList.toggle('is-down', targetCalcDir === 'down');
+      }
+
+      const isChina = detectMarket(sym).market === 'A';
+      const cur = isChina ? '¥' : '$';
+      if (targetCurSym) targetCurSym.textContent = cur;
+
+      const base = parseFloat(targetBaseInput ? targetBaseInput.value : 0) || 0;
+      const perc = parseFloat(targetPercInput ? targetPercInput.value : 0) || 0;
+      const isUp = targetCalcDir === 'up';
+      if (targetResEl) {
+        if (base > 0) {
+          const res = isUp ? base * (1 + perc / 100) : base * (1 - perc / 100);
+          targetResEl.textContent = `${cur}${res.toFixed(2)}`;
+        } else {
+          targetResEl.textContent = `${cur}0.00`;
+        }
+      }
+    } else {
+      // 2. Switch to Percentage Delta tab
+      if (modeDeltaBtn) modeDeltaBtn.classList.add('active');
+      if (modeTargetBtn) modeTargetBtn.classList.remove('active');
+      if (panelDelta) panelDelta.classList.remove('hidden');
+      if (panelTarget) panelTarget.classList.add('hidden');
+
+      const deltaSymInput = document.getElementById('m-delta-symbol');
+      const deltaInitialInput = document.getElementById('m-delta-initial');
+      const deltaFinalInput = document.getElementById('m-delta-final');
+      const deltaTypeInput = document.getElementById('m-delta-type');
+      const deltaCur1 = document.getElementById('m-delta-cur-1');
+      const deltaCur2 = document.getElementById('m-delta-cur-2');
+      const deltaResEl = document.getElementById('m-delta-res-val');
+
+      if (deltaSymInput) deltaSymInput.value = sym;
+      if (deltaTypeInput) deltaTypeInput.value = record.type || '';
+
+      const isChina = detectMarket(sym).market === 'A';
+      const cur = isChina ? '¥' : '$';
+      if (deltaCur1) deltaCur1.textContent = cur;
+      if (deltaCur2) deltaCur2.textContent = cur;
+
+      if (record.inputs && (record.inputs.initial !== undefined || record.inputs.initialPrice !== undefined)) {
+        if (deltaInitialInput) deltaInitialInput.value = record.inputs.initial !== undefined ? record.inputs.initial : record.inputs.initialPrice;
+        if (deltaFinalInput) deltaFinalInput.value = record.inputs.final !== undefined ? record.inputs.final : record.inputs.finalPrice;
+      } else {
+        const initMatch = (record.details || '').match(/Base:\s*([^\s\d]*)\s*([\d.]+)/) || (record.details || '').match(/([\d.]+)\s*(?:->|→)/);
+        const finalMatch = (record.details || '').match(/Target:\s*([^\s\d]*)\s*([\d.]+)/) || (record.details || '').match(/(?:->|→)\s*([^\s\d]*)\s*([\d.]+)/);
+        if (initMatch && deltaInitialInput) deltaInitialInput.value = initMatch[2] || initMatch[1];
+        if (finalMatch && deltaFinalInput) deltaFinalInput.value = finalMatch[2] || finalMatch[1];
+      }
+
+      const init = parseFloat(deltaInitialInput ? deltaInitialInput.value : 0) || 0;
+      const fin = parseFloat(deltaFinalInput ? deltaFinalInput.value : 0) || 0;
+      if (deltaResEl) {
+        if (init > 0 && fin > 0) {
+          const diff = ((fin - init) / init) * 100;
+          deltaResEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
+          deltaResEl.style.color = isChina ? (diff >= 0 ? '#ff453a' : '#32d74b') : (diff >= 0 ? '#32d74b' : '#ff453a');
+        } else {
+          deltaResEl.textContent = '0.00%';
+          deltaResEl.style.color = '#ffffff';
+        }
+      }
+    }
+
+    // Smooth scroll to top of mobile page to show calculator
+    const mainContainer = document.querySelector('.mobile-container');
+    if (mainContainer) {
+      smoothScrollContainer(mainContainer, 0, 850);
+    }
+    showToast(`已将 ${sym} [${record.type || '测算'}] 导回上方计算器`);
   }
 
   // ==========================================================================
