@@ -382,10 +382,10 @@ html, body {
 }
 
 .record-right {
-  text-align: right;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .record-result {
@@ -490,61 +490,32 @@ html, body {
   color: var(--fg-subtle);
 }
 
-/* ─── Edit Pencil Button & Alignment ──────────────────────── */
+/* ─── Edit Pencil Button (Clean Studio Noir Minimalist) ──── */
 .edit-pencil-btn {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
-  display: flex;
+  background: none;
+  border: none;
+  color: var(--fg-subtle);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  opacity: 0.45;
+  transition: opacity 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
-  color: var(--fg);
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
   flex-shrink: 0;
-  transition: all 0.15s ease;
-  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2);
 }
 .edit-pencil-btn:active {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+  color: var(--fg);
 }
 
-.record-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-subtle);
-  position: relative;
-}
-.record-left {
-  flex: 1;
-  min-width: 0;
-}
-.record-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.card-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 .card-title-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
