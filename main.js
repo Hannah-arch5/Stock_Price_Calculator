@@ -50,6 +50,7 @@ async function syncToGDrive(dataStr) {
 
 // --- Real-time Sync Server for iPhone (PWA) ---
 const SYNC_PORT = 7321;
+let mainWindow = null;
 let sseClients = [];
 let currentHttpsUrl = null;
 let tunnelProcess = null;
@@ -962,7 +963,7 @@ function createWindow() {
         }
     } catch(e) {}
 
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: state.width,
         height: state.height,
         x: state.x,
