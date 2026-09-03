@@ -426,6 +426,12 @@
         const highlightedClass = r.highlighted ? 'highlighted' : '';
         const sharesHtml = r.shares ? `<div class="record-shares mono">${escapeHtml(r.shares)} 股</div>` : '';
 
+        let displayResult = r.result || '--';
+        if (displayResult !== '--' && !displayResult.includes('%') && !displayResult.startsWith('¥') && !displayResult.startsWith('$')) {
+          const curSym = detectMarket(group.symbol).market === 'A' ? '¥' : '$';
+          displayResult = `${curSym}${displayResult}`;
+        }
+
         return `
           <div class="record-row ${highlightedClass}" data-symbol="${escapeHtml(group.symbol)}" data-record-idx="${rIdx}">
             <div class="record-left">
@@ -441,7 +447,7 @@
               ${sharesHtml}
             </div>
             <div class="record-right">
-              <div class="record-result mono ${colorClass}">${escapeHtml(r.result || '--')}</div>
+              <div class="record-result mono ${colorClass}">${escapeHtml(displayResult)}</div>
               <button class="edit-pencil-btn calc-edit-trigger" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="Edit calculation">✎</button>
             </div>
           </div>

@@ -808,6 +808,11 @@ function renderHistory(scrollToSymbol = null) {
                 }
             }
 
+            let displayResult = record.result || '--';
+            if (displayResult !== '--' && !displayResult.includes('%') && !displayResult.startsWith('¥') && !displayResult.startsWith('$')) {
+                displayResult = `${recCurrency}${displayResult}`;
+            }
+
             item.innerHTML = `
                 <div class="row-content">
                     <div class="col-details">
@@ -816,7 +821,7 @@ function renderHistory(scrollToSymbol = null) {
                     </div>
                     <div class="col-result-group">
                         <div class="col-result mono" style="color: ${resultColor};">
-                            ${record.result}
+                            ${displayResult}
                         </div>
                         <input type="number" class="shares-inline-input mono" placeholder="Shares" value="${record.shares || ''}">
                     </div>
