@@ -1402,3 +1402,469 @@ html, body {
 .sheet-btn-danger:active {
   background: rgba(255, 69, 58, 0.25);
 }
+
+/* ==========================================================================
+   Search Autocomplete & Global Research Dropdown
+   ========================================================================== */
+.search-box {
+  position: relative;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #0d0d0d;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85);
+  z-index: 250;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:active, .dropdown-item.hovered {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-sym {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.dropdown-name {
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-badge {
+  font-size: 0.62rem;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--fg-dim);
+}
+
+.dropdown-item-global {
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.dropdown-global-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Studio Noir Deep Stock Research Modal
+   ========================================================================== */
+.research-sheet {
+  position: fixed;
+  top: env(safe-area-inset-top, 12px);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #030303;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px 16px 0 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95);
+  animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.research-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: #080808;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.research-symbol-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.research-symbol {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+.research-market-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.research-name {
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  margin-top: 2px;
+}
+
+.research-header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.research-price-box {
+  text-align: right;
+}
+
+.research-price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.research-chg {
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.research-close-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--fg-dim);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.research-close-btn:active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.research-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: max(env(safe-area-inset-bottom, 24px), 32px);
+}
+
+.research-actions-bar {
+  display: flex;
+  gap: 10px;
+}
+
+.research-action-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.research-action-btn.primary {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+.research-action-btn:active {
+  transform: scale(0.98);
+}
+
+.research-section-box {
+  background: #090909;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.section-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--fg-dim);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.section-badge {
+  font-size: 0.62rem;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--fg-dim);
+}
+
+/* Earnings Highlight Box */
+.earnings-highlight-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.earnings-label {
+  font-size: 0.68rem;
+  color: var(--fg-dim);
+}
+
+.earnings-date {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 2px;
+}
+
+.calendar-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.calendar-pill-btn:active {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* 3x3 Financial Matrix */
+.research-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.matrix-cell {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 8px 10px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cell-label {
+  font-size: 0.62rem;
+  color: var(--fg-dim);
+}
+
+.cell-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Tags & Summary */
+.research-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.info-tag {
+  font-size: 0.68rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: var(--fg-dim);
+}
+
+.research-summary-text {
+  font-size: 0.74rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: justify;
+}
+
+/* AI Companion Chat */
+.ai-box {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: #060606;
+}
+
+.ai-badge {
+  color: #a1a1aa;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ai-quick-prompts-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ai-chip-btn {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #d1d1d6;
+  font-size: 0.68rem;
+  padding: 5px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ai-chip-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.ai-chat-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.015);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  margin-bottom: 10px;
+}
+
+.ai-msg {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  max-width: 90%;
+  word-break: break-word;
+}
+
+.ai-msg-bot {
+  background: #141414;
+  color: #e4e4e7;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  align-self: flex-start;
+}
+
+.ai-msg-user {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 500;
+  align-self: flex-end;
+}
+
+.ai-msg-system {
+  font-size: 0.68rem;
+  color: var(--fg-dim);
+  font-style: italic;
+  align-self: center;
+}
+
+.ai-input-bar {
+  display: flex;
+  gap: 6px;
+}
+
+.ai-text-input {
+  flex: 1;
+  background: #0f0f0f;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.76rem;
+  color: #ffffff;
+  outline: none;
+  font-family: inherit;
+}
+
+.ai-text-input:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ai-send-btn {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ai-send-btn:active {
+  background: rgba(255, 255, 255, 0.7);
+}

@@ -164,8 +164,9 @@
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" id="mobile-search-input" placeholder="Search symbol or name..." class="mono">
+                    <input type="text" id="mobile-search-input" placeholder="Search symbol or name..." class="mono" autocomplete="off" autocorrect="off" autocapitalize="characters">
                     <button id="clear-search-btn" class="clear-btn">&times;</button>
+                    <div id="search-autocomplete-dropdown" class="search-dropdown hidden"></div>
                 </div>
                 <div id="market-filter-container" class="market-filter-tabs">
                     <button class="filter-tab active" data-filter="all">ALL</button>
@@ -184,7 +185,7 @@
 
             <div id="empty-state" class="empty-state hidden">
                 <div class="empty-title">NO MATCHING SYMBOLS</div>
-                <div class="empty-desc">Check your search filter or add symbols on desktop.</div>
+                <div class="empty-desc">Check your search filter or tap "全网深度研报" in the search box.</div>
             </div>
         </main>
 
@@ -192,7 +193,7 @@
             <div class="footer-line"></div>
             <div class="footer-info">
                 <span>STUDIO NOIR</span>
-                <span class="mono">TICKER POCKET v5.3.0</span>
+                <span class="mono">TICKER POCKET v5.4.0</span>
             </div>
         </footer>
     </div>
@@ -215,8 +216,141 @@
         </div>
     </div>
 
-    <!-- Backdrop -->
+    <!-- Backdrop for Edit Sheet -->
     <div id="edit-sheet-backdrop" class="sheet-backdrop hidden"></div>
+
+    <!-- Stock Research & AI Companion Modal (Studio Noir Full Sheet) -->
+    <div id="research-modal-backdrop" class="sheet-backdrop hidden"></div>
+    <div id="stock-research-modal" class="research-sheet hidden">
+        <div class="research-sheet-header">
+            <div class="research-header-left">
+                <div class="research-symbol-row">
+                    <span id="res-modal-symbol" class="research-symbol mono">NVDA</span>
+                    <span id="res-modal-market" class="research-market-badge">US</span>
+                </div>
+                <div id="res-modal-name" class="research-name">NVIDIA Corporation</div>
+            </div>
+            <div class="research-header-right">
+                <div id="res-modal-price-box" class="research-price-box">
+                    <div id="res-modal-price" class="research-price mono">$118.20</div>
+                    <div id="res-modal-chg" class="research-chg mono">+2.45%</div>
+                </div>
+                <button id="res-modal-close" class="research-close-btn">&times;</button>
+            </div>
+        </div>
+
+        <div class="research-sheet-body">
+            <!-- Top Action Bar -->
+            <div class="research-actions-bar">
+                <button id="res-modal-add-btn" class="research-action-btn primary">+ 加入我的测算看板</button>
+                <button id="res-modal-open-ai-btn" class="research-action-btn">🤖 AI 深度投研问答</button>
+            </div>
+
+            <!-- Earnings Calendar & Reminder Pill -->
+            <div class="research-section-box earnings-box">
+                <div class="section-title-row">
+                    <span class="section-title">EARNINGS CALENDAR (下次财报)</span>
+                    <span id="res-modal-period" class="section-badge">Q2 2026</span>
+                </div>
+                <div class="earnings-highlight-row">
+                    <div class="earnings-date-info">
+                        <span class="earnings-label">预计发布日期</span>
+                        <div id="res-modal-earnings-date" class="earnings-date mono">2026-10-25</div>
+                    </div>
+                    <button id="res-modal-calendar-btn" class="calendar-pill-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span>添加到 iPhone 日历</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3x3 Fundamental Matrix -->
+            <div class="research-section-box">
+                <div class="section-title-row">
+                    <span class="section-title">FINANCIAL MATRIX (财报与核心指标)</span>
+                </div>
+                <div class="research-matrix-grid">
+                    <div class="matrix-cell">
+                        <span class="cell-label">总市值</span>
+                        <span id="res-m-mktcap" class="cell-val mono">--</span>
+                    </div>
+                    <div class="matrix-cell">
+                        <span class="cell-label">营收增速 (YoY)</span>
+                        <span id="res-m-revgrowth" class="cell-val mono">--</span>
+                    </div>
+                    <div class="matrix-cell">
+                        <span class="cell-label">净利增速 (YoY)</span>
+                        <span id="res-m-earngrowth" class="cell-val mono">--</span>
+                    </div>
+                    <div class="matrix-cell">
+                        <span class="cell-label">净利率 / 毛利率</span>
+                        <span id="res-m-margin" class="cell-val mono">--</span>
+                    </div>
+                    <div class="matrix-cell">
+                        <span class="cell-label">净资产收益率 (ROE)</span>
+                        <span id="res-m-roe" class="cell-val mono">--</span>
+                    </div>
+                    <div class="matrix-cell">
+                        <span class="cell-label">资产负债率 / 负债权益比</span>
+                        <span id="res-m-debt" class="cell-val mono">--</span>
+                    </div>
+                    <div class="matrix-cell">
+                        <span class="cell-label">市盈率 (PE / Fwd PE)</span>
+                        <span id="res-m-pe" class="cell-val mono">--</span>
+                    </div>
+                    <div class="matrix-cell">
+                        <span class="cell-label">股息率 (Dividend Yield)</span>
+                        <span id="res-m-div" class="cell-val mono">--</span>
+                    </div>
+                    <div class="matrix-cell">
+                        <span class="cell-label">机构目标均价</span>
+                        <span id="res-m-target" class="cell-val mono">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sector, Industry & Profile -->
+            <div class="research-section-box">
+                <div class="section-title-row">
+                    <span class="section-title">BUSINESS & INDUSTRY (公司与行业洞察)</span>
+                </div>
+                <div class="research-tags-row">
+                    <span id="res-m-sector" class="info-tag">板块: 科技半导体</span>
+                    <span id="res-m-industry" class="info-tag">细分行业: GPU & AI加速</span>
+                </div>
+                <div id="res-m-summary" class="research-summary-text">
+                    正在加载公司核心业务介绍...
+                </div>
+            </div>
+
+            <!-- Embedded AI Research Chat -->
+            <div id="research-ai-section" class="research-section-box ai-box">
+                <div class="section-title-row">
+                    <span class="section-title">AI COMPANION (智能投研问答)</span>
+                    <span class="section-badge ai-badge">GEMINI FLASH</span>
+                </div>
+                <div class="ai-quick-prompts-row">
+                    <button class="ai-chip-btn" data-prompt="分析该公司的核心护城河与竞争优势">🛡️ 核心护城河</button>
+                    <button class="ai-chip-btn" data-prompt="简要解读最新财报亮点与潜在风险点">📊 财报风险分析</button>
+                    <button class="ai-chip-btn" data-prompt="评估当前市盈率与估值水平是否合理">💰 估值深度评估</button>
+                </div>
+                <div id="res-ai-chat-history" class="ai-chat-stream">
+                    <div class="ai-msg ai-msg-bot">
+                        您好！我是您的智能投研助手，已为您加载该股票的完整财报与行业数据。您可以点击上方快捷问题，或在下方直接提问。
+                    </div>
+                </div>
+                <div class="ai-input-bar">
+                    <input type="text" id="res-ai-input" class="ai-text-input" placeholder="向 AI 提问该公司的财报、护城河或估值..." autocomplete="off">
+                    <button type="button" id="res-ai-send-btn" class="ai-send-btn">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 1. Stock Metadata Edit Sheet -->
     <div id="stock-edit-sheet" class="bottom-sheet hidden">

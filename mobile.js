@@ -1461,17 +1461,6 @@
       }
     });
 
-    // 2. Search input listener
-    const searchInput = document.getElementById('mobile-search-input');
-    const clearBtn = document.getElementById('clear-search-btn');
-    if (searchInput) {
-      searchInput.addEventListener('input', function () {
-        searchQuery = this.value;
-        if (clearBtn) clearBtn.style.display = searchQuery ? 'block' : 'none';
-        renderApp();
-      });
-    }
-
     // 3. Stock Edit Sheet Buttons
     const stockCancelBtn = document.getElementById('stock-cancel-btn');
     const stockSaveBtn = document.getElementById('stock-save-btn');
@@ -2089,14 +2078,400 @@
       };
     }
 
-    // Clear Delta
-    if (deltaClearBtn) {
-      deltaClearBtn.onclick = () => {
-        if (deltaInitialInput) deltaInitialInput.value = '';
-        if (deltaFinalInput) deltaFinalInput.value = '';
-        if (deltaTypeInput) deltaTypeInput.value = '';
-        if (deltaResEl) deltaResEl.textContent = '0.00%';
+  // ==========================================================================
+  // Part 3: Global Stock Deep Research, Apple Calendar & AI Companion Module
+  // ==========================================================================
+  let currentResearchStock = null;
+  let currentAiHistory = [];
+
+  function setupGlobalStockResearchAndSearch() {
+    const searchInput = document.getElementById('mobile-search-input');
+    const dropdown = document.getElementById('search-autocomplete-dropdown');
+    const clearBtn = document.getElementById('clear-search-btn');
+
+    const modal = document.getElementById('stock-research-modal');
+    const backdrop = document.getElementById('research-modal-backdrop');
+    const closeBtn = document.getElementById('res-modal-close');
+    const addBtn = document.getElementById('res-modal-add-btn');
+    const openAiBtn = document.getElementById('res-modal-open-ai-btn');
+    const calendarBtn = document.getElementById('res-modal-calendar-btn');
+
+    const aiHistoryEl = document.getElementById('res-ai-chat-history');
+    const aiInput = document.getElementById('res-ai-input');
+    const aiSendBtn = document.getElementById('res-ai-send-btn');
+
+    if (!searchInput || !dropdown) return;
+
+    function renderDropdown(query) {
+      const q = (query || '').trim().toLowerCase();
+      if (!q) {
+        dropdown.innerHTML = '';
+        dropdown.classList.add('hidden');
+        return;
+      }
+
+      const records = appState.historyRecords || [];
+      const matches = records.filter(g => {
+        const sym = (g.symbol || '').toLowerCase();
+        const name = (g.name || '').toLowerCase();
+        return sym.includes(q) || name.includes(q);
+      }).slice(0, 4);
+
+      let html = '';
+      matches.forEach(m => {
+        const marketInfo = getMarketInfo(m.symbol);
+        html += `
+          <div class="dropdown-item" data-action="select-local" data-symbol="${escapeHtml(m.symbol)}">
+            <div class="dropdown-item-left">
+              <span class="dropdown-sym">${escapeHtml(m.symbol)}</span>
+              <span class="dropdown-name">${escapeHtml(m.name || '')}</span>
+            </div>
+            <span class="dropdown-badge">${marketInfo.market}</span>
+          </div>
+        `;
+      });
+
+      // Bottom item for Global Deep Research
+      html += `
+        <div class="dropdown-item dropdown-item-global" data-action="search-global" data-query="${escapeHtml(query.trim())}">
+          <div class="dropdown-global-label">
+            <span>🔍 全网深度研报:</span>
+            <span class="mono">${escapeHtml(query.trim().toUpperCase())}</span>
+          </div>
+          <span class="dropdown-badge">DEEP AI</span>
+        </div>
+      `;
+
+      dropdown.innerHTML = html;
+      dropdown.classList.remove('hidden');
+    }
+
+    // Input event
+    searchInput.addEventListener('input', function () {
+      searchQuery = this.value;
+      if (clearBtn) clearBtn.style.display = searchQuery ? 'block' : 'none';
+      renderDropdown(searchQuery);
+      renderApp();
+    });
+
+    // Enter key
+    searchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        const q = this.value.trim();
+        if (q) {
+          dropdown.classList.add('hidden');
+          openStockResearch(q);
+        }
+      }
+    });
+
+    // Dropdown clicks
+    dropdown.addEventListener('click', function (e) {
+      const item = e.target.closest('.dropdown-item');
+      if (!item) return;
+
+      const action = item.getAttribute('data-action');
+      if (action === 'select-local') {
+        const sym = item.getAttribute('data-symbol');
+        if (searchInput) searchInput.value = sym;
+        searchQuery = sym;
+        dropdown.classList.add('hidden');
+        renderApp();
+
+        // Scroll to card
+        const card = document.querySelector(`.stock-card[data-symbol="${sym}"]`);
+        const container = document.querySelector('.mobile-container');
+        if (card && container) {
+          const cardRect = card.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          smoothScrollContainer(container, Math.max(0, container.scrollTop + (cardRect.top - containerRect.top) - 110), 1000);
+        }
+      } else if (action === 'search-global') {
+        const q = item.getAttribute('data-query');
+        dropdown.classList.add('hidden');
+        openStockResearch(q);
+      }
+    });
+
+    // Hide dropdown when tapping outside
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.search-box')) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    // Modal close
+    if (closeBtn) closeBtn.onclick = closeStockResearch;
+    if (backdrop) backdrop.onclick = closeStockResearch;
+
+    // Add to My Calculations Button
+    if (addBtn) {
+      addBtn.onclick = function () {
+        if (!currentResearchStock) return;
+        const sym = currentResearchStock.symbol;
+        if (!appState.historyRecords) appState.historyRecords = [];
+
+        let existing = appState.historyRecords.find(g => g.symbol === sym);
+        if (!existing) {
+          existing = {
+            symbol: sym,
+            name: currentResearchStock.name || sym,
+            currency: currentResearchStock.currency || '$',
+            records: []
+          };
+          appState.historyRecords.unshift(existing);
+          saveToCache(appState);
+          renderApp();
+          pushDataToServer(appState);
+          showAlert(`已将 ${sym} 添加到您的测算看板！`, 'success');
+        } else {
+          showAlert(`${sym} 已存在于测算看板中`, 'info');
+        }
+
+        closeStockResearch();
+
+        // Scroll to card
+        setTimeout(() => {
+          const card = document.querySelector(`.stock-card[data-symbol="${sym}"]`);
+          const container = document.querySelector('.mobile-container');
+          if (card && container) {
+            const cardRect = card.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            smoothScrollContainer(container, Math.max(0, container.scrollTop + (cardRect.top - containerRect.top) - 110), 1000);
+          }
+        }, 300);
       };
+    }
+
+    // Add to iPhone Calendar Button
+    if (calendarBtn) {
+      calendarBtn.onclick = function () {
+        if (!currentResearchStock) return;
+        const sym = currentResearchStock.symbol;
+        const name = currentResearchStock.name || sym;
+        const dateVal = currentResearchStock.nextEarnings || currentResearchStock.nextEarningsFormatted;
+
+        const icsUrl = `/api/calendar-ics?symbol=${encodeURIComponent(sym)}&name=${encodeURIComponent(name)}&date=${encodeURIComponent(dateVal)}`;
+        
+        // Trigger download / open in iOS Safari
+        const link = document.createElement('a');
+        link.href = icsUrl;
+        link.download = `earnings-${sym}.ics`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showAlert(`正在打开 iPhone 日历日程，请在弹窗中点击“添加”`, 'success');
+      };
+    }
+
+    // Open AI section button
+    if (openAiBtn) {
+      openAiBtn.onclick = function () {
+        const aiSection = document.getElementById('research-ai-section');
+        if (aiSection) {
+          aiSection.scrollIntoView({ behavior: 'smooth' });
+          if (aiInput) setTimeout(() => aiInput.focus(), 300);
+        }
+      };
+    }
+
+    // AI Quick Prompts
+    document.querySelectorAll('.ai-chip-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const prompt = this.getAttribute('data-prompt');
+        if (prompt) sendResearchAiMessage(prompt);
+      });
+    });
+
+    // AI Send message
+    if (aiSendBtn) {
+      aiSendBtn.onclick = function () {
+        if (aiInput && aiInput.value.trim()) {
+          const text = aiInput.value.trim();
+          aiInput.value = '';
+          sendResearchAiMessage(text);
+        }
+      };
+    }
+
+    if (aiInput) {
+      aiInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          if (aiSendBtn) aiSendBtn.click();
+        }
+      });
+    }
+  }
+
+  async function openStockResearch(symbolOrQuery) {
+    const modal = document.getElementById('stock-research-modal');
+    const backdrop = document.getElementById('research-modal-backdrop');
+    if (!modal || !backdrop) return;
+
+    modal.classList.remove('hidden');
+    backdrop.classList.remove('hidden');
+
+    // Set Loading State
+    const symEl = document.getElementById('res-modal-symbol');
+    const nameEl = document.getElementById('res-modal-name');
+    const mktEl = document.getElementById('res-modal-market');
+    const priceEl = document.getElementById('res-modal-price');
+    const chgEl = document.getElementById('res-modal-chg');
+    const periodEl = document.getElementById('res-modal-period');
+    const earnDateEl = document.getElementById('res-modal-earnings-date');
+    const sectorEl = document.getElementById('res-m-sector');
+    const indEl = document.getElementById('res-m-industry');
+    const sumEl = document.getElementById('res-m-summary');
+
+    if (symEl) symEl.textContent = symbolOrQuery.toUpperCase();
+    if (nameEl) nameEl.textContent = '正在全网检索深度财报与分析数据...';
+    if (mktEl) mktEl.textContent = 'SYNC';
+    if (priceEl) priceEl.textContent = '--';
+    if (chgEl) chgEl.textContent = '--';
+    if (periodEl) periodEl.textContent = 'LOADING';
+    if (earnDateEl) earnDateEl.textContent = '正在获取发布排期...';
+    if (sectorEl) sectorEl.textContent = '板块: 检索中';
+    if (indEl) indEl.textContent = '细分行业: 检索中';
+    if (sumEl) sumEl.textContent = '正在获取公司业务模型与最新财务数据...';
+
+    // Reset 3x3 cells
+    ['mktcap', 'revgrowth', 'earngrowth', 'margin', 'roe', 'debt', 'pe', 'div', 'target'].forEach(id => {
+      const el = document.getElementById(`res-m-${id}`);
+      if (el) el.textContent = '...';
+    });
+
+    // Reset AI History
+    currentAiHistory = [];
+    const aiHistoryEl = document.getElementById('res-ai-chat-history');
+    if (aiHistoryEl) {
+      aiHistoryEl.innerHTML = `
+        <div class="ai-msg ai-msg-bot">
+          您好！已为您连接 ${symbolOrQuery.toUpperCase()} 的深度投研中枢。您可以随时向我提问关于该股票的护城河、最新财报亮点或估值分析。
+        </div>
+      `;
+    }
+
+    try {
+      const res = await fetch(`/api/stock-research?symbol=${encodeURIComponent(symbolOrQuery.trim())}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      currentResearchStock = data;
+
+      // Populate Header
+      if (symEl) symEl.textContent = data.symbol;
+      if (nameEl) nameEl.textContent = data.name;
+      if (mktEl) mktEl.textContent = data.market || 'GLOBAL';
+
+      if (priceEl) {
+        priceEl.textContent = data.currentPrice != null ? `${data.currency || '$'}${data.currentPrice}` : '--';
+      }
+      if (chgEl) {
+        const chg = parseFloat(data.changePercent);
+        if (!isNaN(chg)) {
+          const isUp = chg >= 0;
+          const isCN = data.market === 'CN';
+          chgEl.textContent = `${isUp ? '+' : ''}${chg.toFixed(2)}%`;
+          chgEl.style.color = (isUp ? (isCN ? 'var(--red-color, #ff453a)' : 'var(--green-color, #30d158)') : (isCN ? 'var(--green-color, #30d158)' : 'var(--red-color, #ff453a)'));
+        } else {
+          chgEl.textContent = '--';
+          chgEl.style.color = 'var(--fg-dim)';
+        }
+      }
+
+      // Period & Next Earnings
+      if (periodEl) periodEl.textContent = data.periodLabel || '最新财报';
+      if (earnDateEl) earnDateEl.textContent = data.nextEarningsFormatted || '暂无排期';
+
+      // 3x3 Grid
+      const m = data.metrics || {};
+      const setCell = (id, val) => {
+        const el = document.getElementById(`res-m-${id}`);
+        if (el) el.textContent = val || 'N/A';
+      };
+
+      setCell('mktcap', m.marketCap);
+      setCell('revgrowth', m.revenueGrowth);
+      setCell('earngrowth', m.earningsGrowth);
+      setCell('margin', m.profitMargins);
+      setCell('roe', m.returnOnEquity);
+      setCell('debt', m.debtToEquity);
+      setCell('pe', m.pe !== 'N/A' && m.forwardPe !== 'N/A' ? `${m.pe} / ${m.forwardPe}` : (m.pe || 'N/A'));
+      setCell('div', m.dividendYield);
+      setCell('target', m.targetMeanPrice !== 'N/A' ? `${data.currency || '$'}${m.targetMeanPrice}` : 'N/A');
+
+      // Sector & Industry
+      const prof = data.companyProfile || {};
+      if (sectorEl) sectorEl.textContent = `板块: ${prof.sector || '综合'}`;
+      if (indEl) indEl.textContent = `细分: ${prof.industry || '一般行业'}`;
+      if (sumEl) sumEl.textContent = prof.summary || '暂无详细业务介绍';
+
+    } catch (err) {
+      console.error('[Research] Load error:', err);
+      if (nameEl) nameEl.textContent = `检索失败: ${err.message}`;
+      if (sumEl) sumEl.textContent = '未能加载该股票的财务与业务数据，请检查股票代码或网络连接。';
+    }
+  }
+
+  function closeStockResearch() {
+    const modal = document.getElementById('stock-research-modal');
+    const backdrop = document.getElementById('research-modal-backdrop');
+    if (modal) modal.classList.add('hidden');
+    if (backdrop) backdrop.classList.add('hidden');
+    currentResearchStock = null;
+  }
+
+  async function sendResearchAiMessage(promptText) {
+    if (!promptText || !promptText.trim()) return;
+    const text = promptText.trim();
+    const aiHistoryEl = document.getElementById('res-ai-chat-history');
+    if (!aiHistoryEl) return;
+
+    // Append user message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'ai-msg ai-msg-user';
+    userMsg.textContent = text;
+    aiHistoryEl.appendChild(userMsg);
+
+    // Append loading bot message
+    const botMsg = document.createElement('div');
+    botMsg.className = 'ai-msg ai-msg-bot';
+    botMsg.textContent = '正在分析财报指标与核心基本面...';
+    aiHistoryEl.appendChild(botMsg);
+    aiHistoryEl.scrollTop = aiHistoryEl.scrollHeight;
+
+    currentAiHistory.push({ role: 'user', text: text });
+
+    try {
+      const apiKey = localStorage.getItem('geminiApiKey') || '';
+      const res = await fetch('/api/ai-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          symbol: currentResearchStock?.symbol || '',
+          stockContext: currentResearchStock,
+          history: currentAiHistory.slice(0, -1),
+          apiKey: apiKey
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      botMsg.textContent = data.reply || '已完成分析。';
+      currentAiHistory.push({ role: 'model', text: data.reply });
+      aiHistoryEl.scrollTop = aiHistoryEl.scrollHeight;
+    } catch (err) {
+      console.error('[AI] Chat error:', err);
+      botMsg.textContent = `分析请求失败: ${err.message}`;
     }
   }
 
@@ -2104,6 +2479,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     loadFromCache();
     initListeners();
+    setupGlobalStockResearchAndSearch();
     fetchLatestData();
     setupEventStream();
   });

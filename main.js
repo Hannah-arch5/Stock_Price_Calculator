@@ -1,6 +1,8 @@
 const { app, BrowserWindow, shell, ipcMain, nativeTheme } = require('electron');
 const path = require('path');
 const fs = require('fs');
+
+app.setName('Ticker');
 const os = require('os');
 const http = require('http');
 const { exec } = require('child_process');
@@ -109,11 +111,218 @@ function broadcastSyncData(dataObj) {
     });
 }
 
+function generateIcsContent(symbol, name, dateStr) {
+    const cleanDate = dateStr ? dateStr.replace(/[^0-9]/g, '').substring(0, 8) : new Date().toISOString().replace(/[^0-9]/g, '').substring(0, 8);
+    const y = parseInt(cleanDate.substring(0, 4), 10) || new Date().getFullYear();
+    const m = (parseInt(cleanDate.substring(4, 6), 10) || (new Date().getMonth() + 1)) - 1;
+    const d = parseInt(cleanDate.substring(6, 8), 10) || new Date().getDate();
+    const dt = new Date(Date.UTC(y, m, d + 1));
+    const nextDay = dt.toISOString().replace(/[^0-9]/g, '').substring(0, 8);
+    const nowUtc = new Date().toISOString().replace(/[^0-9]/g, '').substring(0, 15) + 'Z';
+
+    return [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Ticker Pocket//Next Earnings Calendar//CN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'BEGIN:VEVENT',
+        `UID:ticker-earnings-${symbol}-${cleanDate}@ticker.app`,
+        `DTSTAMP:${nowUtc}`,
+        `DTSTART;VALUE=DATE:${cleanDate}`,
+        `DTEND;VALUE=DATE:${nextDay}`,
+        `SUMMARY:${symbol} ${name} 财报发布日`,
+        `DESCRIPTION:Ticker Pocket 财报提醒: ${symbol} (${name}) 预计于今日发布最新财报。`,
+        'STATUS:CONFIRMED',
+        'TRANSP:TRANSPARENT',
+        'BEGIN:VALARM',
+        'TRIGGER:-PT9H',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:Ticker 财报提醒: ${symbol} (${name}) 今日发布财报`,
+        'END:VALARM',
+        'END:VEVENT',
+        'END:VCALENDAR'
+    ].join('\r\n');
+}
+
+async function getStockResearchData(rawSymbol) {
+    if (!rawSymbol) throw new Error('Symbol is required');
+    let symbol = rawSymbol.trim().toUpperCase();
+
+    // Check if symbol is A-share (digits 600xxx, 000xxx, 300xxx, 688xxx, 8xxxxx)
+    const aShareMatch = symbol.match(/^(\d{6})$/) || symbol.match(/^(SH|SZ|BJ)?(\d{6})$/i);
+
+    if (aShareMatch) {
+        const code = aShareMatch[2] || aShareMatch[1];
+        let emCode = code;
+        if (symbol.includes('SH') || code.startsWith('6')) emCode = `SH${code}`;
+        else if (symbol.includes('SZ') || code.startsWith('0') || code.startsWith('3')) emCode = `SZ${code}`;
+        else if (symbol.includes('BJ') || code.startsWith('8') || code.startsWith('4') || code.startsWith('9')) emCode = `BJ${code}`;
+        else emCode = code.startsWith('6') ? `SH${code}` : `SZ${code}`;
+
+        const secid = emCode.startsWith('SH') ? '1.' + code : '0.' + code;
+        const surveyUrl = `https://emweb.securities.eastmoney.com/PC_HSF10/CompanySurvey/CompanySurveyAjax?code=${emCode}`;
+        const f10Url = `https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew?type=0&code=${emCode}`;
+        const push2Url = `https://push2.eastmoney.com/api/qt/stock/get?secid=${secid}&fields=f57,f58,f43,f170,f169,f116,f162,f167,f127`;
+        const forecastUrl = `https://datacenter-web.eastmoney.com/api/data/v1/get?sortColumns=NOTICE_DATE&sortTypes=-1&pageSize=3&pageNumber=1&reportName=RPT_PUBLIC_OP_NEWPREDICT&columns=SECURITY_NAME_ABBR,NOTICE_DATE,PREDICT_CONTENT,PREDICT_TYPE,PREDICT_FINANCE_CODE,ADD_AMP_LOWER,ADD_AMP_UPPER&filter=(SECURITY_CODE%3D%22${code}%22)`;
+
+        const [surveyRes, f10Res, push2Res, forecastRes] = await Promise.all([
+            fetch(surveyUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json()).catch(() => null),
+            fetch(f10Url, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json()).catch(() => null),
+            fetch(push2Url, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json()).catch(() => null),
+            fetch(forecastUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json()).catch(() => null)
+        ]);
+
+        const pushData = push2Res?.data || {};
+        const stockName = pushData.f58 || surveyRes?.jbzl?.[0]?.SECURITY_NAME_ABBR || code;
+        const curPrice = pushData.f43 != null && pushData.f43 !== '-' ? (pushData.f43 / 100).toFixed(2) : null;
+        const chgPct = pushData.f170 != null && pushData.f170 !== '-' ? (pushData.f170 / 100).toFixed(2) : null;
+        const mktCap = pushData.f116 ? (pushData.f116 >= 1e12 ? (pushData.f116 / 1e12).toFixed(2) + '万亿' : (pushData.f116 / 1e8).toFixed(2) + '亿') : 'N/A';
+        const pe = pushData.f162 != null && pushData.f162 !== '-' ? (pushData.f162 / 100).toFixed(2) : 'N/A';
+        const divYield = pushData.f167 != null && pushData.f167 !== '-' ? (pushData.f167 / 100).toFixed(2) + '%' : 'N/A';
+
+        // Survey Info
+        const jbzl = surveyRes?.jbzl?.[0] || {};
+        const companySummary = jbzl.STR_BUSINESS_SCOPE || jbzl.BUSINESS_SCOPE || jbzl.CHG_REG_ADDRESS || '暂无详细业务介绍';
+        const sector = jbzl.EM2016 || jbzl.INDUSTRY || 'A股综合板块';
+        const industry = jbzl.EM2016_NAME || jbzl.INDUSTRY || sector;
+
+        // F10 Financial Analysis
+        let revGrowth = 'N/A', earnGrowth = 'N/A', grossMargin = 'N/A', netMargin = 'N/A', roe = 'N/A', debtRatio = 'N/A', periodLabel = '';
+        if (f10Res?.zyzb && f10Res.zyzb.length > 0) {
+            const latest = f10Res.zyzb[0];
+            periodLabel = latest.REPORT_DATE ? latest.REPORT_DATE.substring(0, 10) : '';
+            if (latest.KCFJYXSYJLR_YOY != null) earnGrowth = latest.KCFJYXSYJLR_YOY.toFixed(2) + '%';
+            else if (latest.NETPROFIT_YOY != null) earnGrowth = latest.NETPROFIT_YOY.toFixed(2) + '%';
+            if (latest.TOTALOPERATEREVE_YOY != null) revGrowth = latest.TOTALOPERATEREVE_YOY.toFixed(2) + '%';
+            if (latest.XSMLL != null) grossMargin = latest.XSMLL.toFixed(2) + '%';
+            if (latest.XSNLL != null) netMargin = latest.XSNLL.toFixed(2) + '%';
+            if (latest.ROEJQ != null) roe = latest.ROEJQ.toFixed(2) + '%';
+            if (latest.ZCFZL != null) debtRatio = latest.ZCFZL.toFixed(2) + '%';
+        }
+
+        // Forecast & Next Earnings Date
+        let nextEarnings = null;
+        let nextEarningsFormatted = '预约披露时间待更新 (Schedule TBD)';
+        if (forecastRes?.result?.data && forecastRes.result.data.length > 0) {
+            const pred = forecastRes.result.data[0];
+            if (pred.NOTICE_DATE) {
+                nextEarnings = pred.NOTICE_DATE;
+                nextEarningsFormatted = pred.NOTICE_DATE.substring(0, 10);
+            }
+        }
+
+        return {
+            symbol: emCode,
+            rawCode: code,
+            name: stockName,
+            currency: '¥',
+            market: 'CN',
+            currentPrice: curPrice,
+            changePercent: chgPct,
+            nextEarnings: nextEarnings,
+            nextEarningsFormatted: nextEarningsFormatted,
+            periodLabel: periodLabel ? `最新报告期: ${periodLabel}` : '最新报告期',
+            companyProfile: {
+                summary: companySummary,
+                sector: sector,
+                industry: industry,
+                website: jbzl.ORG_WEB || ''
+            },
+            metrics: {
+                marketCap: mktCap,
+                revenueGrowth: revGrowth,
+                earningsGrowth: earnGrowth,
+                profitMargins: netMargin !== 'N/A' ? netMargin : grossMargin,
+                grossMargin: grossMargin,
+                returnOnEquity: roe,
+                debtToEquity: debtRatio,
+                pe: pe,
+                forwardPe: 'N/A',
+                dividendYield: divYield,
+                targetMeanPrice: 'N/A'
+            }
+        };
+    }
+
+    // US / Global Stocks via Yahoo Finance
+    const yahooRes = await yahooFinance.quoteSummary(symbol, {
+        modules: ['summaryProfile', 'assetProfile', 'calendarEvents', 'summaryDetail', 'financialData', 'price', 'defaultKeyStatistics']
+    });
+
+    const price = yahooRes?.price || {};
+    const assetProfile = yahooRes?.assetProfile || yahooRes?.summaryProfile || {};
+    const fin = yahooRes?.financialData || {};
+    const sum = yahooRes?.summaryDetail || {};
+    const cal = yahooRes?.calendarEvents?.earnings || {};
+    const keyStats = yahooRes?.defaultKeyStatistics || {};
+
+    const formatPct = (val) => val != null ? (val * 100).toFixed(2) + '%' : 'N/A';
+    const formatNum = (val) => val != null ? val.toFixed(2) : 'N/A';
+    const formatLarge = (val) => {
+        if (!val) return 'N/A';
+        if (val >= 1e12) return (val / 1e12).toFixed(2) + 'T';
+        if (val >= 1e9) return (val / 1e9).toFixed(2) + 'B';
+        if (val >= 1e6) return (val / 1e6).toFixed(2) + 'M';
+        return val.toLocaleString();
+    };
+
+    let nextEarnings = null;
+    let nextEarningsFormatted = '暂无发布排期 (No earnings date)';
+    if (cal.earningsDate && cal.earningsDate.length > 0) {
+        nextEarnings = cal.earningsDate[0];
+        nextEarningsFormatted = cal.earningsDate.map(d => new Date(d).toISOString().substring(0, 10)).join(' ~ ');
+    }
+
+    let periodLabel = '';
+    if (keyStats.mostRecentQuarter) {
+        try {
+            const qDate = new Date(keyStats.mostRecentQuarter);
+            const m = qDate.getMonth() + 1;
+            const q = m <= 3 ? 'Q1' : (m <= 6 ? 'Q2' : (m <= 9 ? 'Q3' : 'Q4'));
+            periodLabel = `最新财报: ${q} ${qDate.getFullYear()} (TTM Data)`;
+        } catch(e) {}
+    }
+
+    return {
+        symbol: price.symbol || symbol,
+        rawCode: price.symbol || symbol,
+        name: price.shortName || price.longName || symbol,
+        currency: price.currencySymbol || (price.currency === 'USD' ? '$' : (price.currency === 'HKD' ? 'HK$' : '$')),
+        market: symbol.includes('.HK') ? 'HK' : 'US',
+        currentPrice: price.regularMarketPrice != null ? price.regularMarketPrice.toFixed(2) : null,
+        changePercent: price.regularMarketChangePercent != null ? (price.regularMarketChangePercent * 100).toFixed(2) : null,
+        nextEarnings: nextEarnings,
+        nextEarningsFormatted: nextEarningsFormatted,
+        periodLabel: periodLabel || '最新财报',
+        companyProfile: {
+            summary: assetProfile.longBusinessSummary || 'No detailed business summary available.',
+            sector: assetProfile.sector || 'Technology / General',
+            industry: assetProfile.industry || 'General Industry',
+            website: assetProfile.website || ''
+        },
+        metrics: {
+            marketCap: sum.marketCap ? formatLarge(sum.marketCap) : 'N/A',
+            revenueGrowth: formatPct(fin.revenueGrowth),
+            earningsGrowth: formatPct(fin.earningsGrowth),
+            profitMargins: formatPct(fin.profitMargins),
+            grossMargin: formatPct(fin.grossMargins),
+            returnOnEquity: formatPct(fin.returnOnEquity),
+            debtToEquity: fin.debtToEquity ? fin.debtToEquity.toFixed(2) : 'N/A',
+            pe: sum.trailingPE ? sum.trailingPE.toFixed(2) : 'N/A',
+            forwardPe: sum.forwardPE ? sum.forwardPE.toFixed(2) : 'N/A',
+            dividendYield: sum.dividendYield ? formatPct(sum.dividendYield) : 'N/A',
+            targetMeanPrice: fin.targetMeanPrice ? fin.targetMeanPrice.toFixed(2) : 'N/A'
+        }
+    };
+}
+
 function startSyncServer() {
     try {
         const server = http.createServer((req, res) => {
             const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
             const pathname = parsedUrl.pathname;
+            const query = Object.fromEntries(parsedUrl.searchParams.entries());
 
             // CORS headers
             res.setHeader('Access-Control-Allow-Origin', '*');
@@ -204,6 +413,130 @@ function startSyncServer() {
                     gdriveUrl: getGDriveSyncUrl(),
                     clientsCount: sseClients.length
                 }));
+                return;
+            }
+
+            // Global Stock Deep Research API
+            if (pathname === '/api/stock-research') {
+                const sym = query.symbol || query.q || '';
+                if (!sym) {
+                    res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                    res.end(JSON.stringify({ error: 'Missing symbol parameter' }));
+                    return;
+                }
+
+                getStockResearchData(sym)
+                    .then(data => {
+                        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                        res.end(JSON.stringify(data));
+                    })
+                    .catch(err => {
+                        console.error('[SyncServer] /api/stock-research error:', err);
+                        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+                        res.end(JSON.stringify({ error: err.message || 'Failed to fetch stock research data' }));
+                    });
+                return;
+            }
+
+            // Apple Calendar (.ics) Generator API
+            if (pathname === '/api/calendar-ics') {
+                const sym = (query.symbol || 'STOCK').toUpperCase();
+                const name = query.name || sym;
+                const dateStr = query.date || '';
+                const icsText = generateIcsContent(sym, name, dateStr);
+
+                res.writeHead(200, {
+                    'Content-Type': 'text/calendar; charset=utf-8',
+                    'Content-Disposition': `attachment; filename="earnings-${sym}.ics"`,
+                    'Access-Control-Allow-Origin': '*'
+                });
+                res.end(icsText);
+                return;
+            }
+
+            // Mobile AI Companion Chat API
+            if (pathname === '/api/ai-chat') {
+                if (req.method !== 'POST') {
+                    res.writeHead(405, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+                    return;
+                }
+
+                let body = '';
+                req.on('data', chunk => { body += chunk.toString(); });
+                req.on('end', async () => {
+                    try {
+                        const parsed = JSON.parse(body);
+                        const { message, symbol, stockContext, history, apiKey } = parsed;
+
+                        const effectiveKey = apiKey || process.env.GEMINI_API_KEY || '';
+                        if (!effectiveKey) {
+                            res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+                            res.end(JSON.stringify({ error: 'Please configure your Gemini API Key in Settings or pass apiKey in request.' }));
+                            return;
+                        }
+
+                        let systemPrompt = "You are an elite financial investment analyst embedded inside Ticker Pocket (Studio Noir edition). " +
+                            "Analyze stocks with deep fundamental insight, calculating intrinsic valuation, competitive moats, growth sustainability, and risk drivers. " +
+                            "Keep your response concise, sharp, highly professional, with bullet points or key takeaways.";
+
+                        if (stockContext) {
+                            systemPrompt += `\n\n[CURRENT RESEARCH STOCK CONTEXT]\n` +
+                                `Symbol: ${stockContext.symbol || symbol}\n` +
+                                `Company Name: ${stockContext.name || ''}\n` +
+                                `Market: ${stockContext.market || ''}\n` +
+                                `Current Price: ${stockContext.currentPrice || 'N/A'} ${stockContext.currency || ''}\n` +
+                                `Sector & Industry: ${stockContext.companyProfile?.sector || ''} / ${stockContext.companyProfile?.industry || ''}\n` +
+                                `Next Earnings Date: ${stockContext.nextEarningsFormatted || 'N/A'}\n` +
+                                `Financial Metrics:\n` +
+                                `- Market Cap: ${stockContext.metrics?.marketCap || 'N/A'}\n` +
+                                `- Revenue Growth: ${stockContext.metrics?.revenueGrowth || 'N/A'}\n` +
+                                `- Earnings Growth: ${stockContext.metrics?.earningsGrowth || 'N/A'}\n` +
+                                `- Profit Margin: ${stockContext.metrics?.profitMargins || 'N/A'}\n` +
+                                `- ROE: ${stockContext.metrics?.returnOnEquity || 'N/A'}\n` +
+                                `- Debt to Equity: ${stockContext.metrics?.debtToEquity || 'N/A'}\n` +
+                                `- P/E: ${stockContext.metrics?.pe || 'N/A'} (Forward P/E: ${stockContext.metrics?.forwardPe || 'N/A'})\n` +
+                                `- Dividend Yield: ${stockContext.metrics?.dividendYield || 'N/A'}\n` +
+                                `- Analyst Target Price: ${stockContext.metrics?.targetMeanPrice || 'N/A'}\n` +
+                                `Company Business Scope: ${(stockContext.companyProfile?.summary || '').substring(0, 1500)}`;
+                        }
+
+                        const contents = [];
+                        if (Array.isArray(history) && history.length > 0) {
+                            history.forEach(h => {
+                                if (h.role && h.text) {
+                                    contents.push({ role: h.role === 'user' ? 'user' : 'model', parts: [{ text: h.text }] });
+                                }
+                            });
+                        }
+                        contents.push({ role: 'user', parts: [{ text: message }] });
+
+                        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${effectiveKey}`;
+                        const geminiRes = await fetch(geminiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                systemInstruction: { parts: [{ text: systemPrompt }] },
+                                contents: contents
+                            })
+                        });
+
+                        if (!geminiRes.ok) {
+                            const errData = await geminiRes.json().catch(() => ({}));
+                            throw new Error(errData?.error?.message || `Gemini API Error: ${geminiRes.status}`);
+                        }
+
+                        const geminiJson = await geminiRes.json();
+                        const reply = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+
+                        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                        res.end(JSON.stringify({ success: true, reply: reply }));
+                    } catch(aiErr) {
+                        console.error('[SyncServer] /api/ai-chat error:', aiErr);
+                        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+                        res.end(JSON.stringify({ error: aiErr.message || 'AI generation failed' }));
+                    }
+                });
                 return;
             }
 
@@ -586,6 +919,11 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+    if (process.platform === 'darwin' && !app.isPackaged) {
+        try {
+            app.dock.setIcon(path.join(__dirname, 'build/icon.png'));
+        } catch(e) {}
+    }
     startSyncServer();
     startCloudflareTunnel();
     createWindow();

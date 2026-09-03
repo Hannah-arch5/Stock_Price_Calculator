@@ -120,27 +120,24 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Per-card independent color isolation.
   - Bidirectional calculator auto-switching.
 
-### v5.3.0: Ticker Pocket (Mobile Companion Edition)
+### v5.3.0: Ticker Pocket (Mobile Companion Edition) [LOCKED & TAGGED]
 - **Official Version Name**: `Ticker Pocket v5.3.0` (Mobile Edition).
-- **Built-in HTTP & SSE Sync Server**:
-  - Electron main process runs lightweight HTTP server on port `7321` serving PWA assets and REST API (`/api/data`, `/api/events`, `/api/server-info`).
-  - Automatic LAN IP discovery (`os.networkInterfaces()`) for frictionless connection.
-  - Real-time SSE push (`broadcastSyncData`): any save/update in Mac desktop instantly syncs to connected iPhones without refreshing.
-- **iPhone 14 Pro Max & iPhone 15 Studio Noir Mobile PWA**:
-  - Designed strictly to Studio Noir aesthetics: pure OLED black (`#030303`), high-contrast JetBrains Mono & Inter typography, 1px dividers, extreme negative whitespace.
-  - Native iOS Web Clip integration: standalone fullscreen mode (`apple-mobile-web-app-capable`, `black-translucent`), customized `apple-touch-icon.png` (with Apple standard padding).
-  - iOS Dynamic Island & Home indicator safe area adaptation (`env(safe-area-inset-top/bottom)`).
-  - **Touch & Motion Engine**:
-    - **Double-Tap to Highlight**: Instantly toggles row highlight with pure-white solid indicator (`3px solid #ffffff`), 12% luminous background (`rgba(255,255,255,0.12)`), and inset boundary glow.
-    - **Hold-to-Drag (180ms)**: Responsive activation with subtle haptic vibration; early finger slide (>7px) yields immediately to native page scrolling.
-    - **`smoothMove` Zero-Bounce Reorder Engine**: Sibling rows/tags calculate displacement deltas and glide silkily (`0.22s cubic-bezier(0.2, 0, 0, 1)`) without spring overshoot or scale distortion.
-    - **Visual Differentiation**: Normal dragging rows display a subtle dashed slot (`1px dashed rgba(255,255,255,0.25)`); highlighted dragging rows strictly preserve the pure-white left stripe and glowing background.
-    - **In-line Quick Controls**: Inline pencil edit button, add-to-calculator trigger, and dynamic micro-pill alert banner.
-  - Offline cache resilience: LocalStorage caching retains full ledger snapshot even when disconnected or outside LAN.
-  - Independent market color isolation: A-Share (red-up/green-down), US/HK (green-up/red-down).
-- **Mac Desktop Integration**:
-  - Added mobile sync icon button in top-right actions.
-  - Studio Noir sync modal displaying current LAN address (e.g. `http://192.168.71.146:7321`), one-click copy button, and real-time connection status.
+- **Status**: Tagged and frozen in git (`v5.3.0`).
+
+### v5.4.0: Ticker Pocket (Global Stock Research Matrix & AI Companion)
+- **Official Version Name**: `Ticker Pocket v5.4.0` (Mobile Edition).
+- **Global Stock Deep Research (`/api/stock-research`)**:
+  - Auto-completion dropdown when typing in `#mobile-search-input` showing local ledger matches + `🔍 全网深度研报: 检索 "SYMBOL"`.
+  - Supports arbitrary US, HK, and A-Share symbols/names.
+  - Fetches live quotes, 3×3 financial fundamentals matrix (Market Cap, Revenue Growth, Earnings Growth, Profit Margin, ROE, Debt/Equity, PE/Fwd PE, Dividend Yield, Analyst Target Price), company profile scope, sector, and industry classifications.
+- **Apple Calendar Reminder Integration (`/api/calendar-ics`)**:
+  - Next Earnings release countdown and date display.
+  - `📅 添加到 iPhone 日历` one-tap action: generates standard `.ics` iCalendar payload with preconfigured 9-hour-ahead alarm, invoking iOS native "Add Event" modal.
+- **AI Research Companion (`/api/ai-chat`)**:
+  - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
+  - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
+- **One-Tap Ledger Addition**:
+  - `+ 加入我的测算看板` directly adds newly researched stocks into the user's calculation list with instant LAN sync.
 
 ---
 
