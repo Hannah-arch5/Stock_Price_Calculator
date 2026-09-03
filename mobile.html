@@ -35,20 +35,108 @@
                 </div>
             </div>
             
-            <div class="meta-row">
-                <div class="meta-item">
-                    <span class="meta-label">PORTFOLIO</span>
-                    <span id="total-symbols-count" class="meta-val mono">0</span>
+            <!-- Part 1: Quick Calculators Module (Desktop Aligned) -->
+            <section class="mobile-calc-module">
+                <div class="calc-mode-switch">
+                    <button type="button" id="m-mode-target" class="calc-mode-btn active" data-mode="target">TARGET PROJECTION</button>
+                    <button type="button" id="m-mode-delta" class="calc-mode-btn" data-mode="delta">PERCENTAGE DELTA</button>
                 </div>
-                <div class="meta-item">
-                    <span class="meta-label">TARGETS</span>
-                    <span id="total-targets-count" class="meta-val mono">0</span>
+
+                <!-- 1. Target Projection View -->
+                <div id="m-panel-target" class="calc-sub-panel">
+                    <div class="calc-grid-row">
+                        <div class="calc-input-wrap">
+                            <span class="calc-label">SYMBOL 代码</span>
+                            <input type="text" id="m-target-symbol" class="calc-input mono" placeholder="e.g. 300775 / AAPL" autocomplete="off" autocorrect="off" autocapitalize="characters" />
+                        </div>
+                        <div class="calc-input-wrap">
+                            <span class="calc-label">ENTRY PRICE 入场价</span>
+                            <div class="calc-cur-input-box">
+                                <span id="m-target-cur" class="calc-cur-sym">¥</span>
+                                <input type="number" inputmode="decimal" id="m-target-base" class="calc-input mono" placeholder="0.00" step="any" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calc-grid-row">
+                        <div class="calc-input-wrap">
+                            <span class="calc-label">MOVEMENT 涨跌幅</span>
+                            <div class="calc-perc-wrap">
+                                <button type="button" id="m-target-dir-btn" class="calc-dir-btn is-up" data-dir="up">▲ UP</button>
+                                <div class="calc-perc-inner">
+                                    <input type="number" inputmode="decimal" id="m-target-perc" class="calc-input mono" placeholder="0.00" step="any" />
+                                    <span class="calc-unit mono">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="calc-input-wrap">
+                            <span class="calc-label">LABEL 标签</span>
+                            <input type="text" id="m-target-type" class="calc-input" placeholder="D买点1" />
+                        </div>
+                    </div>
+
+                    <!-- Label Quick Chips -->
+                    <div id="m-target-chips-container" class="calc-label-chips-row"></div>
+
+                    <!-- Result & Save Action Bar -->
+                    <div class="calc-footer-row">
+                        <div class="calc-res-box">
+                            <span class="calc-res-label">TARGET PRICE</span>
+                            <div id="m-target-res-val" class="calc-res-text mono">¥0.00</div>
+                        </div>
+                        <div class="calc-actions-box">
+                            <button type="button" id="m-target-save-btn" class="calc-primary-btn">SAVE PROJECTION</button>
+                            <button type="button" id="m-target-clear-btn" class="calc-ghost-btn">CLEAR</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="meta-item">
-                    <span class="meta-label">UPDATED</span>
-                    <span id="last-sync-time" class="meta-val mono">--:--</span>
+
+                <!-- 2. Percentage Delta View -->
+                <div id="m-panel-delta" class="calc-sub-panel hidden">
+                    <div class="calc-grid-row">
+                        <div class="calc-input-wrap">
+                            <span class="calc-label">SYMBOL 代码</span>
+                            <input type="text" id="m-delta-symbol" class="calc-input mono" placeholder="e.g. 300775 / AAPL" autocomplete="off" autocorrect="off" autocapitalize="characters" />
+                        </div>
+                        <div class="calc-input-wrap">
+                            <span class="calc-label">INITIAL PRICE 入场价</span>
+                            <div class="calc-cur-input-box">
+                                <span id="m-delta-cur-1" class="calc-cur-sym">¥</span>
+                                <input type="number" inputmode="decimal" id="m-delta-initial" class="calc-input mono" placeholder="0.00" step="any" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calc-grid-row">
+                        <div class="calc-input-wrap">
+                            <span class="calc-label">FINAL PRICE 目标价</span>
+                            <div class="calc-cur-input-box">
+                                <span id="m-delta-cur-2" class="calc-cur-sym">¥</span>
+                                <input type="number" inputmode="decimal" id="m-delta-final" class="calc-input mono" placeholder="0.00" step="any" />
+                            </div>
+                        </div>
+                        <div class="calc-input-wrap">
+                            <span class="calc-label">LABEL 标签</span>
+                            <input type="text" id="m-delta-type" class="calc-input" placeholder="D卖点1" />
+                        </div>
+                    </div>
+
+                    <!-- Label Quick Chips -->
+                    <div id="m-delta-chips-container" class="calc-label-chips-row"></div>
+
+                    <!-- Result & Save Action Bar -->
+                    <div class="calc-footer-row">
+                        <div class="calc-res-box">
+                            <span class="calc-res-label">PERCENTAGE DELTA</span>
+                            <div id="m-delta-res-val" class="calc-res-text mono">0.00%</div>
+                        </div>
+                        <div class="calc-actions-box">
+                            <button type="button" id="m-delta-save-btn" class="calc-primary-btn">SAVE DELTA</button>
+                            <button type="button" id="m-delta-clear-btn" class="calc-ghost-btn">CLEAR</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Search & Market Filters -->
             <div class="controls-row">

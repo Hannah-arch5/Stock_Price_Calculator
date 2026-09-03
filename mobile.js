@@ -1031,7 +1031,10 @@
     // 5. Alert Banner gestures
     setupAlertBannerGestures();
 
-    // 6. Floating Scroll-To-Top Button Visibility based on scroll position
+    // 6. Part 1: Quick Calculators Module
+    setupPart1Calculators();
+
+    // 7. Floating Scroll-To-Top Button Visibility based on scroll position
     const mainContainer = document.querySelector('.mobile-container');
     const scrollBtn = document.getElementById('scroll-to-top-btn');
     if (mainContainer && scrollBtn) {
@@ -1048,6 +1051,348 @@
           }, 350);
         }
       }, { passive: true });
+    }
+  }
+
+  // ─── Part 1: Quick Calculators Controller ──────────────────────
+  let targetCalcDir = 'up'; // 'up' | 'down'
+
+  function renderPart1Chips() {
+    const defaultLabels = ['D买点1', 'D买点2', 'D卖点1', 'D卖点2', 'W买点1', 'W买点2', 'W卖点1', 'W卖点2', '30买点1', '30买点2', '30卖点1', '30卖点2'];
+    const customLabels = (appState.customLabels && appState.customLabels.length > 0) ? appState.customLabels : defaultLabels;
+
+    const targetChipsEl = document.getElementById('m-target-chips-container');
+    const deltaChipsEl = document.getElementById('m-delta-chips-container');
+
+    const chipsHtml = customLabels.map(l => `<button type="button" class="calc-chip">${escapeHtml(l)}</button>`).join('');
+
+    if (targetChipsEl) targetChipsEl.innerHTML = chipsHtml;
+    if (deltaChipsEl) deltaChipsEl.innerHTML = chipsHtml;
+  }
+
+  function setupPart1Calculators() {
+    renderPart1Chips();
+
+    // 1. Mode Switcher
+    const modeTargetBtn = document.getElementById('m-mode-target');
+    const modeDeltaBtn = document.getElementById('m-mode-delta');
+    const panelTarget = document.getElementById('m-panel-target');
+    const panelDelta = document.getElementById('m-panel-delta');
+
+    if (modeTargetBtn && modeDeltaBtn && panelTarget && panelDelta) {
+      modeTargetBtn.onclick = () => {
+        modeTargetBtn.classList.add('active');
+        modeDeltaBtn.classList.remove('active');
+        panelTarget.classList.remove('hidden');
+        panelDelta.classList.add('hidden');
+      };
+      modeDeltaBtn.onclick = () => {
+        modeDeltaBtn.classList.add('active');
+        modeTargetBtn.classList.remove('active');
+        panelDelta.classList.remove('hidden');
+        panelTarget.classList.add('hidden');
+      };
+    }
+
+    // 2. Target Projection Live Inputs
+    const targetSymInput = document.getElementById('m-target-symbol');
+    const targetBaseInput = document.getElementById('m-target-base');
+    const targetPercInput = document.getElementById('m-target-perc');
+    const targetDirBtn = document.getElementById('m-target-dir-btn');
+    const targetTypeInput = document.getElementById('m-target-type');
+    const targetResEl = document.getElementById('m-target-res-val');
+    const targetCurSym = document.getElementById('m-target-cur');
+    const targetSaveBtn = document.getElementById('m-target-save-btn');
+    const targetClearBtn = document.getElementById('m-target-clear-btn');
+
+    function updateTargetMarketColors() {
+      const sym = (targetSymInput ? targetSymInput.value.trim() : '');
+      const market = detectMarket(sym);
+      const isChina = market.market === 'A';
+      if (targetCurSym) targetCurSym.textContent = isChina ? '¥' : '$';
+
+      const panel = document.getElementById('m-panel-target');
+      if (panel) {
+        if (isChina) {
+          panel.style.setProperty('--calc-up-color', '#ff453a');
+          panel.style.setProperty('--calc-down-color', '#32d74b');
+        } else {
+          panel.style.setProperty('--calc-up-color', '#32d74b');
+          panel.style.setProperty('--calc-down-color', '#ff453a');
+        }
+      }
+    }
+
+    function calcTargetLive() {
+      updateTargetMarketColors();
+      const sym = (targetSymInput ? targetSymInput.value.trim() : '');
+      const isChina = detectMarket(sym).market === 'A';
+      const cur = isChina ? '¥' : '$';
+
+      const base = parseFloat(targetBaseInput ? targetBaseInput.value : 0) || 0;
+      const perc = parseFloat(targetPercInput ? targetPercInput.value : 0) || 0;
+      const isUp = targetCalcDir === 'up';
+
+      if (base <= 0) {
+        if (targetResEl) targetResEl.textContent = `${cur}0.00`;
+        return;
+      }
+
+      const res = isUp ? base * (1 + perc / 100) : base * (1 - perc / 100);
+      if (targetResEl) targetResEl.textContent = `${cur}${res.toFixed(2)}`;
+    }
+
+    if (targetDirBtn) {
+      targetDirBtn.onclick = () => {
+        targetCalcDir = targetCalcDir === 'up' ? 'down' : 'up';
+        targetDirBtn.setAttribute('data-dir', targetCalcDir);
+        targetDirBtn.textContent = targetCalcDir === 'up' ? '▲ UP' : '▼ DOWN';
+        targetDirBtn.classList.toggle('is-up', targetCalcDir === 'up');
+        targetDirBtn.classList.toggle('is-down', targetCalcDir === 'down');
+        calcTargetLive();
+      };
+    }
+
+    if (targetSymInput) targetSymInput.addEventListener('input', calcTargetLive);
+    if (targetBaseInput) targetBaseInput.addEventListener('input', calcTargetLive);
+    if (targetPercInput) targetPercInput.addEventListener('input', calcTargetLive);
+
+    // Target Chips Click
+    const targetChipsRow = document.getElementById('m-target-chips-container');
+    if (targetChipsRow) {
+      targetChipsRow.addEventListener('click', (e) => {
+        const chip = e.target.closest('.calc-chip');
+        if (chip && targetTypeInput) {
+          targetTypeInput.value = chip.textContent.trim();
+          targetChipsRow.querySelectorAll('.calc-chip').forEach(c => c.classList.remove('selected'));
+          chip.classList.add('selected');
+        }
+      });
+    }
+
+    // Save Projection
+    if (targetSaveBtn) {
+      targetSaveBtn.onclick = async () => {
+        const sym = (targetSymInput ? targetSymInput.value.trim().toUpperCase() : '');
+        if (!sym) {
+          alert('Please enter a stock symbol');
+          return;
+        }
+        const base = parseFloat(targetBaseInput ? targetBaseInput.value : 0) || 0;
+        const perc = parseFloat(targetPercInput ? targetPercInput.value : 0) || 0;
+        if (base <= 0) {
+          alert('Please enter a valid entry price');
+          return;
+        }
+
+        const isChina = detectMarket(sym).market === 'A';
+        const cur = isChina ? '¥' : '$';
+        const isUp = targetCalcDir === 'up';
+        const resVal = isUp ? base * (1 + perc / 100) : base * (1 - perc / 100);
+        const resultStr = `${cur}${resVal.toFixed(2)}`;
+        const detailsStr = `${cur}${base.toFixed(2)} ${isUp ? '+' : '-'}${perc.toFixed(2)}%`;
+        const labelType = (targetTypeInput ? targetTypeInput.value.trim() : '') || 'Target Projection';
+
+        if (!appState.historyRecords) appState.historyRecords = [];
+        let group = appState.historyRecords.find(g => g.symbol.toUpperCase() === sym);
+        if (!group) {
+          group = {
+            symbol: sym,
+            name: sym,
+            costPrice: '',
+            quantity: '',
+            note: '',
+            records: []
+          };
+          appState.historyRecords.unshift(group);
+        }
+        if (!group.records) group.records = [];
+
+        const newRecord = {
+          type: labelType,
+          result: resultStr,
+          details: detailsStr,
+          timestamp: new Date().toISOString(),
+          basePrice: base,
+          targetPrice: resVal,
+          percentage: perc,
+          isUp: isUp,
+          inputs: {
+            basePrice: base,
+            percentage: perc,
+            direction: targetCalcDir,
+            shares: ''
+          }
+        };
+
+        group.records.unshift(newRecord);
+        appState.lastUpdated = new Date().toISOString();
+
+        saveToCache(appState);
+        renderApp();
+        pushDataToServer(appState);
+
+        // Highlight and scroll to the card
+        const card = document.querySelector(`.stock-card[data-symbol="${sym}"]`);
+        const container = document.querySelector('.mobile-container');
+        if (card && container) {
+          const cardRect = card.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          smoothScrollContainer(container, Math.max(0, container.scrollTop + (cardRect.top - containerRect.top) - 110), 1150);
+          card.classList.remove('card-highlight-flash');
+          void card.offsetWidth;
+          card.classList.add('card-highlight-flash');
+          setTimeout(() => card.classList.remove('card-highlight-flash'), 3300);
+        }
+      };
+    }
+
+    // Clear Target
+    if (targetClearBtn) {
+      targetClearBtn.onclick = () => {
+        if (targetBaseInput) targetBaseInput.value = '';
+        if (targetPercInput) targetPercInput.value = '';
+        if (targetTypeInput) targetTypeInput.value = '';
+        if (targetResEl) {
+          const isChina = detectMarket(targetSymInput ? targetSymInput.value : '').market === 'A';
+          targetResEl.textContent = `${isChina ? '¥' : '$'}0.00`;
+        }
+      };
+    }
+
+    // 3. Percentage Delta Live Inputs
+    const deltaSymInput = document.getElementById('m-delta-symbol');
+    const deltaInitialInput = document.getElementById('m-delta-initial');
+    const deltaFinalInput = document.getElementById('m-delta-final');
+    const deltaTypeInput = document.getElementById('m-delta-type');
+    const deltaResEl = document.getElementById('m-delta-res-val');
+    const deltaCur1 = document.getElementById('m-delta-cur-1');
+    const deltaCur2 = document.getElementById('m-delta-cur-2');
+    const deltaSaveBtn = document.getElementById('m-delta-save-btn');
+    const deltaClearBtn = document.getElementById('m-delta-clear-btn');
+
+    function updateDeltaCur() {
+      const sym = (deltaSymInput ? deltaSymInput.value.trim() : '');
+      const isChina = detectMarket(sym).market === 'A';
+      if (deltaCur1) deltaCur1.textContent = isChina ? '¥' : '$';
+      if (deltaCur2) deltaCur2.textContent = isChina ? '¥' : '$';
+    }
+
+    function calcDeltaLive() {
+      updateDeltaCur();
+      const init = parseFloat(deltaInitialInput ? deltaInitialInput.value : 0) || 0;
+      const fin = parseFloat(deltaFinalInput ? deltaFinalInput.value : 0) || 0;
+
+      if (init <= 0 || fin <= 0) {
+        if (deltaResEl) deltaResEl.textContent = `0.00%`;
+        return;
+      }
+
+      const diff = ((fin - init) / init) * 100;
+      if (deltaResEl) deltaResEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
+    }
+
+    if (deltaSymInput) deltaSymInput.addEventListener('input', calcDeltaLive);
+    if (deltaInitialInput) deltaInitialInput.addEventListener('input', calcDeltaLive);
+    if (deltaFinalInput) deltaFinalInput.addEventListener('input', calcDeltaLive);
+
+    // Delta Chips Click
+    const deltaChipsRow = document.getElementById('m-delta-chips-container');
+    if (deltaChipsRow) {
+      deltaChipsRow.addEventListener('click', (e) => {
+        const chip = e.target.closest('.calc-chip');
+        if (chip && deltaTypeInput) {
+          deltaTypeInput.value = chip.textContent.trim();
+          deltaChipsRow.querySelectorAll('.calc-chip').forEach(c => c.classList.remove('selected'));
+          chip.classList.add('selected');
+        }
+      });
+    }
+
+    // Save Delta
+    if (deltaSaveBtn) {
+      deltaSaveBtn.onclick = async () => {
+        const sym = (deltaSymInput ? deltaSymInput.value.trim().toUpperCase() : '');
+        if (!sym) {
+          alert('Please enter a stock symbol');
+          return;
+        }
+        const init = parseFloat(deltaInitialInput ? deltaInitialInput.value : 0) || 0;
+        const fin = parseFloat(deltaFinalInput ? deltaFinalInput.value : 0) || 0;
+        if (init <= 0 || fin <= 0) {
+          alert('Please enter valid initial and final prices');
+          return;
+        }
+
+        const isChina = detectMarket(sym).market === 'A';
+        const cur = isChina ? '¥' : '$';
+        const diff = ((fin - init) / init) * 100;
+        const isUp = diff >= 0;
+        const resultStr = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
+        const detailsStr = `${cur}${init.toFixed(2)} -> ${cur}${fin.toFixed(2)}`;
+        const labelType = (deltaTypeInput ? deltaTypeInput.value.trim() : '') || 'Percentage Delta';
+
+        if (!appState.historyRecords) appState.historyRecords = [];
+        let group = appState.historyRecords.find(g => g.symbol.toUpperCase() === sym);
+        if (!group) {
+          group = {
+            symbol: sym,
+            name: sym,
+            costPrice: '',
+            quantity: '',
+            note: '',
+            records: []
+          };
+          appState.historyRecords.unshift(group);
+        }
+        if (!group.records) group.records = [];
+
+        const newRecord = {
+          type: labelType,
+          result: resultStr,
+          details: detailsStr,
+          timestamp: new Date().toISOString(),
+          basePrice: init,
+          targetPrice: fin,
+          percentage: Math.abs(diff),
+          isUp: isUp,
+          inputs: {
+            initialPrice: init,
+            finalPrice: fin,
+            shares: ''
+          }
+        };
+
+        group.records.unshift(newRecord);
+        appState.lastUpdated = new Date().toISOString();
+
+        saveToCache(appState);
+        renderApp();
+        pushDataToServer(appState);
+
+        // Highlight and scroll to the card
+        const card = document.querySelector(`.stock-card[data-symbol="${sym}"]`);
+        const container = document.querySelector('.mobile-container');
+        if (card && container) {
+          const cardRect = card.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          smoothScrollContainer(container, Math.max(0, container.scrollTop + (cardRect.top - containerRect.top) - 110), 1150);
+          card.classList.remove('card-highlight-flash');
+          void card.offsetWidth;
+          card.classList.add('card-highlight-flash');
+          setTimeout(() => card.classList.remove('card-highlight-flash'), 3300);
+        }
+      };
+    }
+
+    // Clear Delta
+    if (deltaClearBtn) {
+      deltaClearBtn.onclick = () => {
+        if (deltaInitialInput) deltaInitialInput.value = '';
+        if (deltaFinalInput) deltaFinalInput.value = '';
+        if (deltaTypeInput) deltaTypeInput.value = '';
+        if (deltaResEl) deltaResEl.textContent = '0.00%';
+      };
     }
   }
 
