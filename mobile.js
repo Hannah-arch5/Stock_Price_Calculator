@@ -2967,6 +2967,17 @@
       });
     }
 
+    // Attachment remove button
+    const removeAttachmentBtn = document.getElementById('res-ai-attachment-remove');
+    if (removeAttachmentBtn) {
+      removeAttachmentBtn.onclick = function () {
+        currentAttachedQuote = null;
+        const attachmentBar = document.getElementById('res-ai-attachment-bar');
+        if (attachmentBar) attachmentBar.classList.add('hidden');
+        if (aiInput) aiInput.placeholder = '向 AI 提问该公司的财报、护城河或估值...';
+      };
+    }
+
     // Sentence Action Buttons (➕ Add to notes & ⤤ Quote to AI)
     const researchSheet = document.getElementById('stock-research-modal');
     if (researchSheet && !researchSheet.dataset.sentenceActionsBound) {
@@ -2995,6 +3006,8 @@
     }
   }
 
+  let currentAttachedQuote = null;
+
   function formatSentenceWithActions(text) {
     if (!text || !text.trim()) return '';
     const cleanText = text.trim();
@@ -3007,7 +3020,7 @@
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
         </button>
-        <button type="button" class="sentence-quote-btn" data-snippet="${escapeHtml(cleanText)}" title="引用并向 AI 提问 (Attach to AI Chat)">
+        <button type="button" class="sentence-quote-btn" data-snippet="${escapeHtml(cleanText)}" title="引用至 AI 对话框 (Attach to AI Chat)">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M7 17L17 7M17 7H7M17 7V17"/>
           </svg>
@@ -3057,19 +3070,28 @@
   function quoteSentenceToAi(text) {
     if (!text || !text.trim()) return;
     const cleanText = text.trim();
+    currentAttachedQuote = cleanText;
 
     const researchBody = document.querySelector('.research-sheet-body');
     const aiSection = document.getElementById('res-section-ai');
     const aiInput = document.getElementById('res-ai-input');
     const navTabsContainer = document.getElementById('res-nav-tabs');
+    const attachmentBar = document.getElementById('res-ai-attachment-bar');
+    const attachmentText = document.getElementById('res-ai-attachment-text');
 
-    // 1. Scroll smoothly to AI section
+    // 1. Show attachment bar with quoted text snippet
+    if (attachmentBar && attachmentText) {
+      attachmentText.textContent = cleanText;
+      attachmentBar.classList.remove('hidden');
+    }
+
+    // 2. Scroll smoothly to AI section
     if (aiSection && researchBody) {
       const targetY = aiSection.offsetTop - researchBody.offsetTop - 55;
       smoothScrollContainer(researchBody, Math.max(0, targetY), 850);
     }
 
-    // 2. Set active tab
+    // 3. Set active tab
     if (navTabsContainer) {
       navTabsContainer.querySelectorAll('.res-nav-tab').forEach(b => {
         if (b.getAttribute('data-target') === 'res-section-ai') b.classList.add('active');
@@ -3077,14 +3099,13 @@
       });
     }
 
-    // 3. Populate AI input with quote and focus
+    // 4. Update placeholder and focus input without filling raw text into textbox
     if (aiInput) {
-      aiInput.value = `[引用研报]: "${cleanText}"\n请分析: `;
+      aiInput.placeholder = '针对引用的段落向 AI 提问...';
       aiInput.focus();
-      aiInput.selectionStart = aiInput.selectionEnd = aiInput.value.length;
     }
 
-    showAlert('已引用该段落至 AI 提问框', 'success');
+    showAlert('已将该长句作为引用附件添加至对话框', 'success');
   }
 
   function commitReorderedResearchTabs() {
@@ -3406,13 +3427,25 @@
   async function sendResearchAiMessage(promptText) {
     if (!promptText || !promptText.trim()) return;
     const text = promptText.trim();
-    const aiHistoryEl = document.getElementById('res-ai-chat-history');
-    if (!aiHistoryEl) return;
+    const attached = currentAttachedQuote;
+    // Reset attachment
+    currentAttachedQuote = null;
+    const attachmentBar = document.getElementById('res-ai-attachment-bar');
+    if (attachmentBar) attachmentBar.classList.add('hidden');
+    const aiInput = document.getElementById('res-ai-input');
+    if (aiInput) aiInput.placeholder = '向 AI 提问该公司的财报、护城河或估值...';
 
     // Append user message
     const userMsg = document.createElement('div');
     userMsg.className = 'ai-msg ai-msg-user';
-    userMsg.textContent = text;
+    if (attached) {
+      userMsg.innerHTML = `
+        <div class="ai-msg-quote-badge">↳ 引用: "${escapeHtml(attached)}"</div>
+        <div>${escapeHtml(text)}</div>
+      `;
+    } else {
+      userMsg.textContent = text;
+    }
     aiHistoryEl.appendChild(userMsg);
 
     // Append loading bot message
@@ -3422,7 +3455,8 @@
     aiHistoryEl.appendChild(botMsg);
     aiHistoryEl.scrollTop = aiHistoryEl.scrollHeight;
 
-    currentAiHistory.push({ role: 'user', text: text });
+    const apiMessage = attached ? `[引用研报要点: "${attached}"]\n用户问题: ${text}` : text;
+    currentAiHistory.push({ role: 'user', text: apiMessage });
 
     try {
       const apiKey = localStorage.getItem('geminiApiKey') || '';
@@ -3430,7 +3464,7 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text,
+          message: apiMessage,
           symbol: currentResearchStock?.symbol || '',
           stockContext: currentResearchStock,
           history: currentAiHistory.slice(0, -1),
