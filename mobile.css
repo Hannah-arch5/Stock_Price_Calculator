@@ -579,6 +579,53 @@ html, body {
   flex-shrink: 0;
 }
 
+/* ─── Top Dynamic Island Tap Sensor & Floating Back-To-Top Button ─── */
+.top-scroll-sensor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(env(safe-area-inset-top, 44px) + 12px);
+  z-index: 6800;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scroll-to-top-btn {
+  position: fixed;
+  right: 20px;
+  bottom: calc(env(safe-area-inset-bottom, 20px) + 24px);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 6900;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  opacity: 0;
+  transform: translateY(14px) scale(0.9);
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scroll-to-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.scroll-to-top-btn:active {
+  background: #222222;
+  transform: translateY(0) scale(0.92);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
 /* ─── Alert Banner (Studio Noir Pure Dark) ────────────────── */
 .alert-banner {
   position: fixed;

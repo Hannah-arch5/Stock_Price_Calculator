@@ -985,6 +985,17 @@
         renderApp();
         return;
       }
+
+      // (i) Scroll To Top (Triggered by Floating Button OR Top Dynamic Island Sensor)
+      if (e.target.closest('#scroll-to-top-btn') || e.target.closest('#top-scroll-sensor')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const container = document.querySelector('.mobile-container');
+        if (container) {
+          smoothScrollContainer(container, 0, 950);
+        }
+        return;
+      }
     });
 
     // 2. Search input listener
@@ -1019,6 +1030,25 @@
 
     // 5. Alert Banner gestures
     setupAlertBannerGestures();
+
+    // 6. Floating Scroll-To-Top Button Visibility based on scroll position
+    const mainContainer = document.querySelector('.mobile-container');
+    const scrollBtn = document.getElementById('scroll-to-top-btn');
+    if (mainContainer && scrollBtn) {
+      mainContainer.addEventListener('scroll', function () {
+        if (mainContainer.scrollTop > 240) {
+          scrollBtn.classList.remove('hidden');
+          requestAnimationFrame(() => scrollBtn.classList.add('visible'));
+        } else {
+          scrollBtn.classList.remove('visible');
+          setTimeout(() => {
+            if (!scrollBtn.classList.contains('visible')) {
+              scrollBtn.classList.add('hidden');
+            }
+          }, 350);
+        }
+      }, { passive: true });
+    }
   }
 
   // Init
