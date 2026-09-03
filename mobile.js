@@ -382,7 +382,7 @@
         const sharesHtml = r.shares ? `<div class="record-shares mono">${escapeHtml(r.shares)} 股</div>` : '';
 
         return `
-          <div class="record-row ${highlightedClass}">
+          <div class="record-row ${highlightedClass}" data-symbol="${escapeHtml(group.symbol)}" data-record-idx="${rIdx}">
             <div class="record-left">
               <div class="record-type-badge">${escapeHtml(r.type || 'Projection')}</div>
               <div class="record-formula mono">${escapeHtml(formulaStr)}</div>
@@ -438,7 +438,7 @@
             ${tfTags.length > 0 ? `<div class="timeframe-tags">${tfTags.join('')}</div>` : ''}
           </header>
 
-          <div class="records-ledger">
+          <div class="records-ledger" data-symbol="${escapeHtml(group.symbol)}">
             ${recordsHtml || '<div class="record-row"><span class="record-formula">No active targets</span></div>'}
           </div>
 
@@ -447,8 +447,215 @@
       `;
     }).join('');
 
+    // Setup record double-tap highlight & hold-to-drag reorder
+    setupRecordRowsInteractions();
+
     // Check alerts
     checkTargetAlerts();
+  }
+
+  function toggleRecordHighlight(symbol, recordIdx) {
+    if (!symbol || isNaN(recordIdx)) return;
+    const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+    if (!group || !group.records || !group.records[recordIdx]) return;
+
+    group.records[recordIdx].highlighted = !group.records[recordIdx].highlighted;
+    saveToCache(appState);
+    renderApp();
+    pushDataToServer(appState);
+  }
+
+  function setupRecordRowsInteractions() {
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    document.querySelectorAll('.records-ledger').forEach(ledger => {
+      const symbol = ledger.getAttribute('data-symbol');
+      if (!symbol || ledger.dataset.dragInitialized) return;
+      ledger.dataset.dragInitialized = 'true';
+
+      let draggingRow = null;
+      let isDragging = false;
+      let hasMoved = false;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let dragHoldTimer = null;
+      let lastTapTime = 0;
+      let lastTapRow = null;
+
+      function getDragAfterRecord(container, y) {
+        const draggableElements = [...container.querySelectorAll('.record-row:not(.is-dragging)')];
+        for (const child of draggableElements) {
+          const box = child.getBoundingClientRect();
+          if (y < box.top + box.height / 2) {
+            return child;
+          }
+        }
+        return null;
+      }
+
+      function commitReorderedRecords() {
+        const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+        if (!group || !group.records) return;
+
+        const currentRows = [...ledger.querySelectorAll('.record-row')];
+        const newRecords = [];
+        currentRows.forEach(row => {
+          const origIdx = parseInt(row.getAttribute('data-record-idx'), 10);
+          if (!isNaN(origIdx) && group.records[origIdx]) {
+            newRecords.push(group.records[origIdx]);
+          }
+        });
+
+        if (newRecords.length === group.records.length) {
+          group.records = newRecords;
+          saveToCache(appState);
+          renderApp();
+          pushDataToServer(appState);
+        }
+      }
+
+      // Touch events (Single-tap hold to drag, Double-tap to highlight)
+      ledger.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.calc-edit-trigger') || e.target.closest('.edit-pencil-btn')) return;
+        const row = e.target.closest('.record-row');
+        if (!row) return;
+
+        const touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        draggingRow = row;
+        isDragging = false;
+        hasMoved = false;
+
+        // 350ms deliberate hold to activate drag
+        dragHoldTimer = setTimeout(() => {
+          if (draggingRow) {
+            isDragging = true;
+            draggingRow.classList.add('is-dragging');
+            if (navigator.vibrate) {
+              try { navigator.vibrate(30); } catch (_) {}
+            }
+          }
+        }, 350);
+      }, { passive: true });
+
+      ledger.addEventListener('touchmove', (e) => {
+        if (!draggingRow) return;
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - touchStartX);
+        const deltaY = Math.abs(touch.clientY - touchStartY);
+
+        // Cancel hold if finger moved before 350ms hold (allows normal vertical page scroll)
+        if (!isDragging) {
+          if (deltaX > 6 || deltaY > 6) {
+            if (dragHoldTimer) {
+              clearTimeout(dragHoldTimer);
+              dragHoldTimer = null;
+            }
+            draggingRow = null;
+            return;
+          }
+        } else {
+          // In drag mode
+          if (e.cancelable) e.preventDefault();
+          hasMoved = true;
+          const afterElement = getDragAfterRecord(ledger, touch.clientY);
+          if (afterElement == null) {
+            ledger.appendChild(draggingRow);
+          } else {
+            ledger.insertBefore(draggingRow, afterElement);
+          }
+        }
+      }, { passive: false });
+
+      ledger.addEventListener('touchend', (e) => {
+        if (dragHoldTimer) {
+          clearTimeout(dragHoldTimer);
+          dragHoldTimer = null;
+        }
+
+        if (isDragging && draggingRow) {
+          draggingRow.classList.remove('is-dragging');
+          draggingRow = null;
+          isDragging = false;
+          if (hasMoved) {
+            commitReorderedRecords();
+          }
+        } else if (draggingRow) {
+          // Check for Double-Tap on Mobile
+          const row = draggingRow;
+          draggingRow = null;
+          isDragging = false;
+
+          const now = Date.now();
+          if (now - lastTapTime < 320 && lastTapRow === row) {
+            // Double tap triggered!
+            lastTapTime = 0;
+            lastTapRow = null;
+            const rIdx = parseInt(row.getAttribute('data-record-idx'), 10);
+            toggleRecordHighlight(symbol, rIdx);
+          } else {
+            lastTapTime = now;
+            lastTapRow = row;
+          }
+        }
+      });
+
+      ledger.addEventListener('touchcancel', () => {
+        if (dragHoldTimer) {
+          clearTimeout(dragHoldTimer);
+          dragHoldTimer = null;
+        }
+        if (draggingRow) draggingRow.classList.remove('is-dragging');
+        draggingRow = null;
+        isDragging = false;
+      });
+
+      // Desktop Double-Click Support
+      ledger.addEventListener('dblclick', (e) => {
+        if (e.target.closest('.calc-edit-trigger') || e.target.closest('.edit-pencil-btn')) return;
+        const row = e.target.closest('.record-row');
+        if (!row) return;
+        const rIdx = parseInt(row.getAttribute('data-record-idx'), 10);
+        toggleRecordHighlight(symbol, rIdx);
+      });
+
+      // Desktop Drag & Drop
+      if (!isTouch) {
+        ledger.querySelectorAll('.record-row').forEach(row => {
+          row.setAttribute('draggable', 'true');
+        });
+
+        ledger.addEventListener('dragstart', (e) => {
+          if (e.target.closest('.calc-edit-trigger') || e.target.closest('.edit-pencil-btn')) {
+            e.preventDefault();
+            return;
+          }
+          const row = e.target.closest('.record-row');
+          if (!row) return;
+          row.classList.add('is-dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        ledger.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          const dragging = ledger.querySelector('.is-dragging');
+          if (!dragging) return;
+          const afterElement = getDragAfterRecord(ledger, e.clientY);
+          if (afterElement == null) {
+            ledger.appendChild(dragging);
+          } else {
+            ledger.insertBefore(dragging, afterElement);
+          }
+        });
+
+        ledger.addEventListener('dragend', (e) => {
+          const row = e.target.closest('.record-row');
+          if (row) row.classList.remove('is-dragging');
+          commitReorderedRecords();
+        });
+      }
+    });
   }
 
   // ─── 1. Stock Metadata Edit Sheet ────────────────────────────
