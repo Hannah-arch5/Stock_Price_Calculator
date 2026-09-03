@@ -490,9 +490,7 @@
             <div class="sheet-field-group">
                 <label class="sheet-label">TYPE LABEL</label>
                 <input id="calc-edit-type" type="text" class="sheet-input mono" placeholder="Select tag or type custom label" />
-                <div id="calc-chips-container" class="chips-scroll-row">
-                    <!-- Dynamic custom labels from appState -->
-                </div>
+                <div id="calc-chips-container" class="calc-label-chips-row"></div>
             </div>
 
             <div class="sheet-row-dual">
@@ -526,15 +524,6 @@
                     <label class="sheet-label" style="margin: 0;">HIGHLIGHT</label>
                     <input id="calc-edit-highlight" type="checkbox" class="noir-checkbox" />
                 </div>
-            </div>
-
-            <div class="sheet-field-group" style="margin-top: 8px;">
-                <button id="calc-load-into-calc-btn" type="button" class="sheet-action-secondary-btn" style="width: 100%;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 17L17 7M17 7H7M17 7V17"/>
-                    </svg>
-                    <span>导回上方计算器 (LOAD INTO CALCULATOR)</span>
-                </button>
             </div>
         </div>
         <div class="sheet-footer">

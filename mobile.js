@@ -888,16 +888,8 @@
     if (subtitle) subtitle.textContent = `${group.symbol} ${group.name || ''}`.trim();
     if (typeInput) typeInput.value = rec.type || '';
 
-    // Render Label Chips
-    if (chipsContainer) {
-      const labels = appState.customLabels && appState.customLabels.length > 0
-        ? appState.customLabels
-        : ["D买点1", "D卖点1", "W买点1", "W卖点1", "30买点1", "30卖点1", "目前30已涨", "目前D已涨"];
-
-      chipsContainer.innerHTML = labels.map(lbl => `
-        <button class="label-chip ${lbl === rec.type ? 'selected' : ''}" type="button">${escapeHtml(lbl)}</button>
-      `).join('');
-    }
+    // Render Label Chips matching homepage format
+    renderPart1Chips();
 
     // Populate numbers & inputs
     let baseVal = '';
@@ -1412,16 +1404,43 @@
         return;
       }
 
-      // (c) Label Chip Click inside Calc Sheet
-      const labelChip = e.target.closest('.label-chip');
-      if (labelChip) {
-        e.preventDefault();
-        e.stopPropagation();
-        const typeInput = document.getElementById('calc-edit-type');
-        if (typeInput) typeInput.value = labelChip.textContent.trim();
-        document.querySelectorAll('.label-chip').forEach(c => c.classList.remove('selected'));
-        labelChip.classList.add('selected');
-        return;
+      // (c) Label Chip Click inside Calc Sheet / Chips Row
+      const editChipsContainer = e.target.closest('#calc-chips-container');
+      if (editChipsContainer) {
+        const addBtn = e.target.closest('.calc-chip-add');
+        if (addBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleAddChip();
+          return;
+        }
+        const editBtn = e.target.closest('.calc-chips-pencil-btn');
+        if (editBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleToggleEditChips();
+          return;
+        }
+        const chip = e.target.closest('.calc-chip');
+        if (chip) {
+          e.preventDefault();
+          e.stopPropagation();
+          const idx = parseInt(chip.getAttribute('data-index'), 10);
+          if (isChipsEditMode) {
+            if (confirm(`Delete label "${appState.customLabels[idx]}"?`)) {
+              appState.customLabels.splice(idx, 1);
+              saveToCache(appState);
+              renderPart1Chips();
+              pushDataToServer(appState);
+            }
+          } else {
+            const typeInput = document.getElementById('calc-edit-type');
+            if (typeInput) typeInput.value = chip.textContent.trim();
+            editChipsContainer.querySelectorAll('.calc-chip').forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+          }
+          return;
+        }
       }
 
       // (c2) Urgency 3-Color Dot Toggle (Green / Orange / Red)
@@ -1564,20 +1583,6 @@
     if (calcSaveBtn) calcSaveBtn.onclick = saveCalcEditSheet;
     if (calcDeleteBtn) calcDeleteBtn.onclick = deleteCalcFromSheet;
 
-    const calcLoadIntoCalcBtn = document.getElementById('calc-load-into-calc-btn');
-    if (calcLoadIntoCalcBtn) {
-      calcLoadIntoCalcBtn.onclick = () => {
-        const { symbol, recordIdx } = currentEditingCalcContext;
-        if (symbol && recordIdx !== null) {
-          const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
-          if (group && group.records && group.records[recordIdx]) {
-            closeCalcEditSheet();
-            populateMobileCalculator(group.records[recordIdx], symbol);
-          }
-        }
-      };
-    }
-
     // 5. Alert Banner gestures
     setupAlertBannerGestures();
 
@@ -1617,6 +1622,7 @@
 
     const targetChipsEl = document.getElementById('m-target-chips-container');
     const deltaChipsEl = document.getElementById('m-delta-chips-container');
+    const editSheetChipsEl = document.getElementById('calc-chips-container');
 
     const chipsHtml = customLabels.map((l, idx) => `
       <button type="button" class="calc-chip" data-index="${idx}">${escapeHtml(l)}</button>
@@ -1632,6 +1638,18 @@
     if (deltaChipsEl) {
       deltaChipsEl.innerHTML = chipsHtml;
       deltaChipsEl.classList.toggle('chips-edit-mode', isChipsEditMode);
+    }
+    if (editSheetChipsEl) {
+      const typeInput = document.getElementById('calc-edit-type');
+      const currentType = typeInput ? typeInput.value.trim() : '';
+      const editChipsHtml = customLabels.map((l, idx) => `
+        <button type="button" class="calc-chip ${l === currentType ? 'selected' : ''}" data-index="${idx}">${escapeHtml(l)}</button>
+      `).join('') + `
+        <button type="button" class="calc-chip calc-chip-add" title="Add New Label">+</button>
+        <button type="button" class="calc-chips-pencil-btn edit-pencil-btn ${isChipsEditMode ? 'active' : ''}" title="Edit Labels">✎</button>
+      `;
+      editSheetChipsEl.innerHTML = editChipsHtml;
+      editSheetChipsEl.classList.toggle('chips-edit-mode', isChipsEditMode);
     }
   }
 
