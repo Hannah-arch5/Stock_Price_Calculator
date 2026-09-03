@@ -162,7 +162,7 @@ html, body {
 .calc-sub-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
 }
 .calc-sub-panel.hidden {
   display: none !important;
@@ -172,7 +172,7 @@ html, body {
 .calc-grid-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .calc-input-wrap {
@@ -218,19 +218,20 @@ html, body {
 
 .calc-input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 10px;
   color: var(--fg);
+  font-family: inherit;
   font-size: 0.85rem;
+  padding: 7px 10px;
+  border-radius: 6px;
   outline: none;
   transition: border-color 0.2s, background 0.2s;
-  box-sizing: border-box;
+  -webkit-appearance: none;
 }
 .calc-input:focus {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .calc-cur-input-box {
@@ -243,6 +244,7 @@ html, body {
   left: 10px;
   color: var(--fg-dim);
   font-size: 0.85rem;
+  font-family: var(--font-mono);
   pointer-events: none;
 }
 .calc-cur-input-box .calc-input {
@@ -252,19 +254,20 @@ html, body {
 .calc-perc-wrap {
   display: flex;
   gap: 6px;
-  align-items: center;
 }
 
 .calc-dir-btn {
+  width: 68px;
+  padding: 0;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border);
   border-radius: 6px;
-  color: var(--fg);
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 8px 8px;
+  font-family: inherit;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--fg-dim);
   cursor: pointer;
-  flex-shrink: 0;
   transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -301,7 +304,7 @@ html, body {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  margin-top: 2px;
+  margin-top: -2px;
 }
 
 .calc-chip {
@@ -325,8 +328,9 @@ html, body {
 .calc-pre-action-row {
   display: flex;
   justify-content: flex-end;
-  margin-top: 4px;
-  margin-bottom: 2px;
+  align-items: center;
+  margin-top: -3px;
+  margin-bottom: -3px;
 }
 
 /* Result & Actions Footer (Clean 2-Column Baseline Aligned) */
