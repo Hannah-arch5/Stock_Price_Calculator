@@ -134,42 +134,6 @@
     }
   }
 
-  // FLIP Spring Fluid Reordering Engine ("QQ弹弹" 丝滑物理弹簧动画)
-  function animateFLIP(container, draggingEl, afterElement) {
-    if (!container || !draggingEl) return;
-    const currentNext = draggingEl.nextElementSibling;
-    if (currentNext === afterElement) return;
-
-    const children = [...container.children];
-    const firstPositions = new Map();
-    children.forEach(child => {
-      firstPositions.set(child, child.getBoundingClientRect());
-    });
-
-    if (afterElement == null) {
-      container.appendChild(draggingEl);
-    } else {
-      container.insertBefore(draggingEl, afterElement);
-    }
-
-    children.forEach(child => {
-      if (child === draggingEl) return;
-      const first = firstPositions.get(child);
-      if (!first) return;
-      const last = child.getBoundingClientRect();
-      const deltaX = first.left - last.left;
-      const deltaY = first.top - last.top;
-
-      if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
-        child.style.transition = 'none';
-        child.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-        void child.offsetWidth; // Force reflow
-        child.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.45, 0.64, 1)';
-        child.style.transform = '';
-      }
-    });
-  }
-
   function setupQuickTagsDragAndDrop() {
     const container = document.getElementById('mobile-quick-tags');
     if (!container || container.dataset.dragInitialized) return;
@@ -183,14 +147,14 @@
     let dragHoldTimer = null;
 
     function getDragAfterTag(cont, x, y) {
-      const draggableElements = [...cont.querySelectorAll('.quick-tag:not(.is-dragging)')];
+      const draggableElements = [...cont.querySelectorAll('.quick-tag:not(.dragging-tag)')];
       for (const child of draggableElements) {
         const box = child.getBoundingClientRect();
-        if (y >= box.top - 12 && y <= box.bottom + 12) {
+        if (y >= box.top && y <= box.bottom) {
           if (x < box.left + box.width / 2) {
             return child;
           }
-        } else if (y < box.top - 12) {
+        } else if (y < box.top) {
           return child;
         }
       }
@@ -223,7 +187,7 @@
       pushDataToServer(appState);
     }
 
-    // Touch Drag Support for iOS / Mobile (Responsive Spring Drag)
+    // Touch Support for Mobile (Desktop-Identical Dragging)
     container.addEventListener('touchstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
@@ -235,27 +199,27 @@
       isDragging = false;
       hasMoved = false;
 
-      // 240ms responsive hold before drag mode is activated
+      // 200ms hold to activate dragging
       dragHoldTimer = setTimeout(() => {
         if (draggingTag) {
           isDragging = true;
-          draggingTag.classList.add('is-dragging');
+          draggingTag.classList.add('dragging-tag');
           if (navigator.vibrate) {
-            try { navigator.vibrate(30); } catch (_) {}
+            try { navigator.vibrate(20); } catch (_) {}
           }
         }
-      }, 240);
+      }, 200);
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
       if (!draggingTag) return;
       const touch = e.touches[0];
-      const deltaX = touch.clientX - touchStartX;
-      const deltaY = touch.clientY - touchStartY;
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      const deltaY = Math.abs(touch.clientY - touchStartY);
 
       // If user moves finger BEFORE long-press completes, cancel drag timer immediately to allow natural vertical scrolling
       if (!isDragging) {
-        if (Math.abs(deltaX) > 7 || Math.abs(deltaY) > 7) {
+        if (deltaX > 7 || deltaY > 7) {
           if (dragHoldTimer) {
             clearTimeout(dragHoldTimer);
             dragHoldTimer = null;
@@ -264,14 +228,15 @@
           return;
         }
       } else {
-        // Direct 1:1 finger follow + smooth spring FLIP layout swap
+        // Exactly identical to desktop dragover DOM positioning
         if (e.cancelable) e.preventDefault();
         hasMoved = true;
-        draggingTag.style.transition = 'none';
-        draggingTag.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(1.1)`;
-
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
-        animateFLIP(container, draggingTag, afterElement);
+        if (afterElement == null) {
+          container.appendChild(draggingTag);
+        } else {
+          container.insertBefore(draggingTag, afterElement);
+        }
       }
     }, { passive: false });
 
@@ -281,25 +246,14 @@
         dragHoldTimer = null;
       }
       if (isDragging && draggingTag) {
-        const tag = draggingTag;
+        draggingTag.classList.remove('dragging-tag');
         draggingTag = null;
         isDragging = false;
-
-        tag.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.45, 0.64, 1)';
-        tag.style.transform = '';
-
-        setTimeout(() => {
-          tag.classList.remove('is-dragging');
-          tag.style.transition = '';
-          if (hasMoved) {
-            commitReorderedTags();
-          }
-        }, 180);
-      } else {
-        if (draggingTag) {
-          draggingTag.style.transform = '';
-          draggingTag.classList.remove('is-dragging');
+        if (hasMoved) {
+          commitReorderedTags();
         }
+      } else {
+        if (draggingTag) draggingTag.classList.remove('dragging-tag');
         draggingTag = null;
         isDragging = false;
       }
@@ -310,10 +264,7 @@
         clearTimeout(dragHoldTimer);
         dragHoldTimer = null;
       }
-      if (draggingTag) {
-        draggingTag.style.transform = '';
-        draggingTag.classList.remove('is-dragging');
-      }
+      if (draggingTag) draggingTag.classList.remove('dragging-tag');
       draggingTag = null;
       isDragging = false;
     });
@@ -322,22 +273,26 @@
     container.addEventListener('dragstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
-      tag.classList.add('is-dragging');
+      tag.classList.add('dragging-tag');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', tag.getAttribute('data-symbol'));
     });
 
     container.addEventListener('dragover', (e) => {
       e.preventDefault();
-      const dragging = container.querySelector('.is-dragging');
+      const dragging = container.querySelector('.dragging-tag');
       if (!dragging) return;
       const afterElement = getDragAfterTag(container, e.clientX, e.clientY);
-      animateFLIP(container, dragging, afterElement);
+      if (afterElement == null) {
+        container.appendChild(dragging);
+      } else {
+        container.insertBefore(dragging, afterElement);
+      }
     });
 
     container.addEventListener('dragend', (e) => {
       const tag = e.target.closest('.quick-tag');
-      if (tag) tag.classList.remove('is-dragging');
+      if (tag) tag.classList.remove('dragging-tag');
       commitReorderedTags();
     });
   }
@@ -527,15 +482,17 @@
       let lastTapTime = 0;
       let lastTapRow = null;
 
-      function getDragAfterRecord(container, y) {
-        const draggableElements = [...container.querySelectorAll('.record-row:not(.is-dragging)')];
-        for (const child of draggableElements) {
+      function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.record-row:not(.dragging)')];
+        return draggableElements.reduce((closest, child) => {
           const box = child.getBoundingClientRect();
-          if (y < box.top + box.height / 2) {
-            return child;
+          const offset = y - box.top - box.height / 2;
+          if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+          } else {
+            return closest;
           }
-        }
-        return null;
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
       }
 
       function commitReorderedRecords() {
@@ -572,27 +529,27 @@
         isDragging = false;
         hasMoved = false;
 
-        // 240ms responsive hold to activate drag
+        // 200ms hold to activate drag
         dragHoldTimer = setTimeout(() => {
           if (draggingRow) {
             isDragging = true;
-            draggingRow.classList.add('is-dragging');
+            draggingRow.classList.add('dragging');
             if (navigator.vibrate) {
-              try { navigator.vibrate(30); } catch (_) {}
+              try { navigator.vibrate(20); } catch (_) {}
             }
           }
-        }, 240);
+        }, 200);
       }, { passive: true });
 
       ledger.addEventListener('touchmove', (e) => {
         if (!draggingRow) return;
         const touch = e.touches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = touch.clientY - touchStartY;
+        const deltaX = Math.abs(touch.clientX - touchStartX);
+        const deltaY = Math.abs(touch.clientY - touchStartY);
 
-        // Cancel hold if finger moved before 240ms hold (allows normal vertical page scroll)
+        // Cancel hold if finger moved before 200ms hold (allows normal vertical page scroll)
         if (!isDragging) {
-          if (Math.abs(deltaX) > 7 || Math.abs(deltaY) > 7) {
+          if (deltaX > 7 || deltaY > 7) {
             if (dragHoldTimer) {
               clearTimeout(dragHoldTimer);
               dragHoldTimer = null;
@@ -601,14 +558,15 @@
             return;
           }
         } else {
-          // Direct 1:1 finger follow + smooth spring FLIP layout swap
+          // Exactly identical to desktop dragover DOM positioning
           if (e.cancelable) e.preventDefault();
           hasMoved = true;
-          draggingRow.style.transition = 'none';
-          draggingRow.style.transform = `translate3d(0, ${deltaY}px, 0) scale(1.03)`;
-
-          const afterElement = getDragAfterRecord(ledger, touch.clientY);
-          animateFLIP(ledger, draggingRow, afterElement);
+          const afterElement = getDragAfterElement(ledger, touch.clientY);
+          if (afterElement == null) {
+            ledger.appendChild(draggingRow);
+          } else {
+            ledger.insertBefore(draggingRow, afterElement);
+          }
         }
       }, { passive: false });
 
@@ -619,20 +577,12 @@
         }
 
         if (isDragging && draggingRow) {
-          const row = draggingRow;
+          draggingRow.classList.remove('dragging');
           draggingRow = null;
           isDragging = false;
-
-          row.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.45, 0.64, 1)';
-          row.style.transform = '';
-
-          setTimeout(() => {
-            row.classList.remove('is-dragging');
-            row.style.transition = '';
-            if (hasMoved) {
-              commitReorderedRecords();
-            }
-          }, 180);
+          if (hasMoved) {
+            commitReorderedRecords();
+          }
         } else if (draggingRow) {
           // Check for Double-Tap on Mobile
           const row = draggingRow;
@@ -658,10 +608,7 @@
           clearTimeout(dragHoldTimer);
           dragHoldTimer = null;
         }
-        if (draggingRow) {
-          draggingRow.style.transform = '';
-          draggingRow.classList.remove('is-dragging');
-        }
+        if (draggingRow) draggingRow.classList.remove('dragging');
         draggingRow = null;
         isDragging = false;
       });
@@ -675,7 +622,7 @@
         toggleRecordHighlight(symbol, rIdx);
       });
 
-      // Desktop Drag & Drop
+      // Desktop Drag & Drop (Direct 100% match)
       if (!isTouch) {
         ledger.querySelectorAll('.record-row').forEach(row => {
           row.setAttribute('draggable', 'true');
@@ -688,21 +635,25 @@
           }
           const row = e.target.closest('.record-row');
           if (!row) return;
-          row.classList.add('is-dragging');
+          row.classList.add('dragging');
           e.dataTransfer.effectAllowed = 'move';
         });
 
         ledger.addEventListener('dragover', (e) => {
           e.preventDefault();
-          const dragging = ledger.querySelector('.is-dragging');
+          const dragging = ledger.querySelector('.dragging');
           if (!dragging) return;
-          const afterElement = getDragAfterRecord(ledger, e.clientY);
-          animateFLIP(ledger, dragging, afterElement);
+          const afterElement = getDragAfterElement(ledger, e.clientY);
+          if (afterElement == null) {
+            ledger.appendChild(dragging);
+          } else {
+            ledger.insertBefore(dragging, afterElement);
+          }
         });
 
         ledger.addEventListener('dragend', (e) => {
           const row = e.target.closest('.record-row');
-          if (row) row.classList.remove('is-dragging');
+          if (row) row.classList.remove('dragging');
           commitReorderedRecords();
         });
       }
