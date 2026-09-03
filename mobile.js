@@ -2072,11 +2072,20 @@
           smoothScrollContainer(container, Math.max(0, container.scrollTop + (cardRect.top - containerRect.top) - 110), 1150);
           card.classList.remove('card-highlight-flash');
           void card.offsetWidth;
-          card.classList.add('card-highlight-flash');
-          setTimeout(() => card.classList.remove('card-highlight-flash'), 3300);
         }
       };
     }
+
+    // Clear Delta
+    if (deltaClearBtn) {
+      deltaClearBtn.onclick = () => {
+        if (deltaInitialInput) deltaInitialInput.value = '';
+        if (deltaFinalInput) deltaFinalInput.value = '';
+        if (deltaTypeInput) deltaTypeInput.value = '';
+        if (deltaResEl) deltaResEl.textContent = '0.00%';
+      };
+    }
+  }
 
   // ==========================================================================
   // Part 3: Global Stock Deep Research, Apple Calendar & AI Companion Module
