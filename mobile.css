@@ -336,13 +336,19 @@ html, body {
 .calc-res-box {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-end;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
+.calc-res-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .calc-res-label {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--fg-dim);
