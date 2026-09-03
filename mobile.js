@@ -75,14 +75,14 @@
     let records = appState.historyRecords || [];
 
     // Update global header stats
-    totalSymbolsEl.textContent = records.length;
+    if (totalSymbolsEl) totalSymbolsEl.textContent = records.length;
     let totalCalcs = 0;
     records.forEach(g => {
       if (g.records) totalCalcs += g.records.length;
     });
-    totalTargetsEl.textContent = totalCalcs;
+    if (totalTargetsEl) totalTargetsEl.textContent = totalCalcs;
 
-    if (appState.lastUpdated) {
+    if (appState.lastUpdated && lastSyncEl) {
       const d = new Date(appState.lastUpdated);
       lastSyncEl.textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
     }
@@ -113,11 +113,11 @@
 
     if (filtered.length === 0) {
       container.innerHTML = '';
-      emptyState.classList.remove('hidden');
+      if (emptyState) emptyState.classList.remove('hidden');
       return;
     }
 
-    emptyState.classList.add('hidden');
+    if (emptyState) emptyState.classList.add('hidden');
 
     // Build HTML
     container.innerHTML = filtered.map((group, groupIdx) => {
@@ -200,46 +200,6 @@
       `;
     }).join('');
 
-    // Attach accordion toggles
-    document.querySelectorAll('.note-toggle').forEach(btn => {
-      btn.onclick = function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('data-target');
-        const content = document.getElementById(targetId);
-        if (content) {
-          const isOpen = content.classList.contains('visible');
-          if (isOpen) {
-            content.classList.remove('visible');
-            this.classList.remove('open');
-          } else {
-            content.classList.add('visible');
-            this.classList.add('open');
-          }
-        }
-      };
-    });
-
-    // Attach Stock Edit triggers
-    document.querySelectorAll('.stock-edit-trigger').forEach(btn => {
-      btn.onclick = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const symbol = this.getAttribute('data-symbol');
-        openStockEditSheet(symbol);
-      };
-    });
-
-    // Attach Calculation Edit triggers
-    document.querySelectorAll('.calc-edit-trigger').forEach(btn => {
-      btn.onclick = function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const symbol = this.getAttribute('data-symbol');
-        const recordIdx = parseInt(this.getAttribute('data-record'), 10);
-        openCalcEditSheet(symbol, recordIdx);
-      };
-    });
-
     // Check alerts
     checkTargetAlerts();
   }
@@ -257,22 +217,33 @@
     const backdrop = document.getElementById('edit-sheet-backdrop');
     const subtitle = document.getElementById('stock-sheet-subtitle');
 
-    subtitle.textContent = `${group.symbol} ${group.name || ''}`.trim();
-    document.getElementById('stock-edit-symbol').value = group.symbol || '';
-    document.getElementById('stock-edit-name').value = group.name || '';
-    document.getElementById('stock-edit-cost').value = group.cost || '';
-    document.getElementById('stock-edit-qty').value = group.qty || '';
-    document.getElementById('stock-edit-tf-w').value = group.tf_w || '';
-    document.getElementById('stock-edit-tf-d').value = group.tf_d || '';
-    document.getElementById('stock-edit-tf-30').value = group.tf_30 || '';
-    document.getElementById('stock-edit-note').value = group.note || '';
+    if (subtitle) subtitle.textContent = `${group.symbol} ${group.name || ''}`.trim();
+    const symEl = document.getElementById('stock-edit-symbol');
+    const nameEl = document.getElementById('stock-edit-name');
+    const costEl = document.getElementById('stock-edit-cost');
+    const qtyEl = document.getElementById('stock-edit-qty');
+    const tfWEl = document.getElementById('stock-edit-tf-w');
+    const tfDEl = document.getElementById('stock-edit-tf-d');
+    const tf30El = document.getElementById('stock-edit-tf-30');
+    const noteEl = document.getElementById('stock-edit-note');
 
-    backdrop.classList.remove('hidden');
-    sheet.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      backdrop.classList.add('visible');
-      sheet.classList.add('visible');
-    });
+    if (symEl) symEl.value = group.symbol || '';
+    if (nameEl) nameEl.value = group.name || '';
+    if (costEl) costEl.value = group.cost || '';
+    if (qtyEl) qtyEl.value = group.qty || '';
+    if (tfWEl) tfWEl.value = group.tf_w || '';
+    if (tfDEl) tfDEl.value = group.tf_d || '';
+    if (tf30El) tf30El.value = group.tf_30 || '';
+    if (noteEl) noteEl.value = group.note || '';
+
+    if (backdrop && sheet) {
+      backdrop.classList.remove('hidden');
+      sheet.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        backdrop.classList.add('visible');
+        sheet.classList.add('visible');
+      });
+    }
   }
 
   function closeStockEditSheet() {
@@ -293,14 +264,14 @@
     const group = (appState.historyRecords || []).find(g => g.symbol === currentEditingStockSymbol);
     if (!group) return;
 
-    const newSymbol = document.getElementById('stock-edit-symbol').value.trim().toUpperCase();
-    const newName = document.getElementById('stock-edit-name').value.trim();
-    const newCost = document.getElementById('stock-edit-cost').value.trim();
-    const newQty = document.getElementById('stock-edit-qty').value.trim();
-    const newTfW = document.getElementById('stock-edit-tf-w').value.trim();
-    const newTfD = document.getElementById('stock-edit-tf-d').value.trim();
-    const newTf30 = document.getElementById('stock-edit-tf-30').value.trim();
-    const newNote = document.getElementById('stock-edit-note').value.trim();
+    const newSymbol = (document.getElementById('stock-edit-symbol').value || '').trim().toUpperCase();
+    const newName = (document.getElementById('stock-edit-name').value || '').trim();
+    const newCost = (document.getElementById('stock-edit-cost').value || '').trim();
+    const newQty = (document.getElementById('stock-edit-qty').value || '').trim();
+    const newTfW = (document.getElementById('stock-edit-tf-w').value || '').trim();
+    const newTfD = (document.getElementById('stock-edit-tf-d').value || '').trim();
+    const newTf30 = (document.getElementById('stock-edit-tf-30').value || '').trim();
+    const newNote = (document.getElementById('stock-edit-note').value || '').trim();
     const saveBtn = document.getElementById('stock-save-btn');
 
     if (!newSymbol) {
@@ -308,8 +279,10 @@
       return;
     }
 
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'SAVING...';
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'SAVING...';
+    }
 
     // Update fields
     group.symbol = newSymbol;
@@ -329,12 +302,14 @@
     saveToCache(appState);
     await pushDataToServer(appState);
 
-    saveBtn.textContent = 'SAVED!';
-    setTimeout(() => {
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'SAVE & SYNC';
-      closeStockEditSheet();
-    }, 400);
+    if (saveBtn) {
+      saveBtn.textContent = 'SAVED!';
+      setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'SAVE & SYNC';
+        closeStockEditSheet();
+      }, 400);
+    }
   }
 
   async function deleteStockFromSheet() {
@@ -376,25 +351,19 @@
     const highlightCheck = document.getElementById('calc-edit-highlight');
     const chipsContainer = document.getElementById('calc-chips-container');
 
-    subtitle.textContent = `${group.symbol} #${recordIdx + 1} (${rec.type || 'Target'})`;
-    typeInput.value = rec.type || '';
+    if (subtitle) subtitle.textContent = `${group.symbol} #${recordIdx + 1} (${rec.type || 'Target'})`;
+    if (typeInput) typeInput.value = rec.type || '';
 
     // Render Label Chips
-    const labels = appState.customLabels && appState.customLabels.length > 0
-      ? appState.customLabels
-      : ["D买点1", "D卖点1", "W买点1", "W卖点1", "30买点1", "30卖点1", "目前30已涨", "目前D已涨"];
+    if (chipsContainer) {
+      const labels = appState.customLabels && appState.customLabels.length > 0
+        ? appState.customLabels
+        : ["D买点1", "D卖点1", "W买点1", "W卖点1", "30买点1", "30卖点1", "目前30已涨", "目前D已涨"];
 
-    chipsContainer.innerHTML = labels.map(lbl => `
-      <button class="label-chip ${lbl === rec.type ? 'selected' : ''}" type="button">${escapeHtml(lbl)}</button>
-    `).join('');
-
-    chipsContainer.querySelectorAll('.label-chip').forEach(chip => {
-      chip.onclick = function () {
-        typeInput.value = this.textContent;
-        chipsContainer.querySelectorAll('.label-chip').forEach(c => c.classList.remove('selected'));
-        this.classList.add('selected');
-      };
-    });
+      chipsContainer.innerHTML = labels.map(lbl => `
+        <button class="label-chip ${lbl === rec.type ? 'selected' : ''}" type="button">${escapeHtml(lbl)}</button>
+      `).join('');
+    }
 
     // Populate numbers & inputs
     let baseVal = '';
@@ -415,20 +384,24 @@
       if (match) targetVal = parseFloat(match[0]);
     }
 
-    baseInput.value = baseVal !== '' ? baseVal : '';
-    targetInput.value = targetVal !== '' ? targetVal : '';
-    percInput.value = percVal !== '' ? percVal : '';
-    dirBtn.setAttribute('data-dir', isUp ? 'up' : 'down');
-    dirBtn.textContent = isUp ? '▲ UP' : '▼ DOWN';
-    sharesInput.value = rec.shares || '';
-    highlightCheck.checked = !!rec.highlighted;
+    if (baseInput) baseInput.value = baseVal !== '' ? baseVal : '';
+    if (targetInput) targetInput.value = targetVal !== '' ? targetVal : '';
+    if (percInput) percInput.value = percVal !== '' ? percVal : '';
+    if (dirBtn) {
+      dirBtn.setAttribute('data-dir', isUp ? 'up' : 'down');
+      dirBtn.textContent = isUp ? '▲ UP' : '▼ DOWN';
+    }
+    if (sharesInput) sharesInput.value = rec.shares || '';
+    if (highlightCheck) highlightCheck.checked = !!rec.highlighted;
 
-    backdrop.classList.remove('hidden');
-    sheet.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      backdrop.classList.add('visible');
-      sheet.classList.add('visible');
-    });
+    if (backdrop && sheet) {
+      backdrop.classList.remove('hidden');
+      sheet.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        backdrop.classList.add('visible');
+        sheet.classList.add('visible');
+      });
+    }
   }
 
   function closeCalcEditSheet() {
@@ -451,6 +424,7 @@
     const dirBtn = document.getElementById('calc-edit-dir-btn');
 
     const calcFromBaseAndPerc = () => {
+      if (!baseInput || !percInput || !targetInput || !dirBtn) return;
       const base = parseFloat(baseInput.value);
       const perc = parseFloat(percInput.value);
       const isUp = dirBtn.getAttribute('data-dir') === 'up';
@@ -461,6 +435,7 @@
     };
 
     const calcFromBaseAndTarget = () => {
+      if (!baseInput || !targetInput || !percInput || !dirBtn) return;
       const base = parseFloat(baseInput.value);
       const target = parseFloat(targetInput.value);
       if (!isNaN(base) && !isNaN(target) && base > 0) {
@@ -477,20 +452,22 @@
       }
     };
 
-    baseInput.addEventListener('input', calcFromBaseAndPerc);
-    percInput.addEventListener('input', calcFromBaseAndPerc);
-    dirBtn.addEventListener('click', function () {
-      const current = this.getAttribute('data-dir');
-      if (current === 'up') {
-        this.setAttribute('data-dir', 'down');
-        this.textContent = '▼ DOWN';
-      } else {
-        this.setAttribute('data-dir', 'up');
-        this.textContent = '▲ UP';
-      }
-      calcFromBaseAndPerc();
-    });
-    targetInput.addEventListener('input', calcFromBaseAndTarget);
+    if (baseInput) baseInput.addEventListener('input', calcFromBaseAndPerc);
+    if (percInput) percInput.addEventListener('input', calcFromBaseAndPerc);
+    if (dirBtn) {
+      dirBtn.addEventListener('click', function () {
+        const current = this.getAttribute('data-dir');
+        if (current === 'up') {
+          this.setAttribute('data-dir', 'down');
+          this.textContent = '▼ DOWN';
+        } else {
+          this.setAttribute('data-dir', 'up');
+          this.textContent = '▲ UP';
+        }
+        calcFromBaseAndPerc();
+      });
+    }
+    if (targetInput) targetInput.addEventListener('input', calcFromBaseAndTarget);
   }
 
   async function saveCalcEditSheet() {
@@ -501,17 +478,19 @@
     if (!group || !group.records || !group.records[recordIdx]) return;
 
     const rec = group.records[recordIdx];
-    const typeVal = document.getElementById('calc-edit-type').value.trim() || 'Projection';
+    const typeVal = (document.getElementById('calc-edit-type').value || '').trim() || 'Projection';
     const baseVal = parseFloat(document.getElementById('calc-edit-base').value);
     const targetVal = parseFloat(document.getElementById('calc-edit-target').value);
     const percVal = parseFloat(document.getElementById('calc-edit-perc').value);
     const isUp = document.getElementById('calc-edit-dir-btn').getAttribute('data-dir') === 'up';
-    const sharesVal = document.getElementById('calc-edit-shares').value.trim();
+    const sharesVal = (document.getElementById('calc-edit-shares').value || '').trim();
     const isHighlighted = document.getElementById('calc-edit-highlight').checked;
     const saveBtn = document.getElementById('calc-save-btn');
 
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'SAVING...';
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'SAVING...';
+    }
 
     rec.type = typeVal;
     rec.isUp = isUp;
@@ -530,12 +509,14 @@
     saveToCache(appState);
     await pushDataToServer(appState);
 
-    saveBtn.textContent = 'SAVED!';
-    setTimeout(() => {
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'SAVE & SYNC';
-      closeCalcEditSheet();
-    }, 400);
+    if (saveBtn) {
+      saveBtn.textContent = 'SAVED!';
+      setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'SAVE & SYNC';
+        closeCalcEditSheet();
+      }, 400);
+    }
   }
 
   async function deleteCalcFromSheet() {
@@ -616,15 +597,12 @@
 
   function setupAlertBannerGestures() {
     const banner = document.getElementById('alert-banner');
-    const closeBtn = document.getElementById('alert-banner-close');
     if (!banner) return;
 
     const dismissBanner = () => {
       banner.classList.remove('visible');
       setTimeout(() => banner.classList.add('hidden'), 350);
     };
-
-    if (closeBtn) closeBtn.onclick = dismissBanner;
 
     // Swipe Up to dismiss
     let touchStartY = 0;
@@ -775,42 +753,119 @@
     }
   }
 
-  // Setup UI Listeners
+  // Setup UI Listeners with Robust Global Event Delegation
   function initListeners() {
-    // Market filter tabs
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-      tab.addEventListener('click', function () {
+    // 1. Top-Level Unified Click Delegation (works 100% on iOS PWA)
+    document.addEventListener('click', function (e) {
+      // (a) Stock Edit Trigger
+      const stockBtn = e.target.closest('.stock-edit-trigger');
+      if (stockBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const symbol = stockBtn.getAttribute('data-symbol');
+        if (symbol) openStockEditSheet(symbol);
+        return;
+      }
+
+      // (b) Calculation Target Edit Trigger
+      const calcBtn = e.target.closest('.calc-edit-trigger');
+      if (calcBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const symbol = calcBtn.getAttribute('data-symbol');
+        const recordIdxStr = calcBtn.getAttribute('data-record');
+        const recordIdx = recordIdxStr !== null ? parseInt(recordIdxStr, 10) : null;
+        if (symbol && recordIdx !== null && !isNaN(recordIdx)) {
+          openCalcEditSheet(symbol, recordIdx);
+        }
+        return;
+      }
+
+      // (c) Label Chip Click inside Calc Sheet
+      const labelChip = e.target.closest('.label-chip');
+      if (labelChip) {
+        e.preventDefault();
+        e.stopPropagation();
+        const typeInput = document.getElementById('calc-edit-type');
+        if (typeInput) typeInput.value = labelChip.textContent.trim();
+        document.querySelectorAll('.label-chip').forEach(c => c.classList.remove('selected'));
+        labelChip.classList.add('selected');
+        return;
+      }
+
+      // (d) Note Accordion Toggle
+      const noteBtn = e.target.closest('.note-toggle');
+      if (noteBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const targetId = noteBtn.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+        if (content) {
+          const isOpen = content.classList.contains('visible');
+          if (isOpen) {
+            content.classList.remove('visible');
+            noteBtn.classList.remove('open');
+          } else {
+            content.classList.add('visible');
+            noteBtn.classList.add('open');
+          }
+        }
+        return;
+      }
+
+      // (e) Market Filter Tab
+      const filterTab = e.target.closest('.filter-tab');
+      if (filterTab) {
+        e.preventDefault();
         document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-        currentMarketFilter = this.getAttribute('data-filter');
+        filterTab.classList.add('active');
+        currentMarketFilter = filterTab.getAttribute('data-filter') || 'all';
         renderApp();
-      });
+        return;
+      }
+
+      // (f) Alert Banner Close
+      const alertClose = e.target.closest('#alert-banner-close');
+      if (alertClose) {
+        e.preventDefault();
+        const banner = document.getElementById('alert-banner');
+        if (banner) {
+          banner.classList.remove('visible');
+          setTimeout(() => banner.classList.add('hidden'), 350);
+        }
+        return;
+      }
+
+      // (g) Backdrop click to close sheets
+      if (e.target.id === 'edit-sheet-backdrop') {
+        closeStockEditSheet();
+        closeCalcEditSheet();
+        return;
+      }
+
+      // (h) Clear search button
+      if (e.target.id === 'clear-search-btn') {
+        const searchInput = document.getElementById('mobile-search-input');
+        if (searchInput) searchInput.value = '';
+        searchQuery = '';
+        e.target.style.display = 'none';
+        renderApp();
+        return;
+      }
     });
 
-    // Search input
+    // 2. Search input listener
     const searchInput = document.getElementById('mobile-search-input');
     const clearBtn = document.getElementById('clear-search-btn');
-
     if (searchInput) {
       searchInput.addEventListener('input', function () {
         searchQuery = this.value;
-        if (clearBtn) {
-          clearBtn.style.display = searchQuery ? 'block' : 'none';
-        }
+        if (clearBtn) clearBtn.style.display = searchQuery ? 'block' : 'none';
         renderApp();
       });
     }
 
-    if (clearBtn && searchInput) {
-      clearBtn.addEventListener('click', function () {
-        searchInput.value = '';
-        searchQuery = '';
-        this.style.display = 'none';
-        renderApp();
-      });
-    }
-
-    // Stock Edit Sheet Buttons
+    // 3. Stock Edit Sheet Buttons
     const stockCancelBtn = document.getElementById('stock-cancel-btn');
     const stockSaveBtn = document.getElementById('stock-save-btn');
     const stockDeleteBtn = document.getElementById('stock-delete-btn');
@@ -819,7 +874,7 @@
     if (stockSaveBtn) stockSaveBtn.onclick = saveStockEditSheet;
     if (stockDeleteBtn) stockDeleteBtn.onclick = deleteStockFromSheet;
 
-    // Calculation Edit Sheet Buttons & Bindings
+    // 4. Calculation Edit Sheet Buttons & Bindings
     setupCalcInputBindings();
     const calcCancelBtn = document.getElementById('calc-cancel-btn');
     const calcSaveBtn = document.getElementById('calc-save-btn');
@@ -829,16 +884,7 @@
     if (calcSaveBtn) calcSaveBtn.onclick = saveCalcEditSheet;
     if (calcDeleteBtn) calcDeleteBtn.onclick = deleteCalcFromSheet;
 
-    // Backdrop click
-    const backdrop = document.getElementById('edit-sheet-backdrop');
-    if (backdrop) {
-      backdrop.onclick = function () {
-        closeStockEditSheet();
-        closeCalcEditSheet();
-      };
-    }
-
-    // Alert Banner gestures
+    // 5. Alert Banner gestures
     setupAlertBannerGestures();
   }
 
