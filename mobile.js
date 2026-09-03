@@ -3261,13 +3261,13 @@
       if (bizEl && data.businessIndustry) {
         const bi = data.businessIndustry;
         let html = '';
-        if (bi.coreHeadline) html += `<div class="wind-headline">${formatSentenceWithActions(bi.coreHeadline)}</div>`;
+        if (bi.coreHeadline) html += `<div class="wind-headline">${escapeHtml(bi.coreHeadline)}</div>`;
         if (bi.coreBullets && bi.coreBullets.length) {
           html += `<div class="wind-bullet-list">`;
           bi.coreBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
-        if (bi.industryHeadline) html += `<div class="wind-subhead">${formatSentenceWithActions(bi.industryHeadline)}</div>`;
+        if (bi.industryHeadline) html += `<div class="wind-subhead">${escapeHtml(bi.industryHeadline)}</div>`;
         if (bi.industryBullets && bi.industryBullets.length) {
           html += `<div class="wind-bullet-list">`;
           bi.industryBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
@@ -3281,25 +3281,25 @@
       if (logicEl && data.investmentLogic) {
         const il = data.investmentLogic;
         let html = '';
-        if (il.coreHeadline) html += `<div class="wind-headline">${formatSentenceWithActions(il.coreHeadline)}</div>`;
+        if (il.coreHeadline) html += `<div class="wind-headline">${escapeHtml(il.coreHeadline)}</div>`;
         if (il.coreBullets && il.coreBullets.length) {
           html += `<div class="wind-bullet-list">`;
           il.coreBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
-        if (il.shortTermHeadline) html += `<div class="wind-subhead">${formatSentenceWithActions(il.shortTermHeadline)}</div>`;
+        if (il.shortTermHeadline) html += `<div class="wind-subhead">${escapeHtml(il.shortTermHeadline)}</div>`;
         if (il.shortTermBullets && il.shortTermBullets.length) {
           html += `<div class="wind-bullet-list">`;
           il.shortTermBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
-        if (il.longTermHeadline) html += `<div class="wind-subhead">${formatSentenceWithActions(il.longTermHeadline)}</div>`;
+        if (il.longTermHeadline) html += `<div class="wind-subhead">${escapeHtml(il.longTermHeadline)}</div>`;
         if (il.longTermBullets && il.longTermBullets.length) {
           html += `<div class="wind-bullet-list">`;
           il.longTermBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
           html += `</div>`;
         }
-        if (il.valuationHeadline) html += `<div class="wind-subhead">${formatSentenceWithActions(il.valuationHeadline)}</div>`;
+        if (il.valuationHeadline) html += `<div class="wind-subhead">${escapeHtml(il.valuationHeadline)}</div>`;
         if (il.valuationBullets && il.valuationBullets.length) {
           html += `<div class="wind-bullet-list">`;
           il.valuationBullets.forEach(b => html += `<div class="wind-bullet-item">${formatSentenceWithActions(b)}</div>`);
@@ -3386,6 +3386,11 @@
     if (modal) modal.classList.add('hidden');
     if (backdrop) backdrop.classList.add('hidden');
     currentResearchStock = null;
+
+    const modalScrollBtn = document.getElementById('res-modal-scroll-to-top-btn');
+    if (modalScrollBtn) modalScrollBtn.classList.add('hidden');
+    const mainScrollBtn = document.getElementById('scroll-to-top-btn');
+    if (mainScrollBtn && window.scrollY > 150) mainScrollBtn.classList.remove('hidden');
 
     // Reset search input and search query so the homepage data list is always restored to full original state
     const searchInput = document.getElementById('mobile-search-input');

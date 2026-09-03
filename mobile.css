@@ -1629,9 +1629,6 @@ html, body {
   color: #ffffff;
 }
 
-/* ==========================================================================
-   Studio Noir Deep Stock Research Modal
-   ========================================================================== */
 .research-sheet {
   position: fixed;
   top: env(safe-area-inset-top, 12px);
@@ -1641,11 +1638,15 @@ html, body {
   background: #030303;
   border-top: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 16px 16px 0 0;
-  z-index: 200;
+  z-index: 8500;
   display: flex;
   flex-direction: column;
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95);
   animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#research-modal-backdrop {
+  z-index: 8499 !important;
 }
 
 .research-sheet-header {
@@ -2158,11 +2159,11 @@ html, body {
   text-align: justify;
 }
 
-/* Research sentences action buttons (+ and quote arrow) */
+/* Research sentences action buttons (+ and quote arrow, Pure Minimalist Borderless) */
 .sentence-actions-group {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   margin-left: 6px;
   vertical-align: middle;
   transform: translateY(-1px);
@@ -2173,12 +2174,13 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 19px;
-  height: 19px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--fg-dim);
+  width: 17px;
+  height: 17px;
+  border-radius: 3px;
+  background: transparent !important;
+  border: none !important;
+  color: var(--fg-subtle);
+  opacity: 0.5;
   cursor: pointer;
   padding: 0;
   transition: all 0.15s ease;
@@ -2189,22 +2191,21 @@ html, body {
 
 .sentence-clip-btn:hover,
 .sentence-quote-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.35);
+  opacity: 1;
 }
 
 .sentence-clip-btn:active,
 .sentence-quote-btn:active {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(0.86);
   color: #ffffff;
+  opacity: 1;
+  transform: scale(0.85);
 }
 
 .sentence-clip-btn.clipped {
-  background: #32d74b !important;
-  color: #000000 !important;
-  border-color: #32d74b !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  transform: scale(1.15);
 }
 
 .sentence-clip-btn svg,
