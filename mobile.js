@@ -391,16 +391,27 @@
       const upColor = marketInfo.isCn ? '#ff453a' : '#32d74b';
       const downColor = marketInfo.isCn ? '#32d74b' : '#ff453a';
 
-      // Timeframe tags
-      const tfTags = [];
-      if (group.tf_w) tfTags.push(`<span class="tf-badge"><strong>W</strong>${escapeHtml(group.tf_w)}</span>`);
-      if (group.tf_d) tfTags.push(`<span class="tf-badge"><strong>D</strong>${escapeHtml(group.tf_d)}</span>`);
-      if (group.tf_30) tfTags.push(`<span class="tf-badge"><strong>30</strong>${escapeHtml(group.tf_30)}</span>`);
+      // Timeframe tags (Always render W, D, 30 titles)
+      const wVal = (group.tf_w !== undefined && group.tf_w !== null && String(group.tf_w).trim() !== '') ? escapeHtml(String(group.tf_w)) : '--';
+      const dVal = (group.tf_d !== undefined && group.tf_d !== null && String(group.tf_d).trim() !== '') ? escapeHtml(String(group.tf_d)) : '--';
+      const tf30Val = (group.tf_30 !== undefined && group.tf_30 !== null && String(group.tf_30).trim() !== '') ? escapeHtml(String(group.tf_30)) : '--';
+      const tfTagsHtml = `
+        <div class="timeframe-tags">
+          <span class="tf-badge"><strong>W</strong>${wVal}</span>
+          <span class="tf-badge"><strong>D</strong>${dVal}</span>
+          <span class="tf-badge"><strong>30</strong>${tf30Val}</span>
+        </div>
+      `;
 
-      // Cost & Qty
-      const costQtyItems = [];
-      if (group.cost) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Cost:</span> <span class="meta-val-highlight mono">${escapeHtml(group.cost)}</span></span>`);
-      if (group.qty) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Qty:</span> <span class="meta-val-highlight mono">${escapeHtml(group.qty)}</span></span>`);
+      // Cost & Qty (Always render Cost and Qty titles)
+      const costVal = (group.cost !== undefined && group.cost !== null && String(group.cost).trim() !== '') ? escapeHtml(String(group.cost)) : '--';
+      const qtyVal = (group.qty !== undefined && group.qty !== null && String(group.qty).trim() !== '') ? escapeHtml(String(group.qty)) : '--';
+      const costQtyHtml = `
+        <div class="card-meta-row">
+          <span class="card-meta-item"><span class="meta-key">Cost:</span> <span class="meta-val-highlight mono">${costVal}</span></span>
+          <span class="card-meta-item"><span class="meta-key">Qty:</span> <span class="meta-val-highlight mono">${qtyVal}</span></span>
+        </div>
+      `;
 
       // Calculations Ledger Rows
       const recordsHtml = (group.records || []).map((r, rIdx) => {
@@ -425,9 +436,10 @@
         `;
       }).join('');
 
-      // Notes section
+      // Notes section (Always render STRATEGY & TRADING NOTES title)
       const hasNote = group.note && group.note.trim().length > 0;
-      const noteHtml = hasNote ? `
+      const noteContentHtml = hasNote ? escapeHtml(group.note) : '<span class="note-empty-hint">暂无策略备忘 (点击右上角✎编辑)</span>';
+      const noteHtml = `
         <div class="note-accordion">
           <button class="note-toggle" data-target="note-${groupIdx}">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -435,9 +447,9 @@
             </svg>
             <span>STRATEGY & TRADING NOTES</span>
           </button>
-          <div id="note-${groupIdx}" class="note-content">${escapeHtml(group.note)}</div>
+          <div id="note-${groupIdx}" class="note-content">${noteContentHtml}</div>
         </div>
-      ` : '';
+      `;
 
       // Urgency dots (Green / Orange / Red) matching Desktop
       const currentUrgency = (group.records && group.records[0]) ? group.records[0].urgency : null;
@@ -463,8 +475,8 @@
               </div>
             </div>
 
-            ${costQtyItems.length > 0 ? `<div class="card-meta-row">${costQtyItems.join('')}</div>` : ''}
-            ${tfTags.length > 0 ? `<div class="timeframe-tags">${tfTags.join('')}</div>` : ''}
+            ${costQtyHtml}
+            ${tfTagsHtml}
           </header>
 
           <div class="records-ledger" data-symbol="${escapeHtml(group.symbol)}">

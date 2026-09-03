@@ -926,6 +926,13 @@ html, body {
   display: block;
 }
 
+.note-empty-hint {
+  color: var(--fg-subtle);
+  font-size: 0.72rem;
+  font-style: italic;
+  opacity: 0.6;
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
