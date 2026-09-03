@@ -545,9 +545,9 @@ html, body {
   border: 1px solid var(--border);
   padding: 4px 10px;
   font-size: 0.72rem;
-  cursor: pointer;
+  cursor: grab;
   border-radius: 12px !important;
-  transition: all 0.2s ease;
+  transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), background 0.15s, opacity 0.15s, border-color 0.15s;
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
   user-select: none;
@@ -563,9 +563,16 @@ html, body {
   transform: scale(0.96);
 }
 
-/* 100% Desktop-Identical Dragging Tag State */
+/* Subtle, refined tag floating state */
 .quick-tag.dragging-tag {
-  opacity: 0.5 !important;
+  opacity: 0.94;
+  background: #202020 !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.75);
+  z-index: 100;
+  cursor: grabbing;
+  pointer-events: none;
+  will-change: transform;
 }
 
 @keyframes slideUpFade {
@@ -782,12 +789,12 @@ html, body {
   background: rgba(255, 255, 255, 0.015);
   border-left: 2px solid transparent;
   border-radius: 0 4px 4px 0;
-  cursor: pointer;
+  cursor: grab;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   touch-action: pan-y;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), background 0.2s ease, opacity 0.2s ease;
 }
 
 .record-row:active:not(.dragging) {
@@ -800,9 +807,16 @@ html, body {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* 100% Desktop-Identical Dragging State */
+/* Subtle, refined floating state (gentle micro-amplitude) */
 .record-row.dragging {
-  opacity: 0.4 !important;
+  opacity: 0.94;
+  background: rgba(30, 30, 30, 0.96) !important;
+  border-left-color: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  z-index: 100;
+  cursor: grabbing;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .record-left {

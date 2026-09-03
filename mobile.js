@@ -134,6 +134,42 @@
     }
   }
 
+  // Gentle Low-Amplitude FLIP Fluid Reordering
+  function animateFLIP(container, draggingEl, afterElement) {
+    if (!container || !draggingEl) return;
+    const currentNext = draggingEl.nextElementSibling;
+    if (currentNext === afterElement) return;
+
+    const children = [...container.children];
+    const firstPositions = new Map();
+    children.forEach(child => {
+      firstPositions.set(child, child.getBoundingClientRect());
+    });
+
+    if (afterElement == null) {
+      container.appendChild(draggingEl);
+    } else {
+      container.insertBefore(draggingEl, afterElement);
+    }
+
+    children.forEach(child => {
+      if (child === draggingEl) return;
+      const first = firstPositions.get(child);
+      if (!first) return;
+      const last = child.getBoundingClientRect();
+      const deltaX = first.left - last.left;
+      const deltaY = first.top - last.top;
+
+      if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
+        child.style.transition = 'none';
+        child.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
+        void child.offsetWidth; // Force reflow
+        child.style.transition = 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1)';
+        child.style.transform = '';
+      }
+    });
+  }
+
   function setupQuickTagsDragAndDrop() {
     const container = document.getElementById('mobile-quick-tags');
     if (!container || container.dataset.dragInitialized) return;
@@ -187,7 +223,7 @@
       pushDataToServer(appState);
     }
 
-    // Touch Support for Mobile (Desktop-Identical Dragging)
+    // Touch Support for Mobile (Gentle Low-Amplitude Fluid Dragging)
     container.addEventListener('touchstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
@@ -214,12 +250,12 @@
     container.addEventListener('touchmove', (e) => {
       if (!draggingTag) return;
       const touch = e.touches[0];
-      const deltaX = Math.abs(touch.clientX - touchStartX);
-      const deltaY = Math.abs(touch.clientY - touchStartY);
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
 
       // If user moves finger BEFORE long-press completes, cancel drag timer immediately to allow natural vertical scrolling
       if (!isDragging) {
-        if (deltaX > 7 || deltaY > 7) {
+        if (Math.abs(deltaX) > 7 || Math.abs(deltaY) > 7) {
           if (dragHoldTimer) {
             clearTimeout(dragHoldTimer);
             dragHoldTimer = null;
@@ -228,15 +264,14 @@
           return;
         }
       } else {
-        // Exactly identical to desktop dragover DOM positioning
+        // Direct 1:1 finger follow + smooth low-amplitude FLIP layout swap
         if (e.cancelable) e.preventDefault();
         hasMoved = true;
+        draggingTag.style.transition = 'none';
+        draggingTag.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(1.04)`;
+
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
-        if (afterElement == null) {
-          container.appendChild(draggingTag);
-        } else {
-          container.insertBefore(draggingTag, afterElement);
-        }
+        animateFLIP(container, draggingTag, afterElement);
       }
     }, { passive: false });
 
@@ -246,14 +281,25 @@
         dragHoldTimer = null;
       }
       if (isDragging && draggingTag) {
-        draggingTag.classList.remove('dragging-tag');
+        const tag = draggingTag;
         draggingTag = null;
         isDragging = false;
-        if (hasMoved) {
-          commitReorderedTags();
-        }
+
+        tag.style.transition = 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)';
+        tag.style.transform = '';
+
+        setTimeout(() => {
+          tag.classList.remove('dragging-tag');
+          tag.style.transition = '';
+          if (hasMoved) {
+            commitReorderedTags();
+          }
+        }, 150);
       } else {
-        if (draggingTag) draggingTag.classList.remove('dragging-tag');
+        if (draggingTag) {
+          draggingTag.style.transform = '';
+          draggingTag.classList.remove('dragging-tag');
+        }
         draggingTag = null;
         isDragging = false;
       }
@@ -264,7 +310,10 @@
         clearTimeout(dragHoldTimer);
         dragHoldTimer = null;
       }
-      if (draggingTag) draggingTag.classList.remove('dragging-tag');
+      if (draggingTag) {
+        draggingTag.style.transform = '';
+        draggingTag.classList.remove('dragging-tag');
+      }
       draggingTag = null;
       isDragging = false;
     });
@@ -544,12 +593,12 @@
       ledger.addEventListener('touchmove', (e) => {
         if (!draggingRow) return;
         const touch = e.touches[0];
-        const deltaX = Math.abs(touch.clientX - touchStartX);
-        const deltaY = Math.abs(touch.clientY - touchStartY);
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
 
         // Cancel hold if finger moved before 200ms hold (allows normal vertical page scroll)
         if (!isDragging) {
-          if (deltaX > 7 || deltaY > 7) {
+          if (Math.abs(deltaX) > 7 || Math.abs(deltaY) > 7) {
             if (dragHoldTimer) {
               clearTimeout(dragHoldTimer);
               dragHoldTimer = null;
@@ -558,15 +607,14 @@
             return;
           }
         } else {
-          // Exactly identical to desktop dragover DOM positioning
+          // Direct 1:1 finger follow + smooth low-amplitude FLIP layout swap
           if (e.cancelable) e.preventDefault();
           hasMoved = true;
+          draggingRow.style.transition = 'none';
+          draggingRow.style.transform = `translate3d(0, ${deltaY}px, 0) scale(1.015)`;
+
           const afterElement = getDragAfterElement(ledger, touch.clientY);
-          if (afterElement == null) {
-            ledger.appendChild(draggingRow);
-          } else {
-            ledger.insertBefore(draggingRow, afterElement);
-          }
+          animateFLIP(ledger, draggingRow, afterElement);
         }
       }, { passive: false });
 
@@ -577,12 +625,20 @@
         }
 
         if (isDragging && draggingRow) {
-          draggingRow.classList.remove('dragging');
+          const row = draggingRow;
           draggingRow = null;
           isDragging = false;
-          if (hasMoved) {
-            commitReorderedRecords();
-          }
+
+          row.style.transition = 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)';
+          row.style.transform = '';
+
+          setTimeout(() => {
+            row.classList.remove('dragging');
+            row.style.transition = '';
+            if (hasMoved) {
+              commitReorderedRecords();
+            }
+          }, 150);
         } else if (draggingRow) {
           // Check for Double-Tap on Mobile
           const row = draggingRow;
@@ -608,7 +664,10 @@
           clearTimeout(dragHoldTimer);
           dragHoldTimer = null;
         }
-        if (draggingRow) draggingRow.classList.remove('dragging');
+        if (draggingRow) {
+          draggingRow.style.transform = '';
+          draggingRow.classList.remove('dragging');
+        }
         draggingRow = null;
         isDragging = false;
       });
