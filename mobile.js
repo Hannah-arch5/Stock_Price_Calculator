@@ -122,8 +122,9 @@
         }
 
         let customStyle = '';
-        if (group.records && group.records[0] && group.records[0].urgency && urgencyColors[group.records[0].urgency]) {
-          const color = urgencyColors[group.records[0].urgency];
+        const currentGroupUrgency = group.urgency || (group.records && group.records[0] ? group.records[0].urgency : null);
+        if (currentGroupUrgency && urgencyColors[currentGroupUrgency]) {
+          const color = urgencyColors[currentGroupUrgency];
           customStyle = `style="color: ${color}; border-color: ${color};"`;
         }
 
@@ -452,7 +453,7 @@
       `;
 
       // Urgency dots (Green / Orange / Red) matching Desktop
-      const currentUrgency = (group.records && group.records[0]) ? group.records[0].urgency : null;
+      const currentUrgency = group.urgency || ((group.records && group.records[0]) ? group.records[0].urgency : null);
       const urgencyDotsHtml = `
         <div class="urgency-dots">
           <button type="button" class="urgency-dot green ${currentUrgency === 'green' ? 'selected' : ''}" data-symbol="${escapeHtml(group.symbol)}" data-color="green" title="Green urgency"></button>
@@ -1385,7 +1386,8 @@
         const isSelected = urgencyDot.classList.contains('selected');
         const newUrgency = isSelected ? null : color;
 
-        if (group.records) {
+        group.urgency = newUrgency;
+        if (group.records && group.records.length > 0) {
           group.records.forEach(r => r.urgency = newUrgency);
         }
 

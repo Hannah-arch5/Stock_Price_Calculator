@@ -396,14 +396,15 @@ function renderHistory(scrollToSymbol = null) {
             tag.textContent = tagText;
             
             // Re-apply the priority dot color to the tag border/text if we want, or just leave it gray
-            if (group.records[0] && group.records[0].urgency) {
+            const groupUrgency = group.urgency || (group.records && group.records[0] ? group.records[0].urgency : null);
+            if (groupUrgency) {
                 const colors = {
                     'green': '#32d74b',
                     'orange': '#ff9f0a',
                     'red': '#ff453a'
                 };
-                tag.style.color = colors[group.records[0].urgency];
-                tag.style.borderColor = colors[group.records[0].urgency];
+                tag.style.color = colors[groupUrgency];
+                tag.style.borderColor = colors[groupUrgency];
             }
             
             tag.draggable = true;
@@ -663,14 +664,18 @@ function renderHistory(scrollToSymbol = null) {
         colors.forEach((color) => {
             const dot = document.createElement('button');
             dot.className = `urgency-dot ${color}`;
-            // If the first record has urgency, they all do, or group.records[0].urgency
-            if (group.records[0].urgency === color) {
+            const currentGroupUrgency = group.urgency || (group.records && group.records[0] ? group.records[0].urgency : null);
+            if (currentGroupUrgency === color) {
                 dot.classList.add('selected');
             }
             dot.onclick = (e) => {
                 e.stopPropagation();
                 const isSelected = dot.classList.contains('selected');
-                group.records.forEach(r => r.urgency = isSelected ? null : color);
+                const newUrgency = isSelected ? null : color;
+                group.urgency = newUrgency;
+                if (group.records && group.records.length > 0) {
+                    group.records.forEach(r => r.urgency = newUrgency);
+                }
                 
                 const allDots = urgencyContainer.querySelectorAll('.urgency-dot');
                 allDots.forEach(d => d.classList.remove('selected'));
