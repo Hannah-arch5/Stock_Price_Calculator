@@ -137,7 +137,8 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   4. `INSTITUTIONAL VIEW (机构观点与研报共识)`: 机构一致买入/增持评级分布与目标价上涨空间 (Overweight/Buy Consensus & Target Upside)、华尔街/券商核心逻辑推导链条 (Deduction Chain & Growth Flywheel) 与盈利预期调整.
   5. `TECHNICAL ANALYSIS (技术面研判)`: 支撑位与压力位关键价位区间测算 (Support/Resistance Bands)、均线多空趋势 (Bullish Moving Average Alignment) 与 RSI 强弱信号.
 - **6-Tab Luxury Smooth Navigation & Modal Floating Scroll-To-Top**:
-  - Replaced action bar with 6 quick tabs: `业务洞察` (Profile), `投资逻辑` (Logic), `核心要闻` (News), `机构共识` (Consensus), `技术研判` (Technical), `AI 对话` (AI Companion).
+  - Replaced action bar with 6 English quick tabs: `OVERVIEW`, `LOGIC`, `NEWS`, `CONSENSUS`, `TECHNICAL`, `AI CHAT`.
+  - 100% Solid OLED black mask (`#030303`) sticky background preventing any text transparency/bleed-through.
   - Luxury smooth scrolling physics (`smoothScrollContainer` with 1150ms Studio Noir quintic ease-out) matching the desktop/homepage feel.
   - Active tab auto-synchronization (ScrollSpy) as the user scrolls.
   - Floating scroll-to-top button (`#res-modal-scroll-to-top-btn`) inside the research sheet with threshold appearance and smooth return to top.

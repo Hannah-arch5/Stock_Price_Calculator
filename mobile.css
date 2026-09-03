@@ -1599,17 +1599,17 @@ html, body {
   padding-bottom: max(env(safe-area-inset-bottom, 24px), 32px);
 }
 
-/* 6 Quick Navigation Tabs Bar */
+/* 6 Quick Navigation Tabs Bar (Solid Black Opaque Mask) */
 .research-tabs-wrapper {
   position: sticky;
-  top: 0;
-  z-index: 20;
-  background: rgba(3, 3, 3, 0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  padding: 6px 0 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  margin-top: -8px;
+  top: -16px;
+  z-index: 25;
+  background: #030303;
+  padding: 12px 16px 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: -16px;
+  margin-left: -16px;
+  margin-right: -16px;
 }
 
 .research-nav-tabs {
