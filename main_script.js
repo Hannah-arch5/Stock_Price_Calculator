@@ -1814,6 +1814,9 @@ const syncUrlText = document.getElementById('sync-url-text');
 const syncLocalText = document.getElementById('sync-local-text');
 const copySyncUrlBtn = document.getElementById('copy-sync-url-btn');
 const modalConnectedCount = document.getElementById('modal-connected-count');
+const gdriveUrlInput = document.getElementById('gdrive-url-input');
+const saveGdriveUrlBtn = document.getElementById('save-gdrive-url-btn');
+const gdriveStatus = document.getElementById('gdrive-status');
 
 if (mobileSyncBtn && mobileSyncModal) {
     mobileSyncBtn.addEventListener('click', async () => {
@@ -1826,6 +1829,11 @@ if (mobileSyncBtn && mobileSyncModal) {
                     if (syncLocalText) syncLocalText.textContent = info.localUrl || '--';
                     const modeText = info.httpsUrl ? 'HTTPS Active · No Bottom Bar' : 'Local Wi-Fi Active';
                     modalConnectedCount.textContent = `${modeText} · ${info.clientCount || 0} device(s)`;
+                    // Pre-fill GDrive URL if saved
+                    if (gdriveUrlInput && info.gdriveUrl) {
+                        gdriveUrlInput.value = info.gdriveUrl;
+                        if (gdriveStatus) gdriveStatus.textContent = 'CONNECTED';
+                    }
                 }
             } catch (e) {
                 syncUrlText.textContent = 'http://localhost:7321';
@@ -1855,6 +1863,39 @@ if (mobileSyncBtn && mobileSyncModal) {
                     copySyncUrlBtn.textContent = originalText;
                 }, 2000);
             });
+        });
+    }
+
+    // Google Drive URL save
+    if (saveGdriveUrlBtn && gdriveUrlInput) {
+        saveGdriveUrlBtn.addEventListener('click', async () => {
+            const url = (gdriveUrlInput.value || '').trim();
+            if (!url || !url.startsWith('https://script.google.com/')) {
+                if (gdriveStatus) {
+                    gdriveStatus.style.color = '#ff453a';
+                    gdriveStatus.textContent = 'INVALID URL';
+                    setTimeout(() => { gdriveStatus.textContent = ''; gdriveStatus.style.color = ''; }, 3000);
+                }
+                return;
+            }
+            saveGdriveUrlBtn.textContent = 'SYNCING...';
+            saveGdriveUrlBtn.disabled = true;
+            try {
+                const result = await window.electronAPI.saveGDriveSyncUrl(url);
+                if (result && result.success) {
+                    if (gdriveStatus) { gdriveStatus.style.color = '#32d74b'; gdriveStatus.textContent = 'SAVED & SYNCED'; }
+                    saveGdriveUrlBtn.textContent = 'SAVED!';
+                    setTimeout(() => { saveGdriveUrlBtn.textContent = 'SAVE & SYNC NOW'; saveGdriveUrlBtn.disabled = false; }, 2500);
+                } else {
+                    if (gdriveStatus) { gdriveStatus.style.color = '#ff453a'; gdriveStatus.textContent = 'FAILED: ' + (result && result.error || ''); }
+                    saveGdriveUrlBtn.textContent = 'SAVE & SYNC NOW';
+                    saveGdriveUrlBtn.disabled = false;
+                }
+            } catch (e) {
+                if (gdriveStatus) { gdriveStatus.style.color = '#ff453a'; gdriveStatus.textContent = 'ERROR'; }
+                saveGdriveUrlBtn.textContent = 'SAVE & SYNC NOW';
+                saveGdriveUrlBtn.disabled = false;
+            }
         });
     }
 }

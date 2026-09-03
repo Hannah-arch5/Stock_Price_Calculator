@@ -13,6 +13,38 @@ const FIXED_USER_DATA = path.join(os.homedir(), 'Library', 'Application Support'
 app.setPath('userData', FIXED_USER_DATA);
 
 const DATA_FILE = path.join(FIXED_USER_DATA, 'app-data-v1.json');
+const GDRIVE_CONFIG_FILE = path.join(FIXED_USER_DATA, 'gdrive-sync.json');
+
+function getGDriveSyncUrl() {
+    try {
+        if (fs.existsSync(GDRIVE_CONFIG_FILE)) {
+            const parsed = JSON.parse(fs.readFileSync(GDRIVE_CONFIG_FILE, 'utf8'));
+            return (parsed && parsed.url) ? parsed.url.trim() : null;
+        }
+    } catch(e) {}
+    return null;
+}
+
+async function syncToGDrive(dataStr) {
+    const url = getGDriveSyncUrl();
+    if (!url) return;
+    try {
+        console.log('[GDrive] Syncing data to Google Drive Web App...');
+        const res = await fetch(url, {
+            method: 'POST',
+            body: dataStr,
+            headers: { 'Content-Type': 'text/plain' },
+            redirect: 'follow'
+        });
+        if (res.ok) {
+            console.log('[GDrive] Sync to Google Drive successful!');
+        } else {
+            console.warn('[GDrive] Sync responded with status:', res.status);
+        }
+    } catch (e) {
+        console.error('[GDrive] Sync error:', e.message);
+    }
+}
 
 // --- Real-time Sync Server for iPhone (PWA) ---
 const SYNC_PORT = 7321;
@@ -147,6 +179,7 @@ function startSyncServer() {
                     localUrl,
                     httpsUrl: currentHttpsUrl,
                     url: currentHttpsUrl || localUrl,
+                    gdriveUrl: getGDriveSyncUrl(),
                     clientsCount: sseClients.length
                 }));
                 return;
@@ -167,7 +200,7 @@ function startSyncServer() {
                 contentType = 'application/javascript; charset=utf-8';
             } else if (pathname === '/manifest.json') {
                 filePath = path.join(__dirname, 'manifest.json');
-                contentType = 'application/json; charset=utf-8';
+                contentType = 'application/manifest+json; charset=utf-8';
             } else if (pathname === '/apple-touch-icon.png' || pathname === '/icon.png') {
                 const iconPath = path.join(__dirname, 'apple-touch-icon.png');
                 filePath = fs.existsSync(iconPath) ? iconPath : path.join(__dirname, 'build', 'icon.png');
@@ -207,8 +240,27 @@ ipcMain.handle('get-sync-server-info', () => {
         localUrl,
         httpsUrl: currentHttpsUrl,
         url: currentHttpsUrl || localUrl,
+        gdriveUrl: getGDriveSyncUrl(),
         clientCount: sseClients.length
     };
+});
+
+ipcMain.handle('get-gdrive-sync-url', () => {
+    return getGDriveSyncUrl();
+});
+
+ipcMain.handle('save-gdrive-sync-url', async (event, url) => {
+    try {
+        fs.mkdirSync(FIXED_USER_DATA, { recursive: true });
+        fs.writeFileSync(GDRIVE_CONFIG_FILE, JSON.stringify({ url: (url || '').trim(), updated: Date.now() }));
+        if (url && url.trim() && fs.existsSync(DATA_FILE)) {
+            const currentData = fs.readFileSync(DATA_FILE, 'utf8');
+            await syncToGDrive(currentData);
+        }
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
 });
 
 ipcMain.handle('load-data', () => {
@@ -262,6 +314,9 @@ ipcMain.on('save-data', (event, dataStr) => {
             const parsed = JSON.parse(dataStr);
             broadcastSyncData(parsed);
         } catch(e) {}
+
+        // 5. Asynchronously push to Google Drive
+        syncToGDrive(dataStr);
     } catch(e) {
         console.error('[main] save-data error:', e);
     }

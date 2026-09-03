@@ -1938,3 +1938,29 @@ body.light-theme .macro-news-item.saved {
   box-shadow: 0 0 6px rgba(50, 215, 75, 0.6);
 }
 
+/* Google Drive Sync Section */
+.sync-gdrive-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--fg-dim);
+  margin-bottom: 6px;
+}
+
+.gdrive-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffd60a;
+  font-size: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  -webkit-app-region: no-drag;
+}
+
+.gdrive-input::placeholder {
+  color: rgba(255,255,255,0.2);
+  font-weight: 400;
+}
+

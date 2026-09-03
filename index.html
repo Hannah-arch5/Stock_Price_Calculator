@@ -430,9 +430,9 @@
                 <button id="close-sync-modal-btn" class="modal-close-btn">&times;</button>
             </div>
             <div class="modal-body">
+                <!-- Section 1: Local / HTTPS -->
                 <p class="sync-instruction">
-                    用 iPhone 14 Pro Max / 15 的 Safari 访问下方 <strong>HTTPS 加密链接</strong>，点击底部分享选择<strong>「添加到主屏幕」</strong>。<br>
-                    苹果将自动解除限制，<strong>彻底消除底部地址栏</strong>，获得 100% 全屏纯黑独立 App：
+                    用 iPhone Safari 访问下方链接，点击底部分享 →<strong>「添加到主屏幕」</strong>，获得彻底无底栏全屏体验：
                 </p>
                 <div class="sync-url-box">
                     <span id="sync-url-text" class="mono sync-url">Starting HTTPS Tunnel...</span>
@@ -442,8 +442,30 @@
                     <span class="status-indicator-dot"></span>
                     <span id="modal-connected-count" class="mono">HTTPS Active · No Bottom Bar</span>
                 </div>
-                <div id="local-fallback-row" style="margin-top: 10px; font-size: 0.68rem; color: var(--fg-dim);">
+                <div id="local-fallback-row" style="margin-top: 8px; font-size: 0.68rem; color: var(--fg-dim);">
                     <span>内网直连备用: </span><span id="sync-local-text" class="mono" style="color: var(--fg-subtle);">http://...</span>
+                </div>
+
+                <!-- Divider -->
+                <div style="border-top: 1px solid rgba(255,255,255,0.07); margin: 18px 0;"></div>
+
+                <!-- Section 2: Google Drive (5G out-of-home sync) -->
+                <div class="sync-gdrive-section">
+                    <div class="sync-gdrive-label">GOOGLE DRIVE 5G 同步</div>
+                    <p class="sync-instruction" style="margin-top: 6px;">
+                        出门连 5G 也能双向同步。将下方部署好的 Google Apps Script 专属链接粘贴保存后，每次在 Mac 修改数据会自动推送至 Google Drive，手机随时随地拉取最新数据。
+                    </p>
+                    <div class="sync-url-box">
+                        <input id="gdrive-url-input" type="text" class="mono sync-url gdrive-input"
+                            placeholder="https://script.google.com/macros/s/.../exec" spellcheck="false" />
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
+                        <button id="save-gdrive-url-btn" class="copy-btn">SAVE &amp; SYNC NOW</button>
+                        <span id="gdrive-status" class="mono" style="font-size: 0.65rem; color: var(--fg-dim);"></span>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.65rem; color: var(--fg-dim); line-height: 1.6;">
+                        还没有专属链接？打开电脑浏览器，访问 <span class="mono" style="color: var(--fg-subtle);">script.google.com</span> 按指引一键部署。
+                    </div>
                 </div>
             </div>
         </div>

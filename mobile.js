@@ -241,20 +241,67 @@
     }
   }
 
-  // Fetch full data from Server
-  async function fetchLatestData() {
+  // Fetch full data from Server (home Wi-Fi) or Google Drive (5G/out-of-home)
+  const GDRIVE_CACHE_KEY = 'ticker_gdrive_url_v1';
+
+  function getGDriveUrl() {
+    return localStorage.getItem(GDRIVE_CACHE_KEY) || null;
+  }
+
+  async function fetchFromGDrive(gdriveUrl) {
     try {
-      const res = await fetch('/api/data');
+      const res = await fetch(gdriveUrl, { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json && json.historyRecords !== undefined) {
+          saveToCache(json);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.log('[GDrive] fetch error:', e);
+    }
+    return false;
+  }
+
+  async function fetchLatestData() {
+    // Try home Wi-Fi first (fast & direct)
+    try {
+      const res = await fetch('/api/data', { signal: AbortSignal.timeout(3000) });
       if (res.ok) {
         const json = await res.json();
         saveToCache(json);
+        // Also cache the gdrive url returned by server if available
+        try {
+          const infoRes = await fetch('/api/server-info', { signal: AbortSignal.timeout(2000) });
+          if (infoRes.ok) {
+            const info = await infoRes.json();
+            if (info.gdriveUrl) localStorage.setItem(GDRIVE_CACHE_KEY, info.gdriveUrl);
+          }
+        } catch(_) {}
+        return;
       }
     } catch (e) {
-      console.log('Fetch error (offline or server disconnected):', e);
+      console.log('[Mobile] Mac server unreachable, trying Google Drive...');
     }
+
+    // Home Wi-Fi failed → try Google Drive (5G / away from home)
+    const gdriveUrl = getGDriveUrl();
+    if (gdriveUrl) {
+      const ok = await fetchFromGDrive(gdriveUrl);
+      if (ok) {
+        const indicator = document.getElementById('sync-indicator');
+        const syncText = document.getElementById('sync-text');
+        if (indicator) indicator.className = 'status-pill status-live';
+        if (syncText) syncText.textContent = 'GDRIVE';
+        return;
+      }
+    }
+
+    console.log('[Mobile] All sync sources unavailable, using cached data.');
   }
 
-  // Setup Server-Sent Events (SSE) for Real-Time Sync
+  // Setup Server-Sent Events (SSE) for Real-Time Sync (home Wi-Fi only)
   function setupEventStream() {
     const indicator = document.getElementById('sync-indicator');
     const syncText = document.getElementById('sync-text');

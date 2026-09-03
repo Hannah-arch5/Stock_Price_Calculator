@@ -17,15 +17,14 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
+html, body {
   background-color: var(--bg);
   color: var(--fg);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: fixed;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -37,18 +36,20 @@ body {
 .safe-area-top {
   height: env(safe-area-inset-top, 0px);
   background-color: var(--bg);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  flex-shrink: 0;
 }
 
 .safe-area-bottom {
   height: env(safe-area-inset-bottom, 0px);
   background-color: var(--bg);
+  flex-shrink: 0;
 }
 
 /* Container */
 .mobile-container {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 16px 20px;
   flex: 1;
   display: flex;
