@@ -134,7 +134,7 @@
     }
   }
 
-  // Gentle Low-Amplitude FLIP Fluid Reordering
+  // Soft Zero-Bounce FLIP Fluid Reordering (Pure Velvety Ease)
   function animateFLIP(container, draggingEl, afterElement) {
     if (!container || !draggingEl) return;
     const currentNext = draggingEl.nextElementSibling;
@@ -164,7 +164,7 @@
         child.style.transition = 'none';
         child.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
         void child.offsetWidth; // Force reflow
-        child.style.transition = 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1)';
+        child.style.transition = 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)';
         child.style.transform = '';
       }
     });
@@ -223,7 +223,7 @@
       pushDataToServer(appState);
     }
 
-    // Touch Support for Mobile (Gentle Low-Amplitude Fluid Dragging)
+    // Touch Support for Mobile (Soft Zero-Bounce Fluid Dragging)
     container.addEventListener('touchstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
@@ -264,11 +264,11 @@
           return;
         }
       } else {
-        // Direct 1:1 finger follow + smooth low-amplitude FLIP layout swap
+        // Direct 1:1 finger follow + soft zero-bounce FLIP layout swap
         if (e.cancelable) e.preventDefault();
         hasMoved = true;
         draggingTag.style.transition = 'none';
-        draggingTag.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(1.04)`;
+        draggingTag.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
 
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
         animateFLIP(container, draggingTag, afterElement);
@@ -285,7 +285,7 @@
         draggingTag = null;
         isDragging = false;
 
-        tag.style.transition = 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)';
+        tag.style.transition = 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
         tag.style.transform = '';
 
         setTimeout(() => {
@@ -294,7 +294,7 @@
           if (hasMoved) {
             commitReorderedTags();
           }
-        }, 150);
+        }, 180);
       } else {
         if (draggingTag) {
           draggingTag.style.transform = '';
@@ -607,11 +607,11 @@
             return;
           }
         } else {
-          // Direct 1:1 finger follow + smooth low-amplitude FLIP layout swap
+          // Direct 1:1 finger follow + soft zero-bounce FLIP layout swap
           if (e.cancelable) e.preventDefault();
           hasMoved = true;
           draggingRow.style.transition = 'none';
-          draggingRow.style.transform = `translate3d(0, ${deltaY}px, 0) scale(1.015)`;
+          draggingRow.style.transform = `translate3d(0, ${deltaY}px, 0)`;
 
           const afterElement = getDragAfterElement(ledger, touch.clientY);
           animateFLIP(ledger, draggingRow, afterElement);
@@ -629,7 +629,7 @@
           draggingRow = null;
           isDragging = false;
 
-          row.style.transition = 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)';
+          row.style.transition = 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
           row.style.transform = '';
 
           setTimeout(() => {
@@ -638,7 +638,7 @@
             if (hasMoved) {
               commitReorderedRecords();
             }
-          }, 150);
+          }, 180);
         } else if (draggingRow) {
           // Check for Double-Tap on Mobile
           const row = draggingRow;
