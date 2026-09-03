@@ -428,18 +428,13 @@
 
         return `
           <div class="record-row ${highlightedClass}" data-symbol="${escapeHtml(group.symbol)}" data-record-idx="${rIdx}">
-            <div class="record-left">
+            <div class="record-left calc-load-trigger" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="点击导回上方计算器 (Tap to load into Calculator)">
               <div class="record-type-badge">${escapeHtml(r.type || 'Projection')}</div>
               <div class="record-formula mono">${escapeHtml(formulaStr)}</div>
               ${sharesHtml}
             </div>
             <div class="record-right">
               <div class="record-result mono ${colorClass}">${escapeHtml(r.result || '--')}</div>
-              <button class="calc-load-btn" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="导回上方计算器 (Load into Calculator)">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 17L17 7M17 7H7M17 7V17"/>
-                </svg>
-              </button>
               <button class="edit-pencil-btn calc-edit-trigger" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="Edit calculation">✎</button>
             </div>
           </div>
@@ -1368,13 +1363,13 @@
         return;
       }
 
-      // (b2) Load Calculation into Top Calculator Trigger
-      const loadBtn = e.target.closest('.calc-load-btn');
-      if (loadBtn) {
+      // (b2) Load Calculation into Top Calculator Trigger (Tapping formula / left area)
+      const loadTrigger = e.target.closest('.calc-load-trigger');
+      if (loadTrigger && !e.target.closest('.calc-edit-trigger')) {
         e.preventDefault();
         e.stopPropagation();
-        const symbol = loadBtn.getAttribute('data-symbol');
-        const recordIdxStr = loadBtn.getAttribute('data-record');
+        const symbol = loadTrigger.getAttribute('data-symbol');
+        const recordIdxStr = loadTrigger.getAttribute('data-record');
         const recordIdx = recordIdxStr !== null ? parseInt(recordIdxStr, 10) : null;
         if (symbol && recordIdx !== null && !isNaN(recordIdx)) {
           const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
@@ -1536,6 +1531,20 @@
     if (calcCancelBtn) calcCancelBtn.onclick = closeCalcEditSheet;
     if (calcSaveBtn) calcSaveBtn.onclick = saveCalcEditSheet;
     if (calcDeleteBtn) calcDeleteBtn.onclick = deleteCalcFromSheet;
+
+    const calcLoadIntoCalcBtn = document.getElementById('calc-load-into-calc-btn');
+    if (calcLoadIntoCalcBtn) {
+      calcLoadIntoCalcBtn.onclick = () => {
+        const { symbol, recordIdx } = currentEditingCalcContext;
+        if (symbol && recordIdx !== null) {
+          const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+          if (group && group.records && group.records[recordIdx]) {
+            closeCalcEditSheet();
+            populateMobileCalculator(group.records[recordIdx], symbol);
+          }
+        }
+      };
+    }
 
     // 5. Alert Banner gestures
     setupAlertBannerGestures();

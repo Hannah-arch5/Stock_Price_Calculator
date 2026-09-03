@@ -881,26 +881,42 @@ html, body {
   color: var(--down-color);
 }
 
-.calc-load-btn {
-  background: transparent;
-  border: none;
-  color: var(--fg-subtle);
+.record-left.calc-load-trigger {
   cursor: pointer;
-  padding: 4px;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s ease;
+}
+
+.record-left.calc-load-trigger:active {
+  opacity: 0.65;
+}
+
+.sheet-action-secondary-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--fg);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  gap: 8px;
+  cursor: pointer;
   transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-.calc-load-btn:hover {
-  color: #ffffff;
+.sheet-action-secondary-btn:hover {
   background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.calc-load-btn:active {
-  transform: scale(0.92);
+.sheet-action-secondary-btn:active {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(0.98);
 }
 
 /* Note Accordion */
