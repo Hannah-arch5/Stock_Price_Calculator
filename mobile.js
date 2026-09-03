@@ -799,24 +799,48 @@
     }
   }
 
-  // ─── Target Alerts Check (No Emoji & Swipe to Dismiss) ───────
+  // ─── Target Alerts Check (Compact Micro-Pill & Session-Dismissed) ───────
+  const dismissedAlertKeys = new Set(JSON.parse(sessionStorage.getItem('ticker_dismissed_alerts') || '[]'));
+
   function checkTargetAlerts() {
     const banner = document.getElementById('alert-banner');
-    const bannerText = document.getElementById('alert-banner-text');
-    if (!banner || !bannerText) return;
+    const container = document.getElementById('alert-banner-content');
+    if (!banner || !container) return;
 
-    const alerts = [];
+    const activeAlerts = [];
     (appState.historyRecords || []).forEach(g => {
-      const stockLabel = `${g.symbol} ${g.name || ''}`.trim();
-      (g.records || []).forEach(r => {
-        if (r.highlighted || r.alertTriggered) {
-          alerts.push(`${stockLabel} · 达到目标价 ${r.result || ''}`);
+      const market = detectMarket(g.symbol).market;
+      const isChina = market === 'A';
+
+      (g.records || []).forEach((r, rIdx) => {
+        // ONLY trigger on real alertTriggered flag, and ignore if already dismissed in this session
+        if (r.alertTriggered) {
+          const alertKey = `${g.symbol}_${rIdx}_${r.targetPrice || r.result}`;
+          if (!dismissedAlertKeys.has(alertKey)) {
+            const isUp = r.isUp !== false;
+            const priceColor = isChina ? (isUp ? '#ff453a' : '#32d74b') : (isUp ? '#32d74b' : '#ff453a');
+            const priceText = r.result || (r.targetPrice ? `${isChina ? '¥' : '$'}${r.targetPrice}` : '');
+
+            activeAlerts.push({
+              key: alertKey,
+              symbol: g.symbol,
+              name: g.name || '',
+              price: priceText,
+              color: priceColor
+            });
+          }
         }
       });
     });
 
-    if (alerts.length > 0) {
-      bannerText.textContent = alerts.join(' | ');
+    if (activeAlerts.length > 0) {
+      container.innerHTML = activeAlerts.slice(0, 2).map(a => `
+        <div class="alert-item" data-key="${escapeHtml(a.key)}">
+          <span class="alert-stock-tag">${escapeHtml(a.symbol)} ${escapeHtml(a.name)}</span>
+          <span class="alert-price-val mono" style="color: ${a.color};">${escapeHtml(a.price)}</span>
+        </div>
+      `).join('<span style="color: var(--border); margin: 0 4px; opacity: 0.5;">|</span>');
+
       banner.classList.remove('hidden');
       requestAnimationFrame(() => banner.classList.add('visible'));
     } else {
@@ -825,14 +849,28 @@
     }
   }
 
+  function dismissAllCurrentAlerts() {
+    const banner = document.getElementById('alert-banner');
+    const container = document.getElementById('alert-banner-content');
+    if (!banner) return;
+
+    if (container) {
+      container.querySelectorAll('.alert-item').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (key) dismissedAlertKeys.add(key);
+      });
+      try {
+        sessionStorage.setItem('ticker_dismissed_alerts', JSON.stringify([...dismissedAlertKeys]));
+      } catch (e) {}
+    }
+
+    banner.classList.remove('visible');
+    setTimeout(() => banner.classList.add('hidden'), 350);
+  }
+
   function setupAlertBannerGestures() {
     const banner = document.getElementById('alert-banner');
     if (!banner) return;
-
-    const dismissBanner = () => {
-      banner.classList.remove('visible');
-      setTimeout(() => banner.classList.add('hidden'), 350);
-    };
 
     // Swipe Up to dismiss
     let touchStartY = 0;
@@ -1112,11 +1150,7 @@
       const alertClose = e.target.closest('#alert-banner-close');
       if (alertClose) {
         e.preventDefault();
-        const banner = document.getElementById('alert-banner');
-        if (banner) {
-          banner.classList.remove('visible');
-          setTimeout(() => banner.classList.add('hidden'), 350);
-        }
+        dismissAllCurrentAlerts();
         return;
       }
 

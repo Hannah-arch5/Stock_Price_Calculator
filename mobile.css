@@ -953,16 +953,18 @@ html, body {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* ─── Alert Banner (Studio Noir Pure Dark) ────────────────── */
+/* ─── Compact Alert Notification (Studio Noir Pill) ─────── */
 .alert-banner {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 44px) + 8px);
+  top: calc(env(safe-area-inset-top, 44px) + 6px);
   left: 0; right: 0;
-  z-index: 7000;
+  z-index: 9000;
+  display: flex;
+  justify-content: center;
   padding: 0 16px;
   pointer-events: none;
   transform: translateY(-160%);
-  transition: transform 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
 }
 .alert-banner.visible {
   transform: translateY(0);
@@ -970,32 +972,51 @@ html, body {
 .alert-banner-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: #111111;
+  gap: 8px;
+  background: rgba(18, 18, 18, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  padding: 10px 14px;
-  margin-top: 4px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  border-radius: 20px;
+  padding: 5px 12px 5px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
   pointer-events: auto;
-  touch-action: pan-y;
+  max-width: 92%;
 }
-.alert-text {
-  flex: 1;
+.alert-content-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.72rem;
-  color: #ffffff;
-  line-height: 1.4;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alert-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.alert-stock-tag {
+  color: var(--fg);
+  font-weight: 600;
   letter-spacing: 0.02em;
+}
+.alert-price-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.78rem;
 }
 .alert-close {
   background: none;
   border: none;
   color: var(--fg-dim);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   line-height: 1;
   cursor: pointer;
-  padding: 0 4px;
+  padding: 0 2px;
+  margin-left: 2px;
   flex-shrink: 0;
   transition: color 0.2s;
 }
