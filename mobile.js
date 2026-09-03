@@ -1375,6 +1375,7 @@
       if (loadBtn && !e.target.closest('.calc-edit-trigger')) {
         e.preventDefault();
         e.stopPropagation();
+        if (loadBtn.blur) loadBtn.blur();
         const symbol = loadBtn.getAttribute('data-symbol');
         const recordIdxStr = loadBtn.getAttribute('data-record');
         const recordIdx = recordIdxStr !== null ? parseInt(recordIdxStr, 10) : null;
