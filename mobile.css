@@ -324,9 +324,8 @@ html, body {
 /* Result & Actions Footer */
 .calc-footer-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -336,12 +335,14 @@ html, body {
 
 .calc-res-box {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .calc-res-label {
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--fg-dim);
@@ -357,6 +358,16 @@ html, body {
   display: flex;
   gap: 6px;
   align-items: center;
+  width: 100%;
+}
+
+.calc-actions-box > button {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+  white-space: nowrap;
+  padding: 7px 6px;
+  font-size: 0.68rem;
 }
 
 .calc-primary-btn,
