@@ -185,7 +185,7 @@
       pushDataToServer(appState);
     }
 
-    // Touch Drag Support for iOS / Mobile
+    // Touch Drag Support for iOS / Mobile (Strict Long-Press Guard)
     container.addEventListener('touchstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
@@ -197,12 +197,16 @@
       isDragging = false;
       hasMoved = false;
 
+      // Require deliberate 380ms long-press before drag mode is activated
       dragHoldTimer = setTimeout(() => {
         if (draggingTag) {
           isDragging = true;
           draggingTag.classList.add('is-dragging');
+          if (navigator.vibrate) {
+            try { navigator.vibrate(30); } catch (_) {}
+          }
         }
-      }, 160);
+      }, 380);
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
@@ -211,13 +215,18 @@
       const deltaX = Math.abs(touch.clientX - touchStartX);
       const deltaY = Math.abs(touch.clientY - touchStartY);
 
-      if (!isDragging && (deltaX > 7 || deltaY > 7)) {
-        if (dragHoldTimer) clearTimeout(dragHoldTimer);
-        isDragging = true;
-        draggingTag.classList.add('is-dragging');
-      }
-
-      if (isDragging) {
+      // If user moves finger BEFORE long-press completes, cancel drag timer immediately to allow natural vertical scrolling
+      if (!isDragging) {
+        if (deltaX > 6 || deltaY > 6) {
+          if (dragHoldTimer) {
+            clearTimeout(dragHoldTimer);
+            dragHoldTimer = null;
+          }
+          draggingTag = null; // Yield completely to native page scrolling
+          return;
+        }
+      } else {
+        // Drag mode is active after holding for 380ms
         if (e.cancelable) e.preventDefault();
         hasMoved = true;
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
@@ -230,10 +239,12 @@
     }, { passive: false });
 
     container.addEventListener('touchend', (e) => {
-      if (dragHoldTimer) clearTimeout(dragHoldTimer);
+      if (dragHoldTimer) {
+        clearTimeout(dragHoldTimer);
+        dragHoldTimer = null;
+      }
       if (isDragging && draggingTag) {
         draggingTag.classList.remove('is-dragging');
-        const dragged = draggingTag;
         draggingTag = null;
         isDragging = false;
         if (hasMoved) {
@@ -247,7 +258,10 @@
     });
 
     container.addEventListener('touchcancel', () => {
-      if (dragHoldTimer) clearTimeout(dragHoldTimer);
+      if (dragHoldTimer) {
+        clearTimeout(dragHoldTimer);
+        dragHoldTimer = null;
+      }
       if (draggingTag) draggingTag.classList.remove('is-dragging');
       draggingTag = null;
       isDragging = false;
