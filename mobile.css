@@ -217,6 +217,40 @@ html, body {
   background: rgba(255, 255, 255, 0.06);
 }
 
+/* Quick Stock Tags matching Desktop Part 2 */
+.mobile-quick-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.quick-tag {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--fg-dim);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+}
+
+.quick-tag:active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.card-highlight-flash {
+  outline: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
 /* Feed & Cards Stack */
 .mobile-feed {
   flex: 1;

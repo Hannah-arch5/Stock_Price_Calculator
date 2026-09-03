@@ -63,6 +63,73 @@
   }
 
   // Render Functions
+  function renderMarketTabsAndTags() {
+    const marketTabsContainer = document.getElementById('market-filter-container');
+    const quickTagsContainer = document.getElementById('mobile-quick-tags');
+    const records = appState.historyRecords || [];
+
+    // 1. Dynamic Market Tabs: ALL, US (if has US), A股 (if has CN), HK (if has HK)
+    if (marketTabsContainer) {
+      const hasUS = records.some(g => getMarketInfo(g.symbol).market === 'US');
+      const hasCN = records.some(g => getMarketInfo(g.symbol).market === 'CN');
+      const hasHK = records.some(g => getMarketInfo(g.symbol).market === 'HK');
+
+      if (currentMarketFilter === 'US' && !hasUS) currentMarketFilter = 'all';
+      if (currentMarketFilter === 'CN' && !hasCN) currentMarketFilter = 'all';
+      if (currentMarketFilter === 'HK' && !hasHK) currentMarketFilter = 'all';
+
+      let tabsHtml = `<button class="filter-tab ${currentMarketFilter === 'all' ? 'active' : ''}" data-filter="all">ALL</button>`;
+      if (hasUS) {
+        tabsHtml += `<button class="filter-tab ${currentMarketFilter === 'US' ? 'active' : ''}" data-filter="US">US</button>`;
+      }
+      if (hasCN) {
+        tabsHtml += `<button class="filter-tab ${currentMarketFilter === 'CN' ? 'active' : ''}" data-filter="CN">A股</button>`;
+      }
+      if (hasHK) {
+        tabsHtml += `<button class="filter-tab ${currentMarketFilter === 'HK' ? 'active' : ''}" data-filter="HK">HK</button>`;
+      }
+      marketTabsContainer.innerHTML = tabsHtml;
+    }
+
+    // 2. Stock Quick Tags matching Desktop Part 2 (Naming, Order, Urgency Colors)
+    if (quickTagsContainer) {
+      if (records.length === 0) {
+        quickTagsContainer.innerHTML = '';
+        return;
+      }
+
+      const visibleGroups = records.filter(group => {
+        if (currentMarketFilter === 'all') return true;
+        return getMarketInfo(group.symbol).market === currentMarketFilter;
+      });
+
+      const urgencyColors = {
+        'green': '#32d74b',
+        'orange': '#ff9f0a',
+        'red': '#ff453a'
+      };
+
+      quickTagsContainer.innerHTML = visibleGroups.map(group => {
+        let tagText = group.symbol;
+        if (group.name) {
+          const cleanName = group.name.replace(/\s+/g, '');
+          const hasChinese = /[\u4e00-\u9fa5]/.test(cleanName);
+          if (hasChinese) {
+            tagText = cleanName.length <= 3 ? cleanName : cleanName.substring(0, 2);
+          }
+        }
+
+        let customStyle = '';
+        if (group.records && group.records[0] && group.records[0].urgency && urgencyColors[group.records[0].urgency]) {
+          const color = urgencyColors[group.records[0].urgency];
+          customStyle = `style="color: ${color}; border-color: ${color};"`;
+        }
+
+        return `<button class="quick-tag mono" data-symbol="${escapeHtml(group.symbol)}" ${customStyle}>${escapeHtml(tagText)}</button>`;
+      }).join('');
+    }
+  }
+
   function renderApp() {
     const container = document.getElementById('stocks-container');
     const emptyState = document.getElementById('empty-state');
@@ -73,6 +140,9 @@
     if (!container) return;
 
     let records = appState.historyRecords || [];
+
+    // Render Market tabs & stock quick tags
+    renderMarketTabsAndTags();
 
     // Update global header stats
     if (totalSymbolsEl) totalSymbolsEl.textContent = records.length;
@@ -174,7 +244,7 @@
       ` : '';
 
       return `
-        <article class="stock-card" style="--up-color: ${upColor}; --down-color: ${downColor};">
+        <article class="stock-card" data-symbol="${escapeHtml(group.symbol)}" style="--up-color: ${upColor}; --down-color: ${downColor};">
           <header class="card-header">
             <div class="card-title-row">
               <div class="symbol-name-wrap">
@@ -833,7 +903,23 @@
         return;
       }
 
-      // (f) Alert Banner Close
+      // (f) Stock Quick Tag Tap (Smooth scroll to stock card & highlight)
+      const quickTag = e.target.closest('.quick-tag');
+      if (quickTag) {
+        e.preventDefault();
+        const symbol = quickTag.getAttribute('data-symbol');
+        if (symbol) {
+          const card = document.querySelector(`.stock-card[data-symbol="${symbol}"]`);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            card.classList.add('card-highlight-flash');
+            setTimeout(() => card.classList.remove('card-highlight-flash'), 1200);
+          }
+        }
+        return;
+      }
+
+      // (g) Alert Banner Close
       const alertClose = e.target.closest('#alert-banner-close');
       if (alertClose) {
         e.preventDefault();
