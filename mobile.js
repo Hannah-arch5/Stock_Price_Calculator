@@ -571,7 +571,7 @@
 
       // Touch events (Single-tap hold to drag, Double-tap to highlight)
       ledger.addEventListener('touchstart', (e) => {
-        if (e.target.closest('.calc-edit-trigger') || e.target.closest('.edit-pencil-btn')) return;
+        if (e.target.closest('.calc-edit-trigger') || e.target.closest('.edit-pencil-btn') || e.target.closest('.calc-load-btn')) return;
         const row = e.target.closest('.record-row');
         if (!row) return;
 

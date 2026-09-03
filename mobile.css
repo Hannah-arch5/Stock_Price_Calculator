@@ -927,6 +927,11 @@ html, body {
   }
 }
 
+.calc-load-btn svg,
+.calc-load-btn path {
+  pointer-events: none;
+}
+
 .calc-load-btn:active {
   opacity: 0.4;
   transform: scale(0.9);
