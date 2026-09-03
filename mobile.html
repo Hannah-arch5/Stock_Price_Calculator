@@ -50,7 +50,10 @@
                             <input type="text" id="m-target-symbol" class="calc-input mono" placeholder="e.g. 300775 / AAPL" autocomplete="off" autocorrect="off" autocapitalize="characters" />
                         </div>
                         <div class="calc-input-wrap">
-                            <span class="calc-label">ENTRY PRICE</span>
+                            <div class="calc-label-row">
+                                <span class="calc-label">ENTRY PRICE</span>
+                                <button type="button" id="m-target-rev-btn" class="calc-inline-link">REV. CALC</button>
+                            </div>
                             <div class="calc-cur-input-box">
                                 <span id="m-target-cur" class="calc-cur-sym">¥</span>
                                 <input type="number" inputmode="decimal" id="m-target-base" class="calc-input mono" placeholder="0.00" step="any" />
@@ -81,7 +84,10 @@
                     <!-- Result & Save Action Bar -->
                     <div class="calc-footer-row">
                         <div class="calc-res-box">
-                            <span class="calc-res-label">TARGET PRICE</span>
+                            <div class="calc-label-row">
+                                <span class="calc-res-label">TARGET PRICE</span>
+                                <button type="button" id="m-target-use-entry-btn" class="calc-inline-link">USE AS ENTRY</button>
+                            </div>
                             <div id="m-target-res-val" class="calc-res-text mono">¥0.00</div>
                         </div>
                         <div class="calc-actions-box">
@@ -99,7 +105,10 @@
                             <input type="text" id="m-delta-symbol" class="calc-input mono" placeholder="e.g. 300775 / AAPL" autocomplete="off" autocorrect="off" autocapitalize="characters" />
                         </div>
                         <div class="calc-input-wrap">
-                            <span class="calc-label">INITIAL PRICE</span>
+                            <div class="calc-label-row">
+                                <span class="calc-label">INITIAL PRICE</span>
+                                <button type="button" id="m-delta-rev-init-btn" class="calc-inline-link">REV. CALC</button>
+                            </div>
                             <div class="calc-cur-input-box">
                                 <span id="m-delta-cur-1" class="calc-cur-sym">¥</span>
                                 <input type="number" inputmode="decimal" id="m-delta-initial" class="calc-input mono" placeholder="0.00" step="any" />
@@ -109,7 +118,10 @@
 
                     <div class="calc-grid-row">
                         <div class="calc-input-wrap">
-                            <span class="calc-label">FINAL PRICE</span>
+                            <div class="calc-label-row">
+                                <span class="calc-label">FINAL PRICE</span>
+                                <button type="button" id="m-delta-rev-final-btn" class="calc-inline-link">REV. CALC</button>
+                            </div>
                             <div class="calc-cur-input-box">
                                 <span id="m-delta-cur-2" class="calc-cur-sym">¥</span>
                                 <input type="number" inputmode="decimal" id="m-delta-final" class="calc-input mono" placeholder="0.00" step="any" />
@@ -127,7 +139,10 @@
                     <!-- Result & Save Action Bar -->
                     <div class="calc-footer-row">
                         <div class="calc-res-box">
-                            <span class="calc-res-label">PERCENTAGE DELTA</span>
+                            <div class="calc-label-row">
+                                <span class="calc-res-label">PERCENTAGE DELTA</span>
+                                <button type="button" id="m-delta-use-target-btn" class="calc-inline-link">USE AS TARGET</button>
+                            </div>
                             <div id="m-delta-res-val" class="calc-res-text mono">0.00%</div>
                         </div>
                         <div class="calc-actions-box">

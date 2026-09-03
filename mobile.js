@@ -1153,6 +1153,41 @@
       };
     }
 
+    // Rev. Calc for Target Projection
+    const targetRevBtn = document.getElementById('m-target-rev-btn');
+    if (targetRevBtn) {
+      targetRevBtn.onclick = () => {
+        const currentBase = parseFloat(targetBaseInput ? targetBaseInput.value : 0);
+        const perc = parseFloat(targetPercInput ? targetPercInput.value : 0);
+        if (!isNaN(currentBase) && currentBase > 0 && !isNaN(perc)) {
+          const isUp = targetCalcDir === 'up';
+          let newBase = currentBase;
+          if (isUp) {
+            newBase = currentBase / (1 + perc / 100);
+          } else if (perc !== 100) {
+            newBase = currentBase / (1 - perc / 100);
+          }
+          if (targetBaseInput) targetBaseInput.value = newBase.toFixed(2);
+          calcTargetLive();
+        }
+      };
+    }
+
+    // Use as Entry for Target Projection
+    const targetUseEntryBtn = document.getElementById('m-target-use-entry-btn');
+    if (targetUseEntryBtn) {
+      targetUseEntryBtn.onclick = () => {
+        const base = parseFloat(targetBaseInput ? targetBaseInput.value : 0) || 0;
+        const perc = parseFloat(targetPercInput ? targetPercInput.value : 0) || 0;
+        const isUp = targetCalcDir === 'up';
+        if (base > 0 && perc > 0) {
+          const targetPrice = isUp ? base * (1 + perc / 100) : base * (1 - perc / 100);
+          if (targetBaseInput) targetBaseInput.value = targetPrice.toFixed(2);
+          calcTargetLive();
+        }
+      };
+    }
+
     if (targetSymInput) targetSymInput.addEventListener('input', calcTargetLive);
     if (targetBaseInput) targetBaseInput.addEventListener('input', calcTargetLive);
     if (targetPercInput) targetPercInput.addEventListener('input', calcTargetLive);
@@ -1302,6 +1337,76 @@
           deltaResEl.style.color = diff >= 0 ? '#32d74b' : '#ff453a';
         }
       }
+    }
+
+    // Rev. Calc for Delta Initial Price
+    const deltaRevInitBtn = document.getElementById('m-delta-rev-init-btn');
+    if (deltaRevInitBtn) {
+      deltaRevInitBtn.onclick = () => {
+        const initialVal = parseFloat(deltaInitialInput ? deltaInitialInput.value : 0);
+        const finalVal = parseFloat(deltaFinalInput ? deltaFinalInput.value : 0);
+        if (!isNaN(initialVal) && initialVal > 0 && !isNaN(finalVal)) {
+          const pctDecimal = (finalVal - initialVal) / initialVal;
+          if (pctDecimal === -1) return;
+          const newFinal = initialVal;
+          const newInitial = newFinal / (1 + pctDecimal);
+          if (deltaInitialInput) deltaInitialInput.value = newInitial.toFixed(2);
+          if (deltaFinalInput) deltaFinalInput.value = newFinal.toFixed(2);
+          calcDeltaLive();
+        }
+      };
+    }
+
+    // Rev. Calc for Delta Final Price
+    const deltaRevFinalBtn = document.getElementById('m-delta-rev-final-btn');
+    if (deltaRevFinalBtn) {
+      deltaRevFinalBtn.onclick = () => {
+        const initialVal = parseFloat(deltaInitialInput ? deltaInitialInput.value : 0);
+        const finalVal = parseFloat(deltaFinalInput ? deltaFinalInput.value : 0);
+        if (!isNaN(initialVal) && initialVal > 0 && !isNaN(finalVal) && finalVal > 0) {
+          const pctDecimal = (finalVal - initialVal) / initialVal;
+          const newInitial = finalVal;
+          const newFinal = newInitial * (1 + pctDecimal);
+          if (deltaInitialInput) deltaInitialInput.value = newInitial.toFixed(2);
+          if (deltaFinalInput) deltaFinalInput.value = newFinal.toFixed(2);
+          calcDeltaLive();
+        }
+      };
+    }
+
+    // Use as Target for Percentage Delta
+    const deltaUseTargetBtn = document.getElementById('m-delta-use-target-btn');
+    if (deltaUseTargetBtn) {
+      deltaUseTargetBtn.onclick = () => {
+        const init = parseFloat(deltaInitialInput ? deltaInitialInput.value : 0) || 0;
+        const fin = parseFloat(deltaFinalInput ? deltaFinalInput.value : 0) || 0;
+        if (init > 0 && fin > 0) {
+          const diff = ((fin - init) / init) * 100;
+          const isUp = diff >= 0;
+          if (targetSymInput && deltaSymInput) targetSymInput.value = deltaSymInput.value;
+          if (targetBaseInput) targetBaseInput.value = init.toFixed(2);
+          if (targetPercInput) targetPercInput.value = Math.abs(diff).toFixed(2);
+          targetCalcDir = isUp ? 'up' : 'down';
+          if (targetDirBtn) {
+            targetDirBtn.setAttribute('data-dir', targetCalcDir);
+            targetDirBtn.textContent = targetCalcDir === 'up' ? '▲ UP' : '▼ DOWN';
+            targetDirBtn.classList.toggle('is-up', targetCalcDir === 'up');
+            targetDirBtn.classList.toggle('is-down', targetCalcDir === 'down');
+          }
+          // Switch to Target tab
+          const modeTargetBtn = document.getElementById('m-mode-target');
+          const modeDeltaBtn = document.getElementById('m-mode-delta');
+          const panelTarget = document.getElementById('m-panel-target');
+          const panelDelta = document.getElementById('m-panel-delta');
+          if (modeTargetBtn && modeDeltaBtn && panelTarget && panelDelta) {
+            modeTargetBtn.classList.add('active');
+            modeDeltaBtn.classList.remove('active');
+            panelTarget.classList.remove('hidden');
+            panelDelta.classList.add('hidden');
+          }
+          calcTargetLive();
+        }
+      };
     }
 
     if (deltaSymInput) deltaSymInput.addEventListener('input', calcDeltaLive);
