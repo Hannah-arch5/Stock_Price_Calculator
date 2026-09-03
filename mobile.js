@@ -548,12 +548,12 @@
       ledger.addEventListener('touchmove', (e) => {
         if (!draggingRow) return;
         const touch = e.touches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = touch.clientY - touchStartY;
+        const deltaX = Math.abs(touch.clientX - touchStartX);
+        const deltaY = Math.abs(touch.clientY - touchStartY);
 
         // Cancel hold if finger moved before 200ms hold (allows normal vertical page scroll)
         if (!isDragging) {
-          if (Math.abs(deltaX) > 7 || Math.abs(deltaY) > 7) {
+          if (deltaX > 7 || deltaY > 7) {
             if (dragHoldTimer) {
               clearTimeout(dragHoldTimer);
               dragHoldTimer = null;
@@ -562,14 +562,17 @@
             return;
           }
         } else {
-          // Direct 1:1 finger follow + soft zero-bounce FLIP layout swap
+          // Instant, rock-solid desktop-identical slot insertion
           if (e.cancelable) e.preventDefault();
           hasMoved = true;
-          draggingRow.style.transition = 'none';
-          draggingRow.style.transform = `translate3d(0, ${deltaY}px, 0)`;
-
           const afterElement = getDragAfterElement(ledger, touch.clientY);
-          animateFLIP(ledger, draggingRow, afterElement);
+          if (afterElement !== draggingRow && afterElement !== draggingRow.nextElementSibling) {
+            if (afterElement == null) {
+              ledger.appendChild(draggingRow);
+            } else {
+              ledger.insertBefore(draggingRow, afterElement);
+            }
+          }
         }
       }, { passive: false });
 
@@ -580,20 +583,12 @@
         }
 
         if (isDragging && draggingRow) {
-          const row = draggingRow;
+          draggingRow.classList.remove('dragging');
           draggingRow = null;
           isDragging = false;
-
-          row.style.transition = 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)';
-          row.style.transform = '';
-
-          setTimeout(() => {
-            row.classList.remove('dragging');
-            row.style.transition = '';
-            if (hasMoved) {
-              commitReorderedRecords();
-            }
-          }, 180);
+          if (hasMoved) {
+            commitReorderedRecords();
+          }
         } else if (draggingRow) {
           // Check for Double-Tap on Mobile
           const row = draggingRow;
