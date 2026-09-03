@@ -116,7 +116,8 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Per-card independent color isolation.
   - Bidirectional calculator auto-switching.
 
-### v5.3.0: Ticker Mobile PWA & Real-Time Sync (Current)
+### v5.3.0: Ticker Pocket (Mobile Companion Edition)
+- **Official Version Name**: `Ticker Pocket v5.3.0` (Mobile Edition)
 - **Built-in HTTP & SSE Sync Server**:
   - Electron main process runs lightweight HTTP server on port `7321` serving PWA assets and REST API (`/api/data`, `/api/events`, `/api/server-info`).
   - Automatic LAN IP discovery (`os.networkInterfaces()`) for frictionless connection.
@@ -125,6 +126,7 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Designed strictly to Studio Noir aesthetics: pure OLED black (`#030303`), high-contrast JetBrains Mono & Inter typography, 1px dividers, extreme negative whitespace.
   - Native iOS Web Clip integration: standalone fullscreen mode (`apple-mobile-web-app-capable`, `black-translucent`), customized `apple-touch-icon.png` (with Apple standard padding).
   - iOS Dynamic Island & Home indicator safe area adaptation (`env(safe-area-inset-top/bottom)`).
+  - Touch Interactions: Double-tap to highlight calculation rows, hold-to-reorder calculation rows and stock tags with smooth zero-bounce slot sliding, in-line pencil & add label buttons.
   - Offline cache resilience: LocalStorage caching retains full ledger snapshot even when disconnected or outside LAN.
   - Independent market color isolation: A-Share (red-up/green-down), US/HK (green-up/red-down).
 - **Mac Desktop Integration**:
