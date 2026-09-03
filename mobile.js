@@ -351,6 +351,15 @@
     const highlightCheck = document.getElementById('calc-edit-highlight');
     const chipsContainer = document.getElementById('calc-chips-container');
 
+    const marketInfo = getMarketInfo(symbol);
+    const upColor = marketInfo.isCn ? '#ff453a' : '#32d74b';
+    const downColor = marketInfo.isCn ? '#32d74b' : '#ff453a';
+
+    if (sheet) {
+      sheet.style.setProperty('--modal-up-color', upColor);
+      sheet.style.setProperty('--modal-down-color', downColor);
+    }
+
     if (subtitle) subtitle.textContent = `${group.symbol} ${group.name || ''}`.trim();
     if (typeInput) typeInput.value = rec.type || '';
 

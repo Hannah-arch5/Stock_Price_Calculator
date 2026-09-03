@@ -787,12 +787,14 @@ html, body {
   font-family: 'JetBrains Mono', monospace;
 }
 .dir-toggle-btn[data-dir="up"] {
-  border-color: rgba(50, 215, 75, 0.4);
-  color: #32d74b;
+  border-color: var(--modal-up-color, #32d74b);
+  color: var(--modal-up-color, #32d74b);
+  background: rgba(255, 255, 255, 0.04);
 }
 .dir-toggle-btn[data-dir="down"] {
-  border-color: rgba(255, 69, 58, 0.4);
-  color: #ff453a;
+  border-color: var(--modal-down-color, #ff453a);
+  color: var(--modal-down-color, #ff453a);
+  background: rgba(255, 255, 255, 0.04);
 }
 .perc-unit {
   font-size: 0.8rem;
