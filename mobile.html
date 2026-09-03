@@ -427,28 +427,21 @@
         <div class="sheet-handle-bar"></div>
         <div class="sheet-header">
             <div class="sheet-title-tag">EDIT STOCK METADATA</div>
-            <div id="stock-sheet-subtitle" class="sheet-symbol mono">--</div>
+            <div class="sheet-symbol-title-row">
+                <input id="stock-edit-symbol" type="text" class="sheet-symbol-title-input mono" placeholder="SYMBOL" autocomplete="off" autocorrect="off" autocapitalize="characters" />
+                <span id="stock-edit-name-display" class="sheet-name-title-display">--</span>
+                <input id="stock-edit-name" type="hidden" />
+            </div>
         </div>
         <div class="sheet-body">
             <div class="sheet-row-dual">
                 <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">SYMBOL</label>
-                    <input id="stock-edit-symbol" type="text" class="sheet-input mono" placeholder="300775" />
-                </div>
-                <div class="sheet-field-group flex-1">
-                    <label class="sheet-label">NAME</label>
-                    <input id="stock-edit-name" type="text" class="sheet-input" placeholder="三角防务" />
-                </div>
-            </div>
-
-            <div class="sheet-row-dual">
-                <div class="sheet-field-group flex-1">
                     <label class="sheet-label">COST</label>
-                    <input id="stock-edit-cost" type="number" inputmode="decimal" class="sheet-input mono" placeholder="36.215" step="0.001" />
+                    <input id="stock-edit-cost" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.001" />
                 </div>
                 <div class="sheet-field-group flex-1">
                     <label class="sheet-label">QTY</label>
-                    <input id="stock-edit-qty" type="number" inputmode="numeric" class="sheet-input mono" placeholder="2400" />
+                    <input id="stock-edit-qty" type="number" inputmode="numeric" class="sheet-input mono" placeholder="0" />
                 </div>
             </div>
 
@@ -469,7 +462,7 @@
 
             <div class="sheet-field-group flex-grow-notes">
                 <label class="sheet-label">STRATEGY &amp; TRADING NOTES</label>
-                <textarea id="stock-edit-note" class="sheet-textarea large-note-textarea" placeholder="Strategy & trading notes..."></textarea>
+                <textarea id="stock-edit-note" class="sheet-textarea large-note-textarea" placeholder="Strategy &amp; trading notes..."></textarea>
             </div>
         </div>
         <div class="sheet-footer">

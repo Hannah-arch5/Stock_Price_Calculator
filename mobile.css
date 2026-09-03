@@ -1286,6 +1286,41 @@ html, body {
   letter-spacing: 0.05em;
   margin-top: 2px;
 }
+.sheet-symbol-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 4px;
+}
+.sheet-symbol-title-input {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 2px 4px;
+  max-width: 140px;
+  outline: none;
+  transition: all 0.2s ease;
+  -webkit-appearance: none;
+}
+.sheet-symbol-title-input:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom-style: solid;
+}
+.sheet-name-title-display {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--fg-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
 .sheet-body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -1304,11 +1339,11 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 160px;
+  min-height: 200px;
 }
 .large-note-textarea {
   flex: 1;
-  min-height: 150px;
+  min-height: 190px;
   height: 100%;
 }
 .sheet-row-dual {

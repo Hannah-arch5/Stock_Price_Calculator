@@ -732,6 +732,36 @@
   // ─── 1. Stock Metadata Edit Sheet ────────────────────────────
   let currentEditingStockSymbol = null;
 
+  async function resolveStockNameOnline(sym) {
+    if (!sym) return '';
+    const cleanSym = sym.trim().toUpperCase();
+    const existing = (appState.historyRecords || []).find(g => g.symbol.toUpperCase() === cleanSym && g.name);
+    if (existing && existing.name) return existing.name;
+
+    try {
+      const url = `https://smartbox.gtimg.cn/s3/?v=2&q=${encodeURIComponent(cleanSym)}&t=all`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const match = text.match(/v_hint="(.*?)"/);
+      if (match && match[1]) {
+        const parts = match[1].split('^')[0].split('~');
+        if (parts.length >= 3 && parts[2]) {
+          return JSON.parse('"' + parts[2] + '"');
+        }
+      }
+    } catch (_) {}
+
+    try {
+      const res2 = await fetch(`/api/stock-research?symbol=${encodeURIComponent(cleanSym)}`);
+      if (res2.ok) {
+        const data = await res2.json();
+        if (data && data.name) return data.name;
+      }
+    } catch (_) {}
+
+    return '';
+  }
+
   function openStockEditSheet(symbol) {
     const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
     if (!group) return;
@@ -740,11 +770,9 @@
 
     const sheet = document.getElementById('stock-edit-sheet');
     const backdrop = document.getElementById('edit-sheet-backdrop');
-    const subtitle = document.getElementById('stock-sheet-subtitle');
-
-    if (subtitle) subtitle.textContent = `${group.symbol} ${group.name || ''}`.trim();
     const symEl = document.getElementById('stock-edit-symbol');
     const nameEl = document.getElementById('stock-edit-name');
+    const nameDisplay = document.getElementById('stock-edit-name-display');
     const costEl = document.getElementById('stock-edit-cost');
     const qtyEl = document.getElementById('stock-edit-qty');
     const tfWEl = document.getElementById('stock-edit-tf-w');
@@ -754,12 +782,39 @@
 
     if (symEl) symEl.value = group.symbol || '';
     if (nameEl) nameEl.value = group.name || '';
+    if (nameDisplay) nameDisplay.textContent = group.name || '--';
     if (costEl) costEl.value = group.cost || '';
     if (qtyEl) qtyEl.value = group.qty || '';
     if (tfWEl) tfWEl.value = group.tf_w || '';
     if (tfDEl) tfDEl.value = group.tf_d || '';
     if (tf30El) tf30El.value = group.tf_30 || '';
     if (noteEl) noteEl.value = group.note || '';
+
+    // Bind dynamic symbol change -> auto resolve stock name
+    if (symEl && !symEl.dataset.listenerBound) {
+      symEl.dataset.listenerBound = 'true';
+      let debounceTimer = null;
+
+      const triggerNameLookup = async () => {
+        const enteredSym = (symEl.value || '').trim().toUpperCase();
+        if (!enteredSym) {
+          if (nameEl) nameEl.value = '';
+          if (nameDisplay) nameDisplay.textContent = '--';
+          return;
+        }
+        if (nameDisplay) nameDisplay.textContent = '...';
+        const foundName = await resolveStockNameOnline(enteredSym);
+        if (nameEl) nameEl.value = foundName;
+        if (nameDisplay) nameDisplay.textContent = foundName || '--';
+      };
+
+      symEl.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(triggerNameLookup, 400);
+      });
+      symEl.addEventListener('change', triggerNameLookup);
+      symEl.addEventListener('blur', triggerNameLookup);
+    }
 
     if (backdrop && sheet) {
       backdrop.classList.remove('hidden');
