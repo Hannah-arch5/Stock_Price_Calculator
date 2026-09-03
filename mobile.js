@@ -1056,22 +1056,72 @@
 
   // ─── Part 1: Quick Calculators Controller ──────────────────────
   let targetCalcDir = 'up'; // 'up' | 'down'
+  let isChipsEditMode = false;
 
   function renderPart1Chips() {
     const defaultLabels = ['D买点1', 'D买点2', 'D卖点1', 'D卖点2', 'W买点1', 'W买点2', 'W卖点1', 'W卖点2', '30买点1', '30买点2', '30卖点1', '30卖点2'];
-    const customLabels = (appState.customLabels && appState.customLabels.length > 0) ? appState.customLabels : defaultLabels;
+    if (!appState.customLabels || appState.customLabels.length === 0) {
+      appState.customLabels = defaultLabels;
+    }
+    const customLabels = appState.customLabels;
 
     const targetChipsEl = document.getElementById('m-target-chips-container');
     const deltaChipsEl = document.getElementById('m-delta-chips-container');
 
-    const chipsHtml = customLabels.map(l => `<button type="button" class="calc-chip">${escapeHtml(l)}</button>`).join('');
+    const chipsHtml = customLabels.map((l, idx) => `
+      <button type="button" class="calc-chip" data-index="${idx}">${escapeHtml(l)}</button>
+    `).join('');
 
-    if (targetChipsEl) targetChipsEl.innerHTML = chipsHtml;
-    if (deltaChipsEl) deltaChipsEl.innerHTML = chipsHtml;
+    if (targetChipsEl) {
+      targetChipsEl.innerHTML = chipsHtml;
+      targetChipsEl.classList.toggle('chips-edit-mode', isChipsEditMode);
+    }
+    if (deltaChipsEl) {
+      deltaChipsEl.innerHTML = chipsHtml;
+      deltaChipsEl.classList.toggle('chips-edit-mode', isChipsEditMode);
+    }
+
+    const editBtns = [document.getElementById('m-target-edit-chips-btn'), document.getElementById('m-delta-edit-chips-btn')];
+    editBtns.forEach(btn => {
+      if (btn) {
+        btn.textContent = isChipsEditMode ? 'DONE' : 'EDIT';
+        btn.classList.toggle('active', isChipsEditMode);
+      }
+    });
+  }
+
+  function handleAddChip() {
+    const name = prompt('Enter new label name:');
+    if (name && name.trim()) {
+      const cleanName = name.trim();
+      if (!appState.customLabels) appState.customLabels = [];
+      if (!appState.customLabels.includes(cleanName)) {
+        appState.customLabels.push(cleanName);
+        saveToCache(appState);
+        renderPart1Chips();
+        pushDataToServer(appState);
+      }
+    }
+  }
+
+  function handleToggleEditChips() {
+    isChipsEditMode = !isChipsEditMode;
+    renderPart1Chips();
   }
 
   function setupPart1Calculators() {
     renderPart1Chips();
+
+    // Bind Add & Edit Label Buttons
+    const addBtns = [document.getElementById('m-target-add-chip-btn'), document.getElementById('m-delta-add-chip-btn')];
+    addBtns.forEach(btn => {
+      if (btn) btn.onclick = handleAddChip;
+    });
+
+    const editBtns = [document.getElementById('m-target-edit-chips-btn'), document.getElementById('m-delta-edit-chips-btn')];
+    editBtns.forEach(btn => {
+      if (btn) btn.onclick = handleToggleEditChips;
+    });
 
     // 1. Mode Switcher
     const modeTargetBtn = document.getElementById('m-mode-target');
@@ -1197,7 +1247,17 @@
     if (targetChipsRow) {
       targetChipsRow.addEventListener('click', (e) => {
         const chip = e.target.closest('.calc-chip');
-        if (chip && targetTypeInput) {
+        if (!chip) return;
+        const idx = parseInt(chip.getAttribute('data-index'), 10);
+
+        if (isChipsEditMode) {
+          if (confirm(`Delete label "${appState.customLabels[idx]}"?`)) {
+            appState.customLabels.splice(idx, 1);
+            saveToCache(appState);
+            renderPart1Chips();
+            pushDataToServer(appState);
+          }
+        } else if (targetTypeInput) {
           targetTypeInput.value = chip.textContent.trim();
           targetChipsRow.querySelectorAll('.calc-chip').forEach(c => c.classList.remove('selected'));
           chip.classList.add('selected');
@@ -1418,7 +1478,17 @@
     if (deltaChipsRow) {
       deltaChipsRow.addEventListener('click', (e) => {
         const chip = e.target.closest('.calc-chip');
-        if (chip && deltaTypeInput) {
+        if (!chip) return;
+        const idx = parseInt(chip.getAttribute('data-index'), 10);
+
+        if (isChipsEditMode) {
+          if (confirm(`Delete label "${appState.customLabels[idx]}"?`)) {
+            appState.customLabels.splice(idx, 1);
+            saveToCache(appState);
+            renderPart1Chips();
+            pushDataToServer(appState);
+          }
+        } else if (deltaTypeInput) {
           deltaTypeInput.value = chip.textContent.trim();
           deltaChipsRow.querySelectorAll('.calc-chip').forEach(c => c.classList.remove('selected'));
           chip.classList.add('selected');

@@ -299,15 +299,58 @@ html, body {
   pointer-events: none;
 }
 
-/* Quick Label Chips */
+/* Quick Label Chips & Tools */
+.calc-chips-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: -2px;
+}
+
 .calc-label-chips-row {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
-  margin-top: -2px;
+  flex: 1;
+}
+
+.calc-chips-tools {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.calc-chip-tool-btn {
+  background: transparent;
+  color: var(--fg-dim);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+}
+.calc-chip-tool-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.calc-chip-tool-btn.active {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff453a;
+  border-color: rgba(255, 69, 58, 0.4);
 }
 
 .calc-chip {
+  position: relative;
   background: rgba(255, 255, 255, 0.02);
   color: var(--fg-dim);
   border: 1px solid var(--border);
@@ -322,6 +365,24 @@ html, body {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Edit / Delete Mode for Chips */
+.chips-edit-mode .calc-chip {
+  border-style: dashed;
+  border-color: rgba(255, 69, 58, 0.5);
+  color: #ff9f9a;
+  padding-right: 18px;
+}
+.chips-edit-mode .calc-chip::after {
+  content: '×';
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ff453a;
 }
 
 /* Action Link Above Box */
