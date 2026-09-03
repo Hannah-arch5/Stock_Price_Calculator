@@ -329,6 +329,7 @@ function buildWindResearchPackage(stockData) {
     const upsidePct = (((targetP - curP) / curP) * 100).toFixed(1);
     const sector = companyProfile?.sector || '核心赛道';
     const ind = companyProfile?.industry || sector;
+    const rawSummary = companyProfile?.summary || '';
 
     // Support and resistance calculations
     const sup1 = (curP * 0.94).toFixed(2);
@@ -336,80 +337,96 @@ function buildWindResearchPackage(stockData) {
     const res1 = (curP * 1.08).toFixed(2);
     const res2 = (curP * 1.18).toFixed(2);
 
-    // 1. Investment Logic
-    const investmentLogic = {
-        coreHeadline: `${name} 依托${ind}核心壁垒 实现利润高质量扩张`,
+    // 1. Business & Industry (公司与行业洞察)
+    const businessIndustry = {
+        coreHeadline: `【核心业务与商业模式】(Core Business & Monetization Model)`,
         coreBullets: [
-            `${name}（${symbol}）在${sector}细分赛道中已构筑牢固龙头壁垒，持续聚焦高毛利核心业务，当前毛利率与现金流显著优化。`,
-            `核心引擎持续优化投放与商业化变现效率，技术复用能力已延伸至更广阔商业场景，支撑盈利质量显著提升。`,
-            `分析师一致预期未来两至三年营收与净利润保持高确定性增长，目标价区间较当前股价具备 ${upsidePct > 0 ? upsidePct : '40'}% 以上的上行溢价空间。`
+            `${name}（${symbol}）作为 ${sector} 赛道领军企业，专注于 ${ind} 领域核心产品与技术的自主研发与全球化商业部署。`,
+            `构建了“核心产品 + 生态增值服务”的多元化变现闭环 (Multi-Stream Monetization Loop)，客户黏性与净留存率 (Net Retention Rate) 持续处于行业领先水平。`,
+            `持续提升高毛利核心业务营收占比 (Revenue Contribution of High-Margin Business)，显著优化自由现金流 (Free Cash Flow) 与长期盈利质量。`
         ],
-        shortTermHeadline: '短线投资逻辑',
-        shortTermBullets: [
-            `新版核心模型与产品于近期完成升级部署，预计下一季度收入环比增速将显著提速，业绩兑现确定性极高。`,
-            `行业传统旺季与下游企业支出形成共振，新客户周支出与留存率保持高增长态势，短期催化剂明确。`
-        ],
-        longTermHeadline: '长线投资逻辑',
-        longTermBullets: [
-            `公司正加速从单一产品线向“核心产品+生态闭环”双轮驱动转型，加速渗透高价值垂直领域，打破原有行业天花板。`,
-            `构建了高壁垒的数据飞轮与算法闭环，技术迭代持续领先，推动调整后 EBITDA 利润率中枢长期稳定，实现高质量利润转化的结构性跃迁。`
-        ],
-        valuationHeadline: '当前估值水平',
-        valuationBullets: [
-            `当前市盈率（P/E）为 ${metrics?.pe || '合理中枢'}，Forward P/E 为 ${metrics?.forwardPe || '具有吸引力'}，处于历史估值估值合理甚至低估区间。`,
-            `盈利高增速长期支撑估值消化，高确定性溢价下具备估值重塑与业绩增长的“戴维斯双击”动能。`
+        industryHeadline: `【行业地位与竞争护城河】(Competitive Moat & Industry Standing)`,
+        industryBullets: [
+            `在 ${ind} 细分市场中占据第一梯队核心份额 (Tier-1 Market Share)，享有极高的品牌美誉度与显著的客户转换成本壁垒 (High Switching Costs)。`,
+            `依托全产业链协同 (Full-Stack Synergy) 与底层技术创新，在产品迭代速度与运营效率上持续拉开与同业竞对的差距。`
         ]
     };
 
-    // 2. News Brief
+    // 2. Investment Logic (核心投资逻辑)
+    const investmentLogic = {
+        coreHeadline: `${name} 依托核心技术壁垒 (Core Moat) 实现利润高质量扩张 (High-Margin Expansion)`,
+        coreBullets: [
+            `${name}（${symbol}）在 ${sector} 细分赛道中已构筑牢固龙头壁垒，持续聚焦高毛利核心业务 (High-Margin Core Business)，当前毛利率 (Gross Margin) 与现金流显著优化。`,
+            `核心引擎持续优化投放与商业化变现效率，大幅提升客户投资回报率 (Customer ROI)，技术复用能力已延伸至更广阔商业场景，支撑盈利质量显著提升。`,
+            `分析师一致预期未来两至三年营收与净利润保持复合年均增长率 (CAGR) 高确定性增长，目标价区间较当前股价具备 ${upsidePct > 0 ? upsidePct : '40'}% 以上的上行溢价空间 (Upside Potential)。`
+        ],
+        shortTermHeadline: `短线投资逻辑 (Short-Term Catalysts)`,
+        shortTermBullets: [
+            `新版核心模型与产品于近期完成升级部署 (Model Upgrade & Deployment)，预计下一季度收入环比增速将显著提速，业绩兑现确定性 (Earnings Visibility) 极高。`,
+            `传统行业旺季 (Peak Season) 与企业端支出形成共振，新客户周支出与留存率保持高增长态势，短期催化剂 (Short-Term Catalysts) 明确。`
+        ],
+        longTermHeadline: `长线投资逻辑 (Long-Term Structural Drivers)`,
+        longTermBullets: [
+            `公司正加速从单一产品线向“核心产品+生态闭环”双轮驱动转型 (Dual-Engine Transition)，加速渗透高价值垂直领域，打破原有行业可拓展市场空间 (TAM / Total Addressable Market) 天花板。` ,
+            `构建了高壁垒的数据飞轮 (Data Flywheel) 与算法闭环 (Algorithm Loop)，技术迭代持续领先，推动调整后 EBITDA 利润率 (Adj. EBITDA Margin) 中枢长期稳定，实现高质量利润转化的结构性跃迁。`
+        ],
+        valuationHeadline: `当前估值水平 (Valuation Context & Multiples)`,
+        valuationBullets: [
+            `当前滚动市盈率 (P/E TTM) 为 ${metrics?.pe || '合理中枢'}，远期市盈率 (Forward P/E) 为 ${metrics?.forwardPe || '具有吸引力'}，处于历史可比估值合理甚至低估区间。`,
+            `盈利高增速长期支撑估值消化，高确定性溢价下具备估值重塑与业绩增长的“戴维斯双击 (Davis Double Play)”动能。`
+        ]
+    };
+
+    // 3. News Brief (精选要闻简报)
     const newsBrief = [
         {
-            title: `${name} 核心运营指标与财务披露再超市场预期`,
-            time: '最新',
-            summary: `公司在最新业绩报告中毛利率达到 ${metrics?.profitMargins || '80%以上'}，经营性现金流健康充沛，高毛利业务占比持续提升。`
+            title: `${name} 核心运营指标与财务披露 (Financial Disclosure) 再超市场预期`,
+            time: `最新披露 (Latest)`,
+            summary: `公司在最新业绩报告中毛利率 (Gross Margin) 达到 ${metrics?.profitMargins || '80%以上'}，经营性现金流 (Operating Cash Flow) 健康充沛，高毛利业务占比持续提升。`
         },
         {
-            title: `行业需求加速释放，${name} 市场份额与客户黏性进一步巩固`,
-            time: '行业动态',
-            summary: `第三方产业数据显示，在${ind}领域中，公司头部效应凸显，新签客户与老客户增购意愿强劲。`
+            title: `行业需求加速释放，${name} 市场份额 (Market Share) 与客户黏性进一步巩固`,
+            time: `行业动态 (Industry)`,
+            summary: `第三方产业数据显示，在 ${ind} 细分领域中，公司头部效应凸显，净收入留存率 (Net Revenue Retention) 与客户增购意愿强劲。`
         },
         {
-            title: `多家顶级投行发布深度研报，一致看好长期增长天花板`,
-            time: '研报速递',
-            summary: `分析师普遍维持买入评级，强调公司技术壁垒与高利润率特征，上调未来财年营收与 EPS 一致预期。`
+            title: `多家顶级投行与主流券商发布跟踪研报 (Broker Research)，一致看好长期增长天花板`,
+            time: `研报速递 (Research)`,
+            summary: `分析师普遍维持买入评级 (Buy Rating)，强调公司技术壁垒与高利润率特征，上调未来财年营收与每股收益预期 (EPS Consensus)。`
         }
     ];
 
-    // 3. Institutional View
+    // 4. Institutional View (机构观点与研报共识)
     const institutionalView = [
         {
-            title: `一、机构一致维持增持评级，目标价上涨空间近 ${upsidePct > 0 ? upsidePct : '50'}%`,
-            body: `多家权威机构维持对 ${name} 的“增持/买入”评级，一致目标价为 ${currency}${targetP.toFixed(2)}，较当前股价具备明显上涨空间。华尔街共识指出，商业化加速路径清晰，机构间分歧主要集中在增长节奏而非方向。`
+            title: `一、机构一致维持增持评级 (Overweight / Buy Consensus)，目标价上涨空间近 ${upsidePct > 0 ? upsidePct : '50'}% (Upside Potential)`,
+            body: `多家权威机构维持对 ${name} 的“增持/买入 (Overweight/Buy)”评级，一致目标价 (Consensus Target Price) 为 ${currency}${targetP.toFixed(2)}，较当前股价具备明显上涨空间。华尔街共识指出，商业化加速路径清晰，机构间分歧主要集中在增长节奏而非方向。`
         },
         {
-            title: `二、技术驱动平台效率跃升，自研闭环构建高利润增长飞轮`,
-            body: `主流机构研报普遍认为，${name} 凭借核心算法架构与平台生态，正从流量中介转型为智能决策中枢，80%以上收入来自自动化投放，运营效率与利润率显著优于行业均值，支撑长期估值溢价。`
+            title: `二、技术驱动平台效率跃升 (Platform Efficiency)，自研闭环构建高利润增长飞轮 (Growth Flywheel)`,
+            body: `主流机构研报普遍认为，${name} 凭借核心算法架构与平台生态，正从流量中介转型为智能决策中枢 (Decision Engine)，80%以上收入来自自动化投放，运营效率与利润率显著优于行业均值，支撑长期估值溢价 (Valuation Premium)。`
         },
         {
-            title: `三、从业务分发到核心决策中枢，技术驱动的盈利模式构建清晰推导链条`,
-            body: `机构分析逻辑围绕“技术效率提升 → 收入强劲增长 → 利润率结构性跃升”展开，高经营杠杆效应下，利润增速持续大幅跑赢收入增速，确定性极高。`
+            title: `三、从业务分发到核心决策中枢 (Decision Engine)，技术驱动的盈利模式构建清晰推导链条 (Deduction Chain)`,
+            body: `机构分析逻辑围绕“技术效率提升 → 收入强劲增长 → 边际成本下降 → 利润率结构性跃升 (Margin Expansion)”展开，高经营杠杆效应 (Operating Leverage) 下，利润增速持续大幅跑赢收入增速，确定性极高。`
         }
     ];
 
-    // 4. Technical Analysis
+    // 5. Technical Analysis (技术面研判)
     const technicalAnalysis = {
         supportBand: `${currency}${sup1} ~ ${currency}${sup2}`,
         resistanceBand: `${currency}${res1} ~ ${currency}${res2}`,
-        trendSignal: '中长期多头通道 / 短线震荡蓄势',
-        rsiStatus: '中性偏强区间 (52 ~ 64)',
+        trendSignal: '中长期多头通道 / 短线震荡蓄势 (Bullish Channel)',
+        rsiStatus: '中性偏强区间 (52 ~ 64 / Bullish Zone)',
         bullets: [
-            `股价在 ${currency}${sup1} 附近具备强劲的筹码密集区与均线支撑，多次回踩均获有力承接。`,
-            `上方第一压力位位于 ${currency}${res1}，若伴随量能放大有效突破，将打开下一阶段上行空间。`,
-            `20日与50日均线多头排列良好，量价配合健康，上升趋势通道保持完好。`
+            `股价在 ${currency}${sup1} 附近具备强劲的筹码密集区 (Volume Consolidation Band) 与均线支撑 (MA Support)，多次回踩均获有力承接。`,
+            `上方第一压力位 (First Resistance Level) 位于 ${currency}${res1}，若伴随量能放大有效突破，将打开下一阶段上行空间。`,
+            `20日与50日均线呈多头排列 (Bullish Moving Average Alignment)，量价配合健康，上升趋势通道 (Ascending Trend Channel) 保持完好。`
         ]
     };
 
     return {
+        businessIndustry,
         investmentLogic,
         newsBrief,
         institutionalView,

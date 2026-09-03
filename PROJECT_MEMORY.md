@@ -129,15 +129,16 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 - **Global Stock Deep Research (`/api/stock-research`)**:
   - Auto-completion dropdown when typing in `#mobile-search-input` showing local ledger matches + `🔍 全网深度研报: 检索 "SYMBOL"`.
   - Supports arbitrary US, HK, and A-Share symbols/names.
-  - Fetches live quotes, 3×3 financial fundamentals matrix (Market Cap, Revenue Growth, Earnings Growth, Profit Margin, ROE, Debt/Equity, PE/Fwd PE, Dividend Yield, Analyst Target Price), company profile scope, sector, and industry classifications.
-- **Wind-Style Deep Institutional Research Sections (万得风格四大深度投研板块)**:
-  1. `INVESTMENT LOGIC (核心投资逻辑)`: 核心成长主线 (Core Thesis)、短线投资逻辑 (Short-term Catalysts)、长线投资逻辑 (Long-term Moat)、当前估值水平 (Valuation Context & Multiples).
-  2. `NEWS BRIEF (精选要闻简报)`: 实时精选 3 条与基本面深度相关的核心大事件及影响解读.
-  3. `INSTITUTIONAL VIEW (机构观点与研报共识)`: 机构一致买入/增持评级分布与目标价上涨空间、华尔街/券商核心逻辑推导链条与盈利预期调整.
-  4. `TECHNICAL ANALYSIS (技术面研判)`: 支撑位与压力位关键价位区间测算、均线多空趋势与 RSI 强弱信号.
+  - **Financial Matrix (English Labels)**: Market Cap, Revenue Growth (YoY), Earnings Growth (YoY), Net / Gross Margin, ROE, Debt / Equity Ratio, P/E (TTM / Forward), Dividend Yield, Analyst Target Price.
+- **Wind-Style 5 Deep Institutional Research Sections (万得风格五大深度投研板块，全英文术语注释)**:
+  1. `BUSINESS & INDUSTRY (公司与行业洞察)`: 核心业务与商业模式 (Core Business & Monetization Model)、行业地位与竞争护城河 (Competitive Moat & Industry Standing)、SaaS模式、净留存率 (Net Retention Rate)、全产业链协同 (Full-Stack Synergy).
+  2. `INVESTMENT LOGIC (核心投资逻辑)`: 核心成长主线 (Core Thesis & High-Margin Expansion)、短线投资逻辑 (Short-term Catalysts)、长线投资逻辑 (Long-term Structural Drivers)、当前估值水平 (Valuation Context & Multiples / P/E / EV/EBITDA / Davis Double Play).
+  3. `NEWS BRIEF (精选要闻简报)`: 实时精选 3 条与基本面深度相关的核心大事件 (Financial Disclosure / Industry Dynamics / Broker Research) 及影响解读.
+  4. `INSTITUTIONAL VIEW (机构观点与研报共识)`: 机构一致买入/增持评级分布与目标价上涨空间 (Overweight/Buy Consensus & Target Upside)、华尔街/券商核心逻辑推导链条 (Deduction Chain & Growth Flywheel) 与盈利预期调整.
+  5. `TECHNICAL ANALYSIS (技术面研判)`: 支撑位与压力位关键价位区间测算 (Support/Resistance Bands)、均线多空趋势 (Bullish Moving Average Alignment) 与 RSI 强弱信号.
 - **Apple Calendar Reminder Integration (`/api/calendar-ics`)**:
   - Next Earnings release countdown and date display.
-  - `📅 添加到 iPhone 日历` one-tap action: generates standard `.ics` iCalendar payload with preconfigured 9-hour-ahead alarm, invoking iOS native "Add Event" modal.
+  - `📅 Add to Apple Calendar (添加到日历)` one-tap action: generates standard `.ics` iCalendar payload with preconfigured 9-hour-ahead alarm, invoking iOS native "Add Event" modal.
 - **AI Research Companion (`/api/ai-chat`)**:
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.

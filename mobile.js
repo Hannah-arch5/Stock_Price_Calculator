@@ -2415,11 +2415,30 @@
 
       // Sector & Industry
       const prof = data.companyProfile || {};
-      if (sectorEl) sectorEl.textContent = `板块: ${prof.sector || '综合'}`;
-      if (indEl) indEl.textContent = `细分: ${prof.industry || '一般行业'}`;
-      if (sumEl) sumEl.textContent = prof.summary || '暂无详细业务介绍';
+      if (sectorEl) sectorEl.textContent = `Sector: ${prof.sector || '科技 / 综合'}`;
+      if (indEl) indEl.textContent = `Industry: ${prof.industry || '核心赛道'}`;
 
-      // 1. Investment Logic (Wind Style)
+      // 1. Business & Industry (Wind Style)
+      const bizEl = document.getElementById('res-m-business-industry');
+      if (bizEl && data.businessIndustry) {
+        const bi = data.businessIndustry;
+        let html = '';
+        if (bi.coreHeadline) html += `<div class="wind-headline">${escapeHtml(bi.coreHeadline)}</div>`;
+        if (bi.coreBullets && bi.coreBullets.length) {
+          html += `<div class="wind-bullet-list">`;
+          bi.coreBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          html += `</div>`;
+        }
+        if (bi.industryHeadline) html += `<div class="wind-subhead">${escapeHtml(bi.industryHeadline)}</div>`;
+        if (bi.industryBullets && bi.industryBullets.length) {
+          html += `<div class="wind-bullet-list">`;
+          bi.industryBullets.forEach(b => html += `<div class="wind-bullet-item">${escapeHtml(b)}</div>`);
+          html += `</div>`;
+        }
+        bizEl.innerHTML = html;
+      }
+
+      // 2. Investment Logic (Wind Style)
       const logicEl = document.getElementById('res-m-investment-logic');
       if (logicEl && data.investmentLogic) {
         const il = data.investmentLogic;
