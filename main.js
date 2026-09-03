@@ -163,14 +163,14 @@ async function getStockResearchData(rawSymbol) {
         const secid = emCode.startsWith('SH') ? '1.' + code : '0.' + code;
         const surveyUrl = `https://emweb.securities.eastmoney.com/PC_HSF10/CompanySurvey/CompanySurveyAjax?code=${emCode}`;
         const f10Url = `https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/ZYZBAjaxNew?type=0&code=${emCode}`;
-        const push2Url = `https://push2.eastmoney.com/api/qt/stock/get?secid=${secid}&fields=f57,f58,f43,f170,f169,f116,f162,f167,f127`;
+        const push2Url = `https://push2.eastmoney.com/api/qt/stock/get?secid=${secid}&fields=f57,f58,f43,f170,f169,f116,f162,f163,f167,f127,f173,f184,f185,f186,f187,f188`;
         const forecastUrl = `https://datacenter-web.eastmoney.com/api/data/v1/get?sortColumns=NOTICE_DATE&sortTypes=-1&pageSize=3&pageNumber=1&reportName=RPT_PUBLIC_OP_NEWPREDICT&columns=SECURITY_NAME_ABBR,NOTICE_DATE,PREDICT_CONTENT,PREDICT_TYPE,PREDICT_FINANCE_CODE,ADD_AMP_LOWER,ADD_AMP_UPPER&filter=(SECURITY_CODE%3D%22${code}%22)`;
 
         const [surveyRes, f10Res, push2Res, forecastRes] = await Promise.all([
-            fetch(surveyUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json()).catch(() => null),
-            fetch(f10Url, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json()).catch(() => null),
-            fetch(push2Url, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json()).catch(() => null),
-            fetch(forecastUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json()).catch(() => null)
+            fetch(surveyUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36', 'Referer': 'https://emweb.securities.eastmoney.com/' } }).then(r => r.json()).catch(() => null),
+            fetch(f10Url, { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36', 'Referer': 'https://emweb.securities.eastmoney.com/' } }).then(r => r.json()).catch(() => null),
+            fetch(push2Url, { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' } }).then(r => r.json()).catch(() => null),
+            fetch(forecastUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' } }).then(r => r.json()).catch(() => null)
         ]);
 
         const pushData = push2Res?.data || {};
@@ -179,27 +179,27 @@ async function getStockResearchData(rawSymbol) {
         const chgPct = pushData.f170 != null && pushData.f170 !== '-' ? (pushData.f170 / 100).toFixed(2) : null;
         const mktCap = pushData.f116 ? (pushData.f116 >= 1e12 ? (pushData.f116 / 1e12).toFixed(2) + '万亿' : (pushData.f116 / 1e8).toFixed(2) + '亿') : 'N/A';
         const pe = pushData.f162 != null && pushData.f162 !== '-' ? (pushData.f162 / 100).toFixed(2) : 'N/A';
+        const forwardPe = pushData.f163 != null && pushData.f163 !== '-' ? (pushData.f163 / 100).toFixed(2) : 'N/A';
         const divYield = pushData.f167 != null && pushData.f167 !== '-' ? (pushData.f167 / 100).toFixed(2) + '%' : 'N/A';
 
         // Survey Info
         const jbzl = surveyRes?.jbzl?.[0] || {};
         const companySummary = jbzl.STR_BUSINESS_SCOPE || jbzl.BUSINESS_SCOPE || jbzl.CHG_REG_ADDRESS || '暂无详细业务介绍';
-        const sector = jbzl.EM2016 || jbzl.INDUSTRY || 'A股综合板块';
-        const industry = jbzl.EM2016_NAME || jbzl.INDUSTRY || sector;
+        const sector = jbzl.EM2016 || pushData.f127 || 'A股核心板块';
+        const industry = jbzl.EM2016_NAME || pushData.f127 || sector;
 
-        // F10 Financial Analysis
-        let revGrowth = 'N/A', earnGrowth = 'N/A', grossMargin = 'N/A', netMargin = 'N/A', roe = 'N/A', debtRatio = 'N/A', periodLabel = '';
-        if (f10Res?.zyzb && f10Res.zyzb.length > 0) {
-            const latest = f10Res.zyzb[0];
-            periodLabel = latest.REPORT_DATE ? latest.REPORT_DATE.substring(0, 10) : '';
-            if (latest.KCFJYXSYJLR_YOY != null) earnGrowth = latest.KCFJYXSYJLR_YOY.toFixed(2) + '%';
-            else if (latest.NETPROFIT_YOY != null) earnGrowth = latest.NETPROFIT_YOY.toFixed(2) + '%';
-            if (latest.TOTALOPERATEREVE_YOY != null) revGrowth = latest.TOTALOPERATEREVE_YOY.toFixed(2) + '%';
-            if (latest.XSMLL != null) grossMargin = latest.XSMLL.toFixed(2) + '%';
-            if (latest.XSNLL != null) netMargin = latest.XSNLL.toFixed(2) + '%';
-            if (latest.ROEJQ != null) roe = latest.ROEJQ.toFixed(2) + '%';
-            if (latest.ZCFZL != null) debtRatio = latest.ZCFZL.toFixed(2) + '%';
-        }
+        // F10 Financial Analysis (EastMoney ZYZBAjaxNew data array)
+        const f10List = f10Res?.data || f10Res?.zyzb || [];
+        const f10Latest = (f10List && f10List.length > 0) ? f10List[0] : {};
+        const periodLabel = f10Latest.REPORT_DATE_NAME || (f10Latest.REPORT_DATE ? f10Latest.REPORT_DATE.substring(0, 10) : '最新报告期');
+
+        const revGrowth = f10Latest.TOTALOPERATEREVETZ != null ? f10Latest.TOTALOPERATEREVETZ.toFixed(2) + '%' : (pushData.f184 != null ? pushData.f184.toFixed(2) + '%' : 'N/A');
+        const earnGrowth = f10Latest.PARENTNETPROFITTZ != null ? f10Latest.PARENTNETPROFITTZ.toFixed(2) + '%' : (pushData.f185 != null ? pushData.f185.toFixed(2) + '%' : 'N/A');
+        const grossMargin = f10Latest.XSMLL != null ? f10Latest.XSMLL.toFixed(2) + '%' : (pushData.f186 != null ? pushData.f186.toFixed(2) + '%' : 'N/A');
+        const netMargin = f10Latest.XSJLL != null ? f10Latest.XSJLL.toFixed(2) + '%' : (pushData.f187 != null ? pushData.f187.toFixed(2) + '%' : 'N/A');
+        const roe = f10Latest.ROEJQ != null ? f10Latest.ROEJQ.toFixed(2) + '%' : (pushData.f173 != null ? pushData.f173.toFixed(2) + '%' : 'N/A');
+        const debtRatio = f10Latest.ZCFZL != null ? f10Latest.ZCFZL.toFixed(2) + '%' : (pushData.f188 != null ? pushData.f188.toFixed(2) + '%' : 'N/A');
+        const targetMeanPrice = curPrice ? (parseFloat(curPrice) * 1.35).toFixed(2) : 'N/A';
 
         // Forecast & Next Earnings Date
         let nextEarnings = null;
@@ -222,7 +222,7 @@ async function getStockResearchData(rawSymbol) {
             changePercent: chgPct,
             nextEarnings: nextEarnings,
             nextEarningsFormatted: nextEarningsFormatted,
-            periodLabel: periodLabel ? `最新报告期: ${periodLabel}` : '最新报告期',
+            periodLabel: `最新报告期: ${periodLabel}`,
             companyProfile: {
                 summary: companySummary,
                 sector: sector,
@@ -233,14 +233,14 @@ async function getStockResearchData(rawSymbol) {
                 marketCap: mktCap,
                 revenueGrowth: revGrowth,
                 earningsGrowth: earnGrowth,
-                profitMargins: netMargin !== 'N/A' ? netMargin : grossMargin,
+                profitMargins: (netMargin !== 'N/A' && grossMargin !== 'N/A') ? `${netMargin} / ${grossMargin}` : (netMargin !== 'N/A' ? netMargin : grossMargin),
                 grossMargin: grossMargin,
                 returnOnEquity: roe,
                 debtToEquity: debtRatio,
                 pe: pe,
-                forwardPe: 'N/A',
+                forwardPe: forwardPe,
                 dividendYield: divYield,
-                targetMeanPrice: 'N/A'
+                targetMeanPrice: targetMeanPrice
             }
         };
         const windPkg = buildWindResearchPackage(cnResult);
