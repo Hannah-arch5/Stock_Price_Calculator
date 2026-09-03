@@ -1,12 +1,16 @@
 /**
  * Ticker Mobile - Studio Noir Mobile PWA Client
- * Real-time SSE synchronization + LocalStorage Offline Persistence + Cloud Edit
+ * Real-time SSE synchronization + LocalStorage Offline Persistence + Bidirectional Cloud Edit
  */
 
 (function () {
   let appState = {
     historyRecords: [],
-    customLabels: [],
+    customLabels: [
+      "30买点2", "30卖点2", "M已跌", "目前30已跌", "目前D已跌",
+      "目前30已涨", "目前D已涨", "D买点2", "D卖点2", "30买点1",
+      "W卖点2", "30卖点1", "D卖点1", "W卖点1", "W买点1", "D买点1"
+    ],
     lastUpdated: null,
   };
 
@@ -53,7 +57,6 @@
         return `Base: ${record.currency || ''}${record.inputs.initial} → Target: ${record.currency || ''}${record.inputs.final}`;
       }
     }
-    // Fallback: parse HTML tags into plain text
     const tmp = document.createElement('div');
     tmp.innerHTML = detailsHtml;
     return tmp.textContent.replace(/\s+/g, ' ').trim();
@@ -119,7 +122,6 @@
     // Build HTML
     container.innerHTML = filtered.map((group, groupIdx) => {
       const marketInfo = getMarketInfo(group.symbol);
-      // Determine local card up/down colors based on market
       const upColor = marketInfo.isCn ? '#ff453a' : '#32d74b';
       const downColor = marketInfo.isCn ? '#32d74b' : '#ff453a';
 
@@ -131,8 +133,8 @@
 
       // Cost & Qty
       const costQtyItems = [];
-      if (group.cost) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Cost:</span> <span class="meta-val-highlight mono">${group.cost}</span></span>`);
-      if (group.qty) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Qty:</span> <span class="meta-val-highlight mono">${group.qty}</span></span>`);
+      if (group.cost) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Cost:</span> <span class="meta-val-highlight mono">${escapeHtml(group.cost)}</span></span>`);
+      if (group.qty) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Qty:</span> <span class="meta-val-highlight mono">${escapeHtml(group.qty)}</span></span>`);
 
       // Calculations Ledger Rows
       const recordsHtml = (group.records || []).map((r, rIdx) => {
@@ -149,9 +151,9 @@
               <div class="record-formula mono">${escapeHtml(formulaStr)}</div>
               ${sharesHtml}
             </div>
-            <div class="record-right" style="display: flex; align-items: center; gap: 8px;">
+            <div class="record-right">
               <div class="record-result mono ${colorClass}">${escapeHtml(r.result || '--')}</div>
-              <button class="edit-pencil-btn" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="Edit target">✎</button>
+              <button class="edit-pencil-btn calc-edit-trigger" data-symbol="${escapeHtml(group.symbol)}" data-record="${rIdx}" title="Edit calculation">✎</button>
             </div>
           </div>
         `;
@@ -179,9 +181,9 @@
                 <span class="stock-symbol mono">${escapeHtml(group.symbol)}</span>
                 ${group.name ? `<span class="stock-name">${escapeHtml(group.name)}</span>` : ''}
               </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="card-title-right">
                 <span class="market-tag">${marketInfo.label}</span>
-                <button class="edit-pencil-btn" data-symbol="${escapeHtml(group.symbol)}" title="Edit stock note">✎</button>
+                <button class="edit-pencil-btn stock-edit-trigger" data-symbol="${escapeHtml(group.symbol)}" title="Edit stock metadata">✎</button>
               </div>
             </div>
 
@@ -217,15 +219,24 @@
       };
     });
 
-    // Attach edit pencil clicks
-    document.querySelectorAll('.edit-pencil-btn').forEach(btn => {
+    // Attach Stock Edit triggers
+    document.querySelectorAll('.stock-edit-trigger').forEach(btn => {
       btn.onclick = function (e) {
         e.preventDefault();
         e.stopPropagation();
         const symbol = this.getAttribute('data-symbol');
-        const recordIdxStr = this.getAttribute('data-record');
-        const recordIdx = recordIdxStr !== null ? parseInt(recordIdxStr, 10) : null;
-        openEditSheet(symbol, recordIdx);
+        openStockEditSheet(symbol);
+      };
+    });
+
+    // Attach Calculation Edit triggers
+    document.querySelectorAll('.calc-edit-trigger').forEach(btn => {
+      btn.onclick = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const symbol = this.getAttribute('data-symbol');
+        const recordIdx = parseInt(this.getAttribute('data-record'), 10);
+        openCalcEditSheet(symbol, recordIdx);
       };
     });
 
@@ -233,59 +244,28 @@
     checkTargetAlerts();
   }
 
-  // ─── Edit Bottom Sheet Logic ─────────────────────────────────
-  let editContext = {
-    symbol: null,
-    recordIdx: null
-  };
+  // ─── 1. Stock Metadata Edit Sheet ────────────────────────────
+  let currentEditingStockSymbol = null;
 
-  function openEditSheet(symbol, recordIdx) {
+  function openStockEditSheet(symbol) {
     const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
     if (!group) return;
 
-    editContext.symbol = symbol;
-    editContext.recordIdx = recordIdx;
+    currentEditingStockSymbol = symbol;
 
-    const sheet = document.getElementById('edit-bottom-sheet');
+    const sheet = document.getElementById('stock-edit-sheet');
     const backdrop = document.getElementById('edit-sheet-backdrop');
-    const symbolLabel = document.getElementById('sheet-symbol-label');
-    const recordTypeLabel = document.getElementById('sheet-record-type');
-    const editType = document.getElementById('edit-type');
-    const editBase = document.getElementById('edit-base');
-    const editPerc = document.getElementById('edit-perc');
-    const editDirBtn = document.getElementById('edit-dir-btn');
-    const editNote = document.getElementById('edit-note');
-    const baseGroup = document.getElementById('edit-base-group');
-    const percGroup = document.getElementById('edit-perc-group');
+    const subtitle = document.getElementById('stock-sheet-subtitle');
 
-    if (!sheet || !backdrop) return;
-
-    symbolLabel.textContent = `${group.symbol} ${group.name || ''}`.trim();
-    editNote.value = group.note || '';
-
-    if (recordIdx !== null && group.records && group.records[recordIdx]) {
-      const rec = group.records[recordIdx];
-      recordTypeLabel.textContent = `EDITING TARGET #${recordIdx + 1}`;
-      editType.value = rec.type || '';
-
-      if (rec.inputs && rec.inputs.base !== undefined) {
-        editBase.value = rec.inputs.base;
-        editPerc.value = rec.inputs.perc;
-        const isUp = rec.inputs.isUp !== false;
-        editDirBtn.setAttribute('data-dir', isUp ? 'up' : 'down');
-        editDirBtn.textContent = isUp ? '▲ UP' : '▼ DOWN';
-      } else {
-        editBase.value = '';
-        editPerc.value = '';
-      }
-      if (baseGroup) baseGroup.style.display = 'flex';
-      if (percGroup) percGroup.style.display = 'flex';
-    } else {
-      recordTypeLabel.textContent = `EDITING STOCK NOTES & METADATA`;
-      editType.value = '';
-      if (baseGroup) baseGroup.style.display = 'none';
-      if (percGroup) percGroup.style.display = 'none';
-    }
+    subtitle.textContent = `${group.symbol} ${group.name || ''}`.trim();
+    document.getElementById('stock-edit-symbol').value = group.symbol || '';
+    document.getElementById('stock-edit-name').value = group.name || '';
+    document.getElementById('stock-edit-cost').value = group.cost || '';
+    document.getElementById('stock-edit-qty').value = group.qty || '';
+    document.getElementById('stock-edit-tf-w').value = group.tf_w || '';
+    document.getElementById('stock-edit-tf-d').value = group.tf_d || '';
+    document.getElementById('stock-edit-tf-30').value = group.tf_30 || '';
+    document.getElementById('stock-edit-note').value = group.note || '';
 
     backdrop.classList.remove('hidden');
     sheet.classList.remove('hidden');
@@ -295,8 +275,8 @@
     });
   }
 
-  function closeEditSheet() {
-    const sheet = document.getElementById('edit-bottom-sheet');
+  function closeStockEditSheet() {
+    const sheet = document.getElementById('stock-edit-sheet');
     const backdrop = document.getElementById('edit-sheet-backdrop');
     if (!sheet || !backdrop) return;
     sheet.classList.remove('visible');
@@ -304,66 +284,277 @@
     setTimeout(() => {
       sheet.classList.add('hidden');
       backdrop.classList.add('hidden');
-      editContext = { symbol: null, recordIdx: null };
+      currentEditingStockSymbol = null;
     }, 300);
   }
 
-  async function saveEditSheet() {
-    const { symbol, recordIdx } = editContext;
-    if (!symbol) return;
-
-    const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+  async function saveStockEditSheet() {
+    if (!currentEditingStockSymbol) return;
+    const group = (appState.historyRecords || []).find(g => g.symbol === currentEditingStockSymbol);
     if (!group) return;
 
-    const editType = document.getElementById('edit-type');
-    const editBase = document.getElementById('edit-base');
-    const editPerc = document.getElementById('edit-perc');
-    const editDirBtn = document.getElementById('edit-dir-btn');
-    const editNote = document.getElementById('edit-note');
-    const saveBtn = document.getElementById('sheet-save-btn');
+    const newSymbol = document.getElementById('stock-edit-symbol').value.trim().toUpperCase();
+    const newName = document.getElementById('stock-edit-name').value.trim();
+    const newCost = document.getElementById('stock-edit-cost').value.trim();
+    const newQty = document.getElementById('stock-edit-qty').value.trim();
+    const newTfW = document.getElementById('stock-edit-tf-w').value.trim();
+    const newTfD = document.getElementById('stock-edit-tf-d').value.trim();
+    const newTf30 = document.getElementById('stock-edit-tf-30').value.trim();
+    const newNote = document.getElementById('stock-edit-note').value.trim();
+    const saveBtn = document.getElementById('stock-save-btn');
 
-    if (saveBtn) {
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'SAVING...';
+    if (!newSymbol) {
+      alert('股票代码不能为空');
+      return;
     }
 
-    // Update note
-    group.note = (editNote ? editNote.value : '').trim();
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'SAVING...';
 
-    // Update record calculation if applicable
-    if (recordIdx !== null && group.records && group.records[recordIdx]) {
-      const rec = group.records[recordIdx];
-      if (editType && editType.value.trim()) rec.type = editType.value.trim();
+    // Update fields
+    group.symbol = newSymbol;
+    group.name = newName;
+    group.cost = newCost;
+    group.qty = newQty;
+    group.tf_w = newTfW;
+    group.tf_d = newTfD;
+    group.tf_30 = newTf30;
+    group.note = newNote;
 
-      const baseVal = editBase ? parseFloat(editBase.value) : NaN;
-      const percVal = editPerc ? parseFloat(editPerc.value) : NaN;
-      const isUp = editDirBtn ? editDirBtn.getAttribute('data-dir') === 'up' : true;
+    // Update records symbol if changed
+    (group.records || []).forEach(r => {
+      r.symbol = newSymbol;
+    });
 
-      if (!isNaN(baseVal) && !isNaN(percVal)) {
-        rec.inputs = { base: baseVal, perc: percVal, isUp };
-        const factor = isUp ? (1 + percVal / 100) : (1 - percVal / 100);
-        const calcRes = baseVal * factor;
-        const marketInfo = getMarketInfo(symbol);
-        rec.result = `${marketInfo.currency}${calcRes.toFixed(2)}`;
-        rec.details = `<span>Base: ${marketInfo.currency}${baseVal}</span> ${isUp ? '▲' : '▼'} ${percVal}%`;
+    saveToCache(appState);
+    await pushDataToServer(appState);
+
+    saveBtn.textContent = 'SAVED!';
+    setTimeout(() => {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'SAVE & SYNC';
+      closeStockEditSheet();
+    }, 400);
+  }
+
+  async function deleteStockFromSheet() {
+    if (!currentEditingStockSymbol) return;
+    const groupIdx = (appState.historyRecords || []).findIndex(g => g.symbol === currentEditingStockSymbol);
+    if (groupIdx === -1) return;
+
+    const confirmed = confirm(`确定要删除股票 [${currentEditingStockSymbol}] 及所有计算数据吗？`);
+    if (!confirmed) return;
+
+    appState.historyRecords.splice(groupIdx, 1);
+    saveToCache(appState);
+    await pushDataToServer(appState);
+    closeStockEditSheet();
+  }
+
+  // ─── 2. Calculation Target Edit Sheet ────────────────────────
+  let currentEditingCalcContext = {
+    symbol: null,
+    recordIdx: null
+  };
+
+  function openCalcEditSheet(symbol, recordIdx) {
+    const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+    if (!group || !group.records || !group.records[recordIdx]) return;
+
+    currentEditingCalcContext = { symbol, recordIdx };
+    const rec = group.records[recordIdx];
+
+    const sheet = document.getElementById('calc-edit-sheet');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+    const subtitle = document.getElementById('calc-sheet-subtitle');
+    const typeInput = document.getElementById('calc-edit-type');
+    const baseInput = document.getElementById('calc-edit-base');
+    const targetInput = document.getElementById('calc-edit-target');
+    const percInput = document.getElementById('calc-edit-perc');
+    const dirBtn = document.getElementById('calc-edit-dir-btn');
+    const sharesInput = document.getElementById('calc-edit-shares');
+    const highlightCheck = document.getElementById('calc-edit-highlight');
+    const chipsContainer = document.getElementById('calc-chips-container');
+
+    subtitle.textContent = `${group.symbol} #${recordIdx + 1} (${rec.type || 'Target'})`;
+    typeInput.value = rec.type || '';
+
+    // Render Label Chips
+    const labels = appState.customLabels && appState.customLabels.length > 0
+      ? appState.customLabels
+      : ["D买点1", "D卖点1", "W买点1", "W卖点1", "30买点1", "30卖点1", "目前30已涨", "目前D已涨"];
+
+    chipsContainer.innerHTML = labels.map(lbl => `
+      <button class="label-chip ${lbl === rec.type ? 'selected' : ''}" type="button">${escapeHtml(lbl)}</button>
+    `).join('');
+
+    chipsContainer.querySelectorAll('.label-chip').forEach(chip => {
+      chip.onclick = function () {
+        typeInput.value = this.textContent;
+        chipsContainer.querySelectorAll('.label-chip').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+      };
+    });
+
+    // Populate numbers & inputs
+    let baseVal = '';
+    let percVal = '';
+    let isUp = rec.isUp !== false;
+    let targetVal = '';
+
+    if (rec.inputs) {
+      if (rec.inputs.base !== undefined) baseVal = rec.inputs.base;
+      if (rec.inputs.perc !== undefined) percVal = rec.inputs.perc;
+      if (rec.inputs.isUp !== undefined) isUp = rec.inputs.isUp;
+      if (rec.inputs.final !== undefined) targetVal = rec.inputs.final;
+      if (rec.inputs.initial !== undefined && !baseVal) baseVal = rec.inputs.initial;
+    }
+
+    if (!targetVal && rec.result) {
+      const match = rec.result.match(/[\d.]+/);
+      if (match) targetVal = parseFloat(match[0]);
+    }
+
+    baseInput.value = baseVal !== '' ? baseVal : '';
+    targetInput.value = targetVal !== '' ? targetVal : '';
+    percInput.value = percVal !== '' ? percVal : '';
+    dirBtn.setAttribute('data-dir', isUp ? 'up' : 'down');
+    dirBtn.textContent = isUp ? '▲ UP' : '▼ DOWN';
+    sharesInput.value = rec.shares || '';
+    highlightCheck.checked = !!rec.highlighted;
+
+    backdrop.classList.remove('hidden');
+    sheet.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      backdrop.classList.add('visible');
+      sheet.classList.add('visible');
+    });
+  }
+
+  function closeCalcEditSheet() {
+    const sheet = document.getElementById('calc-edit-sheet');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+    if (!sheet || !backdrop) return;
+    sheet.classList.remove('visible');
+    backdrop.classList.remove('visible');
+    setTimeout(() => {
+      sheet.classList.add('hidden');
+      backdrop.classList.add('hidden');
+      currentEditingCalcContext = { symbol: null, recordIdx: null };
+    }, 300);
+  }
+
+  function setupCalcInputBindings() {
+    const baseInput = document.getElementById('calc-edit-base');
+    const targetInput = document.getElementById('calc-edit-target');
+    const percInput = document.getElementById('calc-edit-perc');
+    const dirBtn = document.getElementById('calc-edit-dir-btn');
+
+    const calcFromBaseAndPerc = () => {
+      const base = parseFloat(baseInput.value);
+      const perc = parseFloat(percInput.value);
+      const isUp = dirBtn.getAttribute('data-dir') === 'up';
+      if (!isNaN(base) && !isNaN(perc)) {
+        const factor = isUp ? (1 + perc / 100) : (1 - perc / 100);
+        targetInput.value = (base * factor).toFixed(4).replace(/\.?0+$/, '');
       }
+    };
+
+    const calcFromBaseAndTarget = () => {
+      const base = parseFloat(baseInput.value);
+      const target = parseFloat(targetInput.value);
+      if (!isNaN(base) && !isNaN(target) && base > 0) {
+        const diff = target - base;
+        const perc = Math.abs((diff / base) * 100);
+        percInput.value = perc.toFixed(2).replace(/\.?0+$/, '');
+        if (diff >= 0) {
+          dirBtn.setAttribute('data-dir', 'up');
+          dirBtn.textContent = '▲ UP';
+        } else {
+          dirBtn.setAttribute('data-dir', 'down');
+          dirBtn.textContent = '▼ DOWN';
+        }
+      }
+    };
+
+    baseInput.addEventListener('input', calcFromBaseAndPerc);
+    percInput.addEventListener('input', calcFromBaseAndPerc);
+    dirBtn.addEventListener('click', function () {
+      const current = this.getAttribute('data-dir');
+      if (current === 'up') {
+        this.setAttribute('data-dir', 'down');
+        this.textContent = '▼ DOWN';
+      } else {
+        this.setAttribute('data-dir', 'up');
+        this.textContent = '▲ UP';
+      }
+      calcFromBaseAndPerc();
+    });
+    targetInput.addEventListener('input', calcFromBaseAndTarget);
+  }
+
+  async function saveCalcEditSheet() {
+    const { symbol, recordIdx } = currentEditingCalcContext;
+    if (!symbol || recordIdx === null) return;
+
+    const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+    if (!group || !group.records || !group.records[recordIdx]) return;
+
+    const rec = group.records[recordIdx];
+    const typeVal = document.getElementById('calc-edit-type').value.trim() || 'Projection';
+    const baseVal = parseFloat(document.getElementById('calc-edit-base').value);
+    const targetVal = parseFloat(document.getElementById('calc-edit-target').value);
+    const percVal = parseFloat(document.getElementById('calc-edit-perc').value);
+    const isUp = document.getElementById('calc-edit-dir-btn').getAttribute('data-dir') === 'up';
+    const sharesVal = document.getElementById('calc-edit-shares').value.trim();
+    const isHighlighted = document.getElementById('calc-edit-highlight').checked;
+    const saveBtn = document.getElementById('calc-save-btn');
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'SAVING...';
+
+    rec.type = typeVal;
+    rec.isUp = isUp;
+    rec.highlighted = isHighlighted;
+    rec.shares = sharesVal || null;
+
+    const marketInfo = getMarketInfo(symbol);
+
+    if (!isNaN(baseVal) && !isNaN(percVal)) {
+      rec.inputs = { base: baseVal, perc: percVal, isUp, final: !isNaN(targetVal) ? targetVal : undefined };
+      const formattedTarget = !isNaN(targetVal) ? targetVal.toFixed(4).replace(/\.?0+$/, '') : (baseVal * (isUp ? 1 + percVal / 100 : 1 - percVal / 100)).toFixed(4).replace(/\.?0+$/, '');
+      rec.result = `${marketInfo.currency}${formattedTarget}`;
+      rec.details = `<span>Base: ${marketInfo.currency}<span class="edit-trigger-val" data-field="base"><span class="edit-container-val">${baseVal}</span></span></span><span><span class="editable-toggle" data-field="isUp">${isUp ? 'Up' : 'Down'}</span> <span class="edit-trigger-val" data-field="perc"><span class="edit-container-val">${percVal}</span>%</span></span>`;
     }
 
     saveToCache(appState);
-
-    // Sync to Mac server & Google Drive
     await pushDataToServer(appState);
 
-    if (saveBtn) {
-      saveBtn.textContent = 'SAVED!';
-      setTimeout(() => {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'SAVE & SYNC';
-        closeEditSheet();
-      }, 500);
-    }
+    saveBtn.textContent = 'SAVED!';
+    setTimeout(() => {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'SAVE & SYNC';
+      closeCalcEditSheet();
+    }, 400);
   }
 
+  async function deleteCalcFromSheet() {
+    const { symbol, recordIdx } = currentEditingCalcContext;
+    if (!symbol || recordIdx === null) return;
+
+    const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+    if (!group || !group.records || !group.records[recordIdx]) return;
+
+    const confirmed = confirm(`确定要删除此条目标价记录 [${group.records[recordIdx].type || 'Target'}] 吗？`);
+    if (!confirmed) return;
+
+    group.records.splice(recordIdx, 1);
+    saveToCache(appState);
+    await pushDataToServer(appState);
+    closeCalcEditSheet();
+  }
+
+  // ─── Push Data To Servers (Mac & GDrive) ─────────────────────
   async function pushDataToServer(data) {
     const payloadStr = JSON.stringify(data);
 
@@ -397,7 +588,7 @@
     }
   }
 
-  // ─── Target Alerts Check ─────────────────────────────────────
+  // ─── Target Alerts Check (No Emoji & Swipe to Dismiss) ───────
   function checkTargetAlerts() {
     const banner = document.getElementById('alert-banner');
     const bannerText = document.getElementById('alert-banner-text');
@@ -405,18 +596,48 @@
 
     const alerts = [];
     (appState.historyRecords || []).forEach(g => {
+      const stockLabel = `${g.symbol} ${g.name || ''}`.trim();
       (g.records || []).forEach(r => {
         if (r.highlighted || r.alertTriggered) {
-          alerts.push(`${g.symbol} 达到目标价 ${r.result || ''}`);
+          alerts.push(`${stockLabel} · 达到目标价 ${r.result || ''}`);
         }
       });
     });
 
     if (alerts.length > 0) {
-      bannerText.textContent = `🎯 ${alerts.slice(0, 2).join(' · ')}`;
+      bannerText.textContent = alerts.join(' | ');
       banner.classList.remove('hidden');
       requestAnimationFrame(() => banner.classList.add('visible'));
+    } else {
+      banner.classList.remove('visible');
+      setTimeout(() => banner.classList.add('hidden'), 350);
     }
+  }
+
+  function setupAlertBannerGestures() {
+    const banner = document.getElementById('alert-banner');
+    const closeBtn = document.getElementById('alert-banner-close');
+    if (!banner) return;
+
+    const dismissBanner = () => {
+      banner.classList.remove('visible');
+      setTimeout(() => banner.classList.add('hidden'), 350);
+    };
+
+    if (closeBtn) closeBtn.onclick = dismissBanner;
+
+    // Swipe Up to dismiss
+    let touchStartY = 0;
+    banner.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    banner.addEventListener('touchend', (e) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      if (touchStartY - touchEndY > 20) {
+        dismissBanner();
+      }
+    }, { passive: true });
   }
 
   // Load from local storage cache
@@ -589,39 +810,36 @@
       });
     }
 
-    // Direction toggle in sheet
-    const editDirBtn = document.getElementById('edit-dir-btn');
-    if (editDirBtn) {
-      editDirBtn.addEventListener('click', function () {
-        const current = this.getAttribute('data-dir');
-        if (current === 'up') {
-          this.setAttribute('data-dir', 'down');
-          this.textContent = '▼ DOWN';
-        } else {
-          this.setAttribute('data-dir', 'up');
-          this.textContent = '▲ UP';
-        }
-      });
-    }
+    // Stock Edit Sheet Buttons
+    const stockCancelBtn = document.getElementById('stock-cancel-btn');
+    const stockSaveBtn = document.getElementById('stock-save-btn');
+    const stockDeleteBtn = document.getElementById('stock-delete-btn');
 
-    // Sheet buttons
-    const sheetCancelBtn = document.getElementById('sheet-cancel-btn');
-    const sheetSaveBtn = document.getElementById('sheet-save-btn');
+    if (stockCancelBtn) stockCancelBtn.onclick = closeStockEditSheet;
+    if (stockSaveBtn) stockSaveBtn.onclick = saveStockEditSheet;
+    if (stockDeleteBtn) stockDeleteBtn.onclick = deleteStockFromSheet;
+
+    // Calculation Edit Sheet Buttons & Bindings
+    setupCalcInputBindings();
+    const calcCancelBtn = document.getElementById('calc-cancel-btn');
+    const calcSaveBtn = document.getElementById('calc-save-btn');
+    const calcDeleteBtn = document.getElementById('calc-delete-btn');
+
+    if (calcCancelBtn) calcCancelBtn.onclick = closeCalcEditSheet;
+    if (calcSaveBtn) calcSaveBtn.onclick = saveCalcEditSheet;
+    if (calcDeleteBtn) calcDeleteBtn.onclick = deleteCalcFromSheet;
+
+    // Backdrop click
     const backdrop = document.getElementById('edit-sheet-backdrop');
-
-    if (sheetCancelBtn) sheetCancelBtn.addEventListener('click', closeEditSheet);
-    if (backdrop) backdrop.addEventListener('click', closeEditSheet);
-    if (sheetSaveBtn) sheetSaveBtn.addEventListener('click', saveEditSheet);
-
-    // Alert banner close
-    const alertCloseBtn = document.getElementById('alert-banner-close');
-    const alertBanner = document.getElementById('alert-banner');
-    if (alertCloseBtn && alertBanner) {
-      alertCloseBtn.addEventListener('click', () => {
-        alertBanner.classList.remove('visible');
-        setTimeout(() => alertBanner.classList.add('hidden'), 300);
-      });
+    if (backdrop) {
+      backdrop.onclick = function () {
+        closeStockEditSheet();
+        closeCalcEditSheet();
+      };
     }
+
+    // Alert Banner gestures
+    setupAlertBannerGestures();
   }
 
   // Init

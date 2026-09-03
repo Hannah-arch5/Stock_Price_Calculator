@@ -94,55 +94,130 @@
 
     <div class="safe-area-bottom"></div>
 
-    <!-- Alert Banner -->
+    <!-- Alert Banner (Studio Noir Pure Dark) -->
     <div id="alert-banner" class="alert-banner hidden">
         <div class="alert-banner-inner">
-            <span class="alert-icon">◈</span>
-            <span id="alert-banner-text" class="alert-text mono"></span>
-            <button id="alert-banner-close" class="alert-close">×</button>
+            <div id="alert-banner-text" class="alert-text mono"></div>
+            <button id="alert-banner-close" class="alert-close" aria-label="Close">&times;</button>
         </div>
     </div>
 
-    <!-- Edit Bottom Sheet -->
+    <!-- Backdrop -->
     <div id="edit-sheet-backdrop" class="sheet-backdrop hidden"></div>
-    <div id="edit-bottom-sheet" class="bottom-sheet hidden">
+
+    <!-- 1. Stock Metadata Edit Sheet -->
+    <div id="stock-edit-sheet" class="bottom-sheet hidden">
         <div class="sheet-handle-bar"></div>
         <div class="sheet-header">
-            <div id="sheet-symbol-label" class="sheet-symbol mono">--</div>
-            <div id="sheet-record-type" class="sheet-record-type">--</div>
+            <div class="sheet-title-tag">EDIT STOCK METADATA</div>
+            <div id="stock-sheet-subtitle" class="sheet-symbol mono">--</div>
         </div>
         <div class="sheet-body">
-            <div class="sheet-field-group">
-                <label class="sheet-label">TYPE LABEL</label>
-                <input id="edit-type" type="text" class="sheet-input mono" placeholder="e.g. 目前30已涨" />
-            </div>
-            <div class="sheet-field-group" id="edit-base-group">
-                <label class="sheet-label">BASE PRICE</label>
-                <input id="edit-base" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
-            </div>
-            <div class="sheet-field-group" id="edit-perc-group">
-                <label class="sheet-label">TARGET %</label>
-                <div class="sheet-perc-row">
-                    <input id="edit-perc" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.0" step="0.1" />
-                    <button id="edit-dir-btn" class="dir-toggle-btn" data-dir="up">▲ UP</button>
+            <div class="sheet-row-dual">
+                <div class="sheet-field-group flex-1">
+                    <label class="sheet-label">SYMBOL 代码</label>
+                    <input id="stock-edit-symbol" type="text" class="sheet-input mono" placeholder="300775" />
+                </div>
+                <div class="sheet-field-group flex-1">
+                    <label class="sheet-label">NAME 股票名称</label>
+                    <input id="stock-edit-name" type="text" class="sheet-input" placeholder="三角防务" />
                 </div>
             </div>
-            <div class="sheet-field-group" id="edit-initial-group" style="display:none;">
-                <label class="sheet-label">INITIAL PRICE</label>
-                <input id="edit-initial" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
+
+            <div class="sheet-row-dual">
+                <div class="sheet-field-group flex-1">
+                    <label class="sheet-label">COST 成本价</label>
+                    <input id="stock-edit-cost" type="number" inputmode="decimal" class="sheet-input mono" placeholder="36.215" step="0.001" />
+                </div>
+                <div class="sheet-field-group flex-1">
+                    <label class="sheet-label">QTY 持股数量</label>
+                    <input id="stock-edit-qty" type="number" inputmode="numeric" class="sheet-input mono" placeholder="2400" />
+                </div>
             </div>
-            <div class="sheet-field-group" id="edit-final-group" style="display:none;">
-                <label class="sheet-label">TARGET PRICE</label>
-                <input id="edit-final" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
+
+            <div class="sheet-field-group">
+                <label class="sheet-label">TIMEFRAME 便签 (W / D / 30)</label>
+                <div class="tf-inputs-row">
+                    <div class="tf-input-wrap">
+                        <span class="tf-prefix mono">W</span>
+                        <input id="stock-edit-tf-w" type="text" class="sheet-input tf-input" placeholder="周线策略" />
+                    </div>
+                    <div class="tf-input-wrap">
+                        <span class="tf-prefix mono">D</span>
+                        <input id="stock-edit-tf-d" type="text" class="sheet-input tf-input" placeholder="日线策略" />
+                    </div>
+                    <div class="tf-input-wrap">
+                        <span class="tf-prefix mono">30</span>
+                        <input id="stock-edit-tf-30" type="text" class="sheet-input tf-input" placeholder="30分策略" />
+                    </div>
+                </div>
             </div>
+
             <div class="sheet-field-group">
                 <label class="sheet-label">STRATEGY &amp; TRADING NOTES</label>
-                <textarea id="edit-note" class="sheet-textarea" placeholder="Add notes..."></textarea>
+                <textarea id="stock-edit-note" class="sheet-textarea" placeholder="填写操盘纪律、核心逻辑与备忘录..."></textarea>
             </div>
         </div>
         <div class="sheet-footer">
-            <button id="sheet-cancel-btn" class="sheet-btn sheet-btn-cancel">CANCEL</button>
-            <button id="sheet-save-btn" class="sheet-btn sheet-btn-save">SAVE &amp; SYNC</button>
+            <button id="stock-delete-btn" class="sheet-btn sheet-btn-danger">DELETE STOCK</button>
+            <button id="stock-cancel-btn" class="sheet-btn sheet-btn-cancel">CANCEL</button>
+            <button id="stock-save-btn" class="sheet-btn sheet-btn-save">SAVE &amp; SYNC</button>
+        </div>
+    </div>
+
+    <!-- 2. Calculation Target Edit Sheet -->
+    <div id="calc-edit-sheet" class="bottom-sheet hidden">
+        <div class="sheet-handle-bar"></div>
+        <div class="sheet-header">
+            <div class="sheet-title-tag">EDIT CALCULATION TARGET</div>
+            <div id="calc-sheet-subtitle" class="sheet-symbol mono">--</div>
+        </div>
+        <div class="sheet-body">
+            <div class="sheet-field-group">
+                <label class="sheet-label">TYPE LABEL 小标题 / 标签</label>
+                <input id="calc-edit-type" type="text" class="sheet-input mono" placeholder="选择下方标签或直接输入" />
+                <div id="calc-chips-container" class="chips-scroll-row">
+                    <!-- Dynamic custom labels from appState -->
+                </div>
+            </div>
+
+            <div class="sheet-row-dual">
+                <div class="sheet-field-group flex-1">
+                    <label class="sheet-label">BASE PRICE 基准价</label>
+                    <input id="calc-edit-base" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
+                </div>
+                <div class="sheet-field-group flex-1">
+                    <label class="sheet-label">TARGET PRICE 目标价</label>
+                    <input id="calc-edit-target" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.00" step="0.01" />
+                </div>
+            </div>
+
+            <div class="sheet-row-dual">
+                <div class="sheet-field-group flex-1">
+                    <label class="sheet-label">DIRECTION &amp; PERC 涨跌幅</label>
+                    <div class="sheet-perc-row">
+                        <button id="calc-edit-dir-btn" class="dir-toggle-btn" data-dir="up">▲ UP</button>
+                        <input id="calc-edit-perc" type="number" inputmode="decimal" class="sheet-input mono" placeholder="0.0" step="0.1" />
+                        <span class="perc-unit mono">%</span>
+                    </div>
+                </div>
+                <div class="sheet-field-group flex-1">
+                    <label class="sheet-label">SHARES 股数</label>
+                    <input id="calc-edit-shares" type="number" inputmode="numeric" class="sheet-input mono" placeholder="可选填股数" />
+                </div>
+            </div>
+
+            <div class="sheet-field-group">
+                <div class="sheet-toggle-row">
+                    <label class="sheet-label" style="margin: 0;">HIGHLIGHT 高亮突出显示</label>
+                    <input id="calc-edit-highlight" type="checkbox" class="noir-checkbox" />
+                </div>
+            </div>
+        </div>
+        <div class="sheet-footer">
+            <button id="calc-delete-btn" class="sheet-btn sheet-btn-danger">DELETE TARGET</button>
+            <button id="calc-cancel-btn" class="sheet-btn sheet-btn-cancel">CANCEL</button>
+            <button id="calc-save-btn" class="sheet-btn sheet-btn-save">SAVE &amp; SYNC</button>
         </div>
     </div>
 
