@@ -134,6 +134,42 @@
     }
   }
 
+  // FLIP Spring Fluid Reordering Engine ("QQ弹弹" 丝滑物理弹簧动画)
+  function animateFLIP(container, draggingEl, afterElement) {
+    if (!container || !draggingEl) return;
+    const currentNext = draggingEl.nextElementSibling;
+    if (currentNext === afterElement) return;
+
+    const children = [...container.children];
+    const firstPositions = new Map();
+    children.forEach(child => {
+      firstPositions.set(child, child.getBoundingClientRect());
+    });
+
+    if (afterElement == null) {
+      container.appendChild(draggingEl);
+    } else {
+      container.insertBefore(draggingEl, afterElement);
+    }
+
+    children.forEach(child => {
+      if (child === draggingEl) return;
+      const first = firstPositions.get(child);
+      if (!first) return;
+      const last = child.getBoundingClientRect();
+      const deltaX = first.left - last.left;
+      const deltaY = first.top - last.top;
+
+      if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
+        child.style.transition = 'none';
+        child.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        void child.offsetWidth; // Force reflow
+        child.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.45, 0.64, 1)';
+        child.style.transform = '';
+      }
+    });
+  }
+
   function setupQuickTagsDragAndDrop() {
     const container = document.getElementById('mobile-quick-tags');
     if (!container || container.dataset.dragInitialized) return;
@@ -232,11 +268,7 @@
         if (e.cancelable) e.preventDefault();
         hasMoved = true;
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
-        if (afterElement == null) {
-          container.appendChild(draggingTag);
-        } else {
-          container.insertBefore(draggingTag, afterElement);
-        }
+        animateFLIP(container, draggingTag, afterElement);
       }
     }, { passive: false });
 
@@ -283,11 +315,7 @@
       const dragging = container.querySelector('.is-dragging');
       if (!dragging) return;
       const afterElement = getDragAfterTag(container, e.clientX, e.clientY);
-      if (afterElement == null) {
-        container.appendChild(dragging);
-      } else {
-        container.insertBefore(dragging, afterElement);
-      }
+      animateFLIP(container, dragging, afterElement);
     });
 
     container.addEventListener('dragend', (e) => {
@@ -556,15 +584,11 @@
             return;
           }
         } else {
-          // In drag mode
+          // In drag mode with fluid spring FLIP animation
           if (e.cancelable) e.preventDefault();
           hasMoved = true;
           const afterElement = getDragAfterRecord(ledger, touch.clientY);
-          if (afterElement == null) {
-            ledger.appendChild(draggingRow);
-          } else {
-            ledger.insertBefore(draggingRow, afterElement);
-          }
+          animateFLIP(ledger, draggingRow, afterElement);
         }
       }, { passive: false });
 
@@ -642,11 +666,7 @@
           const dragging = ledger.querySelector('.is-dragging');
           if (!dragging) return;
           const afterElement = getDragAfterRecord(ledger, e.clientY);
-          if (afterElement == null) {
-            ledger.appendChild(dragging);
-          } else {
-            ledger.insertBefore(dragging, afterElement);
-          }
+          animateFLIP(ledger, dragging, afterElement);
         });
 
         ledger.addEventListener('dragend', (e) => {
