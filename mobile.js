@@ -125,7 +125,9 @@
           customStyle = `style="color: ${color}; border-color: ${color};"`;
         }
 
-        return `<button class="quick-tag mono" draggable="true" data-symbol="${escapeHtml(group.symbol)}" ${customStyle}>${escapeHtml(tagText)}</button>`;
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const draggableAttr = isTouchDevice ? '' : 'draggable="true"';
+        return `<button class="quick-tag mono" ${draggableAttr} data-symbol="${escapeHtml(group.symbol)}" ${customStyle}>${escapeHtml(tagText)}</button>`;
       }).join('');
 
       setupQuickTagsDragAndDrop();
