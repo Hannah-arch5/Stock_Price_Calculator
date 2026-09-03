@@ -17,6 +17,8 @@ const DATA_FILE = path.join(FIXED_USER_DATA, 'app-data-v1.json');
 // --- Real-time Sync Server for iPhone (PWA) ---
 const SYNC_PORT = 7321;
 let sseClients = [];
+let currentHttpsUrl = null;
+let tunnelProcess = null;
 
 function getLanIp() {
     const interfaces = os.networkInterfaces();
@@ -29,6 +31,40 @@ function getLanIp() {
         }
     }
     return 'localhost';
+}
+
+function startCloudflareTunnel() {
+    const cloudflaredBin = '/opt/homebrew/bin/cloudflared';
+    if (!fs.existsSync(cloudflaredBin)) {
+        console.log('[Tunnel] cloudflared not found at', cloudflaredBin);
+        return;
+    }
+
+    try {
+        console.log('[Tunnel] Starting cloudflared tunnel for port', SYNC_PORT);
+        const proc = exec(`${cloudflaredBin} tunnel --url http://localhost:${SYNC_PORT}`);
+        tunnelProcess = proc;
+
+        const checkOutput = (data) => {
+            const str = data.toString();
+            const match = str.match(/https:\/\/[a-zA-Z0-9.-]+\.trycloudflare\.com/);
+            if (match && match[0]) {
+                currentHttpsUrl = match[0];
+                console.log('[Tunnel] Active HTTPS URL:', currentHttpsUrl);
+            }
+        };
+
+        proc.stderr.on('data', checkOutput);
+        proc.stdout.on('data', checkOutput);
+
+        proc.on('close', () => {
+            console.log('[Tunnel] Tunnel process closed');
+            currentHttpsUrl = null;
+            tunnelProcess = null;
+        });
+    } catch (e) {
+        console.error('[Tunnel] Failed to start tunnel:', e);
+    }
 }
 
 function broadcastSyncData(dataObj) {
@@ -103,11 +139,14 @@ function startSyncServer() {
 
             if (pathname === '/api/server-info') {
                 const ip = getLanIp();
+                const localUrl = `http://${ip}:${SYNC_PORT}`;
                 res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
                 res.end(JSON.stringify({
                     ip,
                     port: SYNC_PORT,
-                    url: `http://${ip}:${SYNC_PORT}`,
+                    localUrl,
+                    httpsUrl: currentHttpsUrl,
+                    url: currentHttpsUrl || localUrl,
                     clientsCount: sseClients.length
                 }));
                 return;
@@ -161,10 +200,13 @@ function startSyncServer() {
 
 ipcMain.handle('get-sync-server-info', () => {
     const ip = getLanIp();
+    const localUrl = `http://${ip}:${SYNC_PORT}`;
     return {
         ip,
         port: SYNC_PORT,
-        url: `http://${ip}:${SYNC_PORT}`,
+        localUrl,
+        httpsUrl: currentHttpsUrl,
+        url: currentHttpsUrl || localUrl,
         clientCount: sseClients.length
     };
 });
@@ -468,6 +510,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
     startSyncServer();
+    startCloudflareTunnel();
     createWindow();
 
     app.on('activate', () => {
@@ -475,6 +518,14 @@ app.whenReady().then(() => {
             createWindow();
         }
     });
+});
+
+app.on('will-quit', () => {
+    if (tunnelProcess) {
+        try {
+            tunnelProcess.kill('SIGTERM');
+        } catch(e) {}
+    }
 });
 
 app.on('window-all-closed', () => {

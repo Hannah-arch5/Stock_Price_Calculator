@@ -3,6 +3,8 @@
   "short_name": "Ticker",
   "description": "Financial Research Dashboard & Target Price Calculator",
   "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#030303",

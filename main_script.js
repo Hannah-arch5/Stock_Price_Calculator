@@ -1811,6 +1811,7 @@ const mobileSyncBtn = document.getElementById('mobile-sync-btn');
 const mobileSyncModal = document.getElementById('mobile-sync-modal');
 const closeSyncModalBtn = document.getElementById('close-sync-modal-btn');
 const syncUrlText = document.getElementById('sync-url-text');
+const syncLocalText = document.getElementById('sync-local-text');
 const copySyncUrlBtn = document.getElementById('copy-sync-url-btn');
 const modalConnectedCount = document.getElementById('modal-connected-count');
 
@@ -1820,9 +1821,11 @@ if (mobileSyncBtn && mobileSyncModal) {
         if (window.electronAPI && window.electronAPI.getSyncServerInfo) {
             try {
                 const info = await window.electronAPI.getSyncServerInfo();
-                if (info && info.url) {
-                    syncUrlText.textContent = info.url;
-                    modalConnectedCount.textContent = `Sync Server Active · ${info.clientCount || 0} device(s) connected`;
+                if (info) {
+                    syncUrlText.textContent = info.httpsUrl || info.url || info.localUrl;
+                    if (syncLocalText) syncLocalText.textContent = info.localUrl || '--';
+                    const modeText = info.httpsUrl ? 'HTTPS Active · No Bottom Bar' : 'Local Wi-Fi Active';
+                    modalConnectedCount.textContent = `${modeText} · ${info.clientCount || 0} device(s)`;
                 }
             } catch (e) {
                 syncUrlText.textContent = 'http://localhost:7321';

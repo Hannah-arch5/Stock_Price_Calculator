@@ -431,15 +431,19 @@
             </div>
             <div class="modal-body">
                 <p class="sync-instruction">
-                    用 iPhone 14 Pro Max / 15 的 Safari 浏览器访问下方地址，点击底部分享按钮选择<strong>「添加到主屏幕」</strong>，即可全屏独立使用 Ticker 移动版并实时同步：
+                    用 iPhone 14 Pro Max / 15 的 Safari 访问下方 <strong>HTTPS 加密链接</strong>，点击底部分享选择<strong>「添加到主屏幕」</strong>。<br>
+                    苹果将自动解除限制，<strong>彻底消除底部地址栏</strong>，获得 100% 全屏纯黑独立 App：
                 </p>
                 <div class="sync-url-box">
-                    <span id="sync-url-text" class="mono sync-url">Loading...</span>
+                    <span id="sync-url-text" class="mono sync-url">Starting HTTPS Tunnel...</span>
                     <button id="copy-sync-url-btn" class="copy-btn">COPY</button>
                 </div>
                 <div class="sync-status-row">
                     <span class="status-indicator-dot"></span>
-                    <span id="modal-connected-count" class="mono">Sync Service Active on Port 7321</span>
+                    <span id="modal-connected-count" class="mono">HTTPS Active · No Bottom Bar</span>
+                </div>
+                <div id="local-fallback-row" style="margin-top: 10px; font-size: 0.68rem; color: var(--fg-dim);">
+                    <span>内网直连备用: </span><span id="sync-local-text" class="mono" style="color: var(--fg-subtle);">http://...</span>
                 </div>
             </div>
         </div>
