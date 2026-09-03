@@ -121,7 +121,7 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Bidirectional calculator auto-switching.
 
 ### v5.3.0: Ticker Pocket (Mobile Companion Edition)
-- **Official Version Name**: `Ticker Pocket v5.3.0` (Mobile Edition)
+- **Official Version Name**: `Ticker Pocket v5.3.0` (Mobile Edition).
 - **Built-in HTTP & SSE Sync Server**:
   - Electron main process runs lightweight HTTP server on port `7321` serving PWA assets and REST API (`/api/data`, `/api/events`, `/api/server-info`).
   - Automatic LAN IP discovery (`os.networkInterfaces()`) for frictionless connection.
@@ -130,7 +130,12 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Designed strictly to Studio Noir aesthetics: pure OLED black (`#030303`), high-contrast JetBrains Mono & Inter typography, 1px dividers, extreme negative whitespace.
   - Native iOS Web Clip integration: standalone fullscreen mode (`apple-mobile-web-app-capable`, `black-translucent`), customized `apple-touch-icon.png` (with Apple standard padding).
   - iOS Dynamic Island & Home indicator safe area adaptation (`env(safe-area-inset-top/bottom)`).
-  - Touch Interactions: Double-tap to highlight calculation rows, hold-to-reorder calculation rows and stock tags with smooth zero-bounce slot sliding, in-line pencil & add label buttons.
+  - **Touch & Motion Engine**:
+    - **Double-Tap to Highlight**: Instantly toggles row highlight with pure-white solid indicator (`3px solid #ffffff`), 12% luminous background (`rgba(255,255,255,0.12)`), and inset boundary glow.
+    - **Hold-to-Drag (180ms)**: Responsive activation with subtle haptic vibration; early finger slide (>7px) yields immediately to native page scrolling.
+    - **`smoothMove` Zero-Bounce Reorder Engine**: Sibling rows/tags calculate displacement deltas and glide silkily (`0.22s cubic-bezier(0.2, 0, 0, 1)`) without spring overshoot or scale distortion.
+    - **Visual Differentiation**: Normal dragging rows display a subtle dashed slot (`1px dashed rgba(255,255,255,0.25)`); highlighted dragging rows strictly preserve the pure-white left stripe and glowing background.
+    - **In-line Quick Controls**: Inline pencil edit button, add-to-calculator trigger, and dynamic micro-pill alert banner.
   - Offline cache resilience: LocalStorage caching retains full ledger snapshot even when disconnected or outside LAN.
   - Independent market color isolation: A-Share (red-up/green-down), US/HK (green-up/red-down).
 - **Mac Desktop Integration**:
