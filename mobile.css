@@ -563,12 +563,13 @@ html, body {
   transform: scale(0.96);
 }
 
-/* Rich, solid, high-contrast tag dragging state */
+/* Subtle dashed floating slot state for quick-tags */
 .quick-tag.dragging-tag {
-  background: #222222 !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.45) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--fg-dim) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.75);
+  opacity: 0.85 !important;
   z-index: 100;
 }
 
@@ -804,12 +805,13 @@ html, body {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* Rich, solid, high-contrast dragging state (no washed-out pale colors) */
+/* Subtle dashed floating slot state (clearly distinct from solid bright highlighted state) */
 .record-row.dragging {
-  background: #1e1e1e !important;
-  border: 1px solid rgba(255, 255, 255, 0.28) !important;
-  border-left: 3px solid #ffffff !important;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85);
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.25) !important;
+  border-left: 2px dashed rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+  opacity: 0.85 !important;
   z-index: 100;
 }
 
