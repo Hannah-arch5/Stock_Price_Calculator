@@ -780,7 +780,10 @@
     const tf30El = document.getElementById('stock-edit-tf-30');
     const noteEl = document.getElementById('stock-edit-note');
 
-    if (symEl) symEl.value = group.symbol || '';
+    if (symEl) {
+      symEl.value = group.symbol || '';
+      symEl.style.width = `${Math.max(3, (symEl.value || '').length)}ch`;
+    }
     if (nameEl) nameEl.value = group.name || '';
     if (nameDisplay) nameDisplay.textContent = group.name || '--';
     if (costEl) costEl.value = group.cost || '';
@@ -797,6 +800,7 @@
 
       const triggerNameLookup = async () => {
         const enteredSym = (symEl.value || '').trim().toUpperCase();
+        symEl.style.width = `${Math.max(3, enteredSym.length || 3)}ch`;
         if (!enteredSym) {
           if (nameEl) nameEl.value = '';
           if (nameDisplay) nameDisplay.textContent = '--';
@@ -809,6 +813,7 @@
       };
 
       symEl.addEventListener('input', () => {
+        symEl.style.width = `${Math.max(3, (symEl.value || '').length || 3)}ch`;
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(triggerNameLookup, 400);
       });

@@ -1289,7 +1289,7 @@ html, body {
 .sheet-symbol-title-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
   margin-top: 4px;
 }
 .sheet-symbol-title-input {
@@ -1301,11 +1301,16 @@ html, body {
   border: 1px solid transparent;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
   border-radius: 4px;
-  padding: 2px 4px;
-  max-width: 140px;
+  padding: 1px 3px;
+  margin: 0;
+  width: auto;
+  min-width: 3ch;
+  max-width: 10ch;
+  field-sizing: content;
   outline: none;
   transition: all 0.2s ease;
   -webkit-appearance: none;
+  box-sizing: content-box;
 }
 .sheet-symbol-title-input:focus {
   border-color: rgba(255, 255, 255, 0.4);
