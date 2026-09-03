@@ -780,9 +780,15 @@
     const tf30El = document.getElementById('stock-edit-tf-30');
     const noteEl = document.getElementById('stock-edit-note');
 
+    function updateSymInputWidth(input) {
+      if (!input) return;
+      const len = (input.value || '').length || 4;
+      input.style.width = `calc(${Math.max(4, len)}ch + 24px)`;
+    }
+
     if (symEl) {
       symEl.value = group.symbol || '';
-      symEl.style.width = `${Math.max(3, (symEl.value || '').length)}ch`;
+      updateSymInputWidth(symEl);
     }
     if (nameEl) nameEl.value = group.name || '';
     if (nameDisplay) nameDisplay.textContent = group.name || '--';
@@ -800,7 +806,7 @@
 
       const triggerNameLookup = async () => {
         const enteredSym = (symEl.value || '').trim().toUpperCase();
-        symEl.style.width = `${Math.max(3, enteredSym.length || 3)}ch`;
+        updateSymInputWidth(symEl);
         if (!enteredSym) {
           if (nameEl) nameEl.value = '';
           if (nameDisplay) nameDisplay.textContent = '--';
@@ -813,7 +819,7 @@
       };
 
       symEl.addEventListener('input', () => {
-        symEl.style.width = `${Math.max(3, (symEl.value || '').length || 3)}ch`;
+        updateSymInputWidth(symEl);
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(triggerNameLookup, 400);
       });
