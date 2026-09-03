@@ -545,18 +545,31 @@ html, body {
   border: 1px solid var(--border);
   padding: 4px 10px;
   font-size: 0.72rem;
-  cursor: pointer;
+  cursor: grab;
   border-radius: 12px !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s, opacity 0.15s, box-shadow 0.15s;
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
 }
 
-.quick-tag:active {
+.quick-tag:active:not(.is-dragging) {
   background-color: #1a1a1a;
   color: #ffffff;
   border-color: var(--fg-dim);
   transform: scale(0.96);
+}
+
+.quick-tag.is-dragging {
+  opacity: 0.9;
+  transform: scale(1.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  z-index: 100;
+  cursor: grabbing;
 }
 
 @keyframes slideUpFade {

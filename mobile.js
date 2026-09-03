@@ -125,9 +125,160 @@
           customStyle = `style="color: ${color}; border-color: ${color};"`;
         }
 
-        return `<button class="quick-tag mono" data-symbol="${escapeHtml(group.symbol)}" ${customStyle}>${escapeHtml(tagText)}</button>`;
+        return `<button class="quick-tag mono" draggable="true" data-symbol="${escapeHtml(group.symbol)}" ${customStyle}>${escapeHtml(tagText)}</button>`;
       }).join('');
+
+      setupQuickTagsDragAndDrop();
     }
+  }
+
+  function setupQuickTagsDragAndDrop() {
+    const container = document.getElementById('mobile-quick-tags');
+    if (!container || container.dataset.dragInitialized) return;
+    container.dataset.dragInitialized = 'true';
+
+    let draggingTag = null;
+    let isDragging = false;
+    let hasMoved = false;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let dragHoldTimer = null;
+
+    function getDragAfterTag(cont, x, y) {
+      const draggableElements = [...cont.querySelectorAll('.quick-tag:not(.is-dragging)')];
+      for (const child of draggableElements) {
+        const box = child.getBoundingClientRect();
+        if (y >= box.top - 12 && y <= box.bottom + 12) {
+          if (x < box.left + box.width / 2) {
+            return child;
+          }
+        } else if (y < box.top - 12) {
+          return child;
+        }
+      }
+      return null;
+    }
+
+    function commitReorderedTags() {
+      const currentTags = [...container.querySelectorAll('.quick-tag')];
+      const orderedSymbols = currentTags.map(el => el.getAttribute('data-symbol'));
+      if (!appState.historyRecords || orderedSymbols.length === 0) return;
+
+      const newHistoryRecords = [];
+      orderedSymbols.forEach(sym => {
+        const group = appState.historyRecords.find(g => g.symbol === sym);
+        if (group && !newHistoryRecords.includes(group)) {
+          newHistoryRecords.push(group);
+        }
+      });
+      // Append any groups that were not in currently visible tag list
+      appState.historyRecords.forEach(g => {
+        if (!newHistoryRecords.includes(g)) {
+          newHistoryRecords.push(g);
+        }
+      });
+
+      appState.historyRecords = newHistoryRecords;
+      appState.lastUpdated = new Date().toISOString();
+      saveToCache(appState);
+      renderApp();
+      pushDataToServer(appState);
+    }
+
+    // Touch Drag Support for iOS / Mobile
+    container.addEventListener('touchstart', (e) => {
+      const tag = e.target.closest('.quick-tag');
+      if (!tag) return;
+
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      draggingTag = tag;
+      isDragging = false;
+      hasMoved = false;
+
+      dragHoldTimer = setTimeout(() => {
+        if (draggingTag) {
+          isDragging = true;
+          draggingTag.classList.add('is-dragging');
+        }
+      }, 160);
+    }, { passive: true });
+
+    container.addEventListener('touchmove', (e) => {
+      if (!draggingTag) return;
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - touchStartX);
+      const deltaY = Math.abs(touch.clientY - touchStartY);
+
+      if (!isDragging && (deltaX > 7 || deltaY > 7)) {
+        if (dragHoldTimer) clearTimeout(dragHoldTimer);
+        isDragging = true;
+        draggingTag.classList.add('is-dragging');
+      }
+
+      if (isDragging) {
+        if (e.cancelable) e.preventDefault();
+        hasMoved = true;
+        const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
+        if (afterElement == null) {
+          container.appendChild(draggingTag);
+        } else {
+          container.insertBefore(draggingTag, afterElement);
+        }
+      }
+    }, { passive: false });
+
+    container.addEventListener('touchend', (e) => {
+      if (dragHoldTimer) clearTimeout(dragHoldTimer);
+      if (isDragging && draggingTag) {
+        draggingTag.classList.remove('is-dragging');
+        const dragged = draggingTag;
+        draggingTag = null;
+        isDragging = false;
+        if (hasMoved) {
+          commitReorderedTags();
+        }
+      } else {
+        if (draggingTag) draggingTag.classList.remove('is-dragging');
+        draggingTag = null;
+        isDragging = false;
+      }
+    });
+
+    container.addEventListener('touchcancel', () => {
+      if (dragHoldTimer) clearTimeout(dragHoldTimer);
+      if (draggingTag) draggingTag.classList.remove('is-dragging');
+      draggingTag = null;
+      isDragging = false;
+    });
+
+    // Desktop Drag & Drop Support
+    container.addEventListener('dragstart', (e) => {
+      const tag = e.target.closest('.quick-tag');
+      if (!tag) return;
+      tag.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', tag.getAttribute('data-symbol'));
+    });
+
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const dragging = container.querySelector('.is-dragging');
+      if (!dragging) return;
+      const afterElement = getDragAfterTag(container, e.clientX, e.clientY);
+      if (afterElement == null) {
+        container.appendChild(dragging);
+      } else {
+        container.insertBefore(dragging, afterElement);
+      }
+    });
+
+    container.addEventListener('dragend', (e) => {
+      const tag = e.target.closest('.quick-tag');
+      if (tag) tag.classList.remove('is-dragging');
+      commitReorderedTags();
+    });
   }
 
   function renderApp() {
