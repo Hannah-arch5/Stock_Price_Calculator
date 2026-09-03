@@ -202,21 +202,50 @@
       const orderedSymbols = currentTags.map(el => el.getAttribute('data-symbol'));
       if (!appState.historyRecords || orderedSymbols.length === 0) return;
 
-      const newHistoryRecords = [];
-      orderedSymbols.forEach(sym => {
-        const group = appState.historyRecords.find(g => g.symbol === sym);
-        if (group && !newHistoryRecords.includes(group)) {
-          newHistoryRecords.push(group);
-        }
-      });
-      // Append any groups that were not in currently visible tag list
-      appState.historyRecords.forEach(g => {
-        if (!newHistoryRecords.includes(g)) {
-          newHistoryRecords.push(g);
-        }
-      });
+      if (currentMarketFilter === 'all') {
+        const newHistoryRecords = [];
+        orderedSymbols.forEach(sym => {
+          const group = appState.historyRecords.find(g => g.symbol === sym);
+          if (group && !newHistoryRecords.includes(group)) {
+            newHistoryRecords.push(group);
+          }
+        });
+        // Append any groups that were not in currently visible tag list
+        appState.historyRecords.forEach(g => {
+          if (!newHistoryRecords.includes(g)) {
+            newHistoryRecords.push(g);
+          }
+        });
+        appState.historyRecords = newHistoryRecords;
+      } else {
+        // Tab-isolated in-place reordering:
+        // Find exact slot indices in appState.historyRecords matching current active tab filter
+        const targetIndices = [];
+        appState.historyRecords.forEach((group, idx) => {
+          let matches = false;
+          if (currentMarketFilter === 'FAV') {
+            matches = (group.isFavorite === true);
+          } else {
+            matches = (getMarketInfo(group.symbol).market === currentMarketFilter);
+          }
+          if (matches) {
+            targetIndices.push(idx);
+          }
+        });
 
-      appState.historyRecords = newHistoryRecords;
+        // Map reordered symbols to corresponding group objects
+        const reorderedGroups = orderedSymbols
+          .map(sym => appState.historyRecords.find(g => g.symbol === sym))
+          .filter(Boolean);
+
+        // Substitute into targetIndices in-place without disturbing other tabs
+        targetIndices.forEach((targetIdx, i) => {
+          if (reorderedGroups[i]) {
+            appState.historyRecords[targetIdx] = reorderedGroups[i];
+          }
+        });
+      }
+
       appState.lastUpdated = new Date().toISOString();
       saveToCache(appState);
       renderApp();
