@@ -387,18 +387,18 @@
       const upColor = marketInfo.isCn ? '#ff453a' : '#32d74b';
       const downColor = marketInfo.isCn ? '#32d74b' : '#ff453a';
 
-      // Timeframe memo lines (Desktop Studio Noir Dashed Layout)
+      // Timeframe tags
       const tfTags = [];
-      if (group.tf_w) tfTags.push(`<div class="tf-line-row"><span class="tf-label"><span>W</span><span>:</span></span><span class="tf-line-val mono">${escapeHtml(group.tf_w)}</span></div>`);
-      if (group.tf_d) tfTags.push(`<div class="tf-line-row"><span class="tf-label"><span>D</span><span>:</span></span><span class="tf-line-val mono">${escapeHtml(group.tf_d)}</span></div>`);
-      if (group.tf_30) tfTags.push(`<div class="tf-line-row"><span class="tf-label"><span>30</span><span>:</span></span><span class="tf-line-val mono">${escapeHtml(group.tf_30)}</span></div>`);
+      if (group.tf_w) tfTags.push(`<span class="tf-badge"><strong>W</strong>${escapeHtml(group.tf_w)}</span>`);
+      if (group.tf_d) tfTags.push(`<span class="tf-badge"><strong>D</strong>${escapeHtml(group.tf_d)}</span>`);
+      if (group.tf_30) tfTags.push(`<span class="tf-badge"><strong>30</strong>${escapeHtml(group.tf_30)}</span>`);
 
       // Cost & Qty
       const costQtyItems = [];
       if (group.cost) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Cost:</span> <span class="meta-val-highlight mono">${escapeHtml(group.cost)}</span></span>`);
       if (group.qty) costQtyItems.push(`<span class="card-meta-item"><span class="meta-key">Qty:</span> <span class="meta-val-highlight mono">${escapeHtml(group.qty)}</span></span>`);
 
-      // Calculations Ledger Rows (with horizontal line dividers)
+      // Calculations Ledger Rows
       const recordsHtml = (group.records || []).map((r, rIdx) => {
         const isUp = r.isUp !== false;
         const colorClass = isUp ? 'is-up' : 'is-down';
@@ -421,7 +421,7 @@
         `;
       }).join('');
 
-      // Notes section (with dashed divider)
+      // Notes section
       const hasNote = group.note && group.note.trim().length > 0;
       const noteHtml = hasNote ? `
         <div class="note-accordion">
