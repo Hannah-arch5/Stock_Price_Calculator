@@ -584,17 +584,15 @@ html, body {
   position: fixed;
   left: 0;
   right: 0;
+  top: 14vh;
   bottom: 0;
   z-index: 8001;
   background: #0a0a0a;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px 20px 0 0;
-  padding-bottom: 0;
   transform: translateY(100%);
   pointer-events: none;
   transition: transform 0.35s cubic-bezier(0.34, 1.15, 0.64, 1);
-  height: 84vh;
-  max-height: 84vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.95);
@@ -809,7 +807,8 @@ html, body {
 .sheet-footer {
   display: flex;
   gap: 8px;
-  padding: 10px 16px max(env(safe-area-inset-bottom, 12px), 12px);
+  padding: 10px 16px;
+  padding-bottom: max(env(safe-area-inset-bottom, 8px), 10px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background: #0a0a0a;
   flex-shrink: 0;
@@ -821,7 +820,7 @@ html, body {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  padding: 12px 6px;
+  padding: 10px 4px;
   cursor: pointer;
   transition: all 0.2s;
   font-family: 'JetBrains Mono', monospace;
