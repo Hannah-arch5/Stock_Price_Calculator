@@ -321,11 +321,12 @@ html, body {
   border-color: rgba(255, 255, 255, 0.35);
 }
 
-/* Result & Actions Footer */
+/* Result & Actions Footer (Strict Bottom Baseline Alignment) */
 .calc-footer-row {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -333,18 +334,12 @@ html, body {
   margin-top: 4px;
 }
 
-.calc-res-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.calc-res-left {
+.calc-footer-left {
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: 2px;
+  flex-shrink: 0;
 }
 
 .calc-res-label {
@@ -352,28 +347,30 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--fg-dim);
+  line-height: 1;
 }
 
 .calc-res-text {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #ffffff;
+  line-height: 1.1;
+}
+
+.calc-footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+  flex: 1;
 }
 
 .calc-actions-box {
   display: flex;
   gap: 6px;
-  align-items: center;
-  width: 100%;
-}
-
-.calc-actions-box > button {
-  flex: 1;
-  text-align: center;
-  justify-content: center;
-  white-space: nowrap;
-  padding: 7px 6px;
-  font-size: 0.68rem;
+  align-items: flex-end;
+  justify-content: flex-end;
 }
 
 .calc-primary-btn,
@@ -383,13 +380,15 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 6px;
   font-family: inherit;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
-  padding: 7px 10px;
+  letter-spacing: 0.04em;
+  padding: 6px 10px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .calc-primary-btn:active,
