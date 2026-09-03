@@ -394,6 +394,16 @@
         </div>
       ` : '';
 
+      // Urgency dots (Green / Orange / Red) matching Desktop
+      const currentUrgency = (group.records && group.records[0]) ? group.records[0].urgency : null;
+      const urgencyDotsHtml = `
+        <div class="urgency-dots">
+          <button type="button" class="urgency-dot green ${currentUrgency === 'green' ? 'selected' : ''}" data-symbol="${escapeHtml(group.symbol)}" data-color="green" title="Green urgency"></button>
+          <button type="button" class="urgency-dot orange ${currentUrgency === 'orange' ? 'selected' : ''}" data-symbol="${escapeHtml(group.symbol)}" data-color="orange" title="Orange urgency"></button>
+          <button type="button" class="urgency-dot red ${currentUrgency === 'red' ? 'selected' : ''}" data-symbol="${escapeHtml(group.symbol)}" data-color="red" title="Red urgency"></button>
+        </div>
+      `;
+
       return `
         <article class="stock-card" data-symbol="${escapeHtml(group.symbol)}" style="--up-color: ${upColor}; --down-color: ${downColor};">
           <header class="card-header">
@@ -403,7 +413,7 @@
                 ${group.name ? `<span class="stock-name">${escapeHtml(group.name)}</span>` : ''}
               </div>
               <div class="card-title-right">
-                <span class="market-tag">${marketInfo.label}</span>
+                ${urgencyDotsHtml}
                 <button class="edit-pencil-btn stock-edit-trigger" data-symbol="${escapeHtml(group.symbol)}" title="Edit stock metadata">✎</button>
               </div>
             </div>
@@ -1086,6 +1096,31 @@
         if (typeInput) typeInput.value = labelChip.textContent.trim();
         document.querySelectorAll('.label-chip').forEach(c => c.classList.remove('selected'));
         labelChip.classList.add('selected');
+        return;
+      }
+
+      // (c2) Urgency 3-Color Dot Toggle (Green / Orange / Red)
+      const urgencyDot = e.target.closest('.urgency-dot');
+      if (urgencyDot) {
+        e.preventDefault();
+        e.stopPropagation();
+        const symbol = urgencyDot.getAttribute('data-symbol');
+        const color = urgencyDot.getAttribute('data-color');
+        if (!symbol || !color) return;
+
+        const group = (appState.historyRecords || []).find(g => g.symbol === symbol);
+        if (!group) return;
+
+        const isSelected = urgencyDot.classList.contains('selected');
+        const newUrgency = isSelected ? null : color;
+
+        if (group.records) {
+          group.records.forEach(r => r.urgency = newUrgency);
+        }
+
+        saveToCache(appState);
+        renderApp();
+        pushDataToServer(appState);
         return;
       }
 
