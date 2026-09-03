@@ -910,8 +910,18 @@
         const symbol = quickTag.getAttribute('data-symbol');
         if (symbol) {
           const card = document.querySelector(`.stock-card[data-symbol="${symbol}"]`);
-          if (card) {
-            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const container = document.querySelector('.mobile-container');
+          if (card && container) {
+            const cardTop = card.getBoundingClientRect().top;
+            const containerTop = container.getBoundingClientRect().top;
+            // Generous offset below the dynamic island and sticky header
+            const targetScroll = container.scrollTop + (cardTop - containerTop) - 24;
+            container.scrollTo({
+              top: Math.max(0, targetScroll),
+              behavior: 'smooth'
+            });
+            card.classList.remove('card-highlight-flash');
+            void card.offsetWidth; // Trigger reflow for re-animation
             card.classList.add('card-highlight-flash');
             setTimeout(() => card.classList.remove('card-highlight-flash'), 1200);
           }

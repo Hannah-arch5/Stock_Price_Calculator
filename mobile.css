@@ -232,23 +232,33 @@ html, body {
   padding: 4px 10px;
   font-size: 0.72rem;
   cursor: pointer;
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  border-radius: 12px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
 }
 
 .quick-tag:active {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: #1a1a1a;
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: var(--fg-dim);
+  transform: scale(0.96);
+}
+
+@keyframes cardHighlightPulse {
+  0% {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    background: transparent;
+    border-color: var(--border);
+  }
 }
 
 .card-highlight-flash {
-  outline: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 6px;
-  transition: all 0.3s ease;
+  animation: cardHighlightPulse 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  border-radius: 8px;
 }
 
 /* Feed & Cards Stack */
@@ -266,6 +276,8 @@ html, body {
 .stock-card {
   border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
+  scroll-margin-top: calc(env(safe-area-inset-top, 44px) + 24px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Card Header */
