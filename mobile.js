@@ -351,7 +351,7 @@
     const highlightCheck = document.getElementById('calc-edit-highlight');
     const chipsContainer = document.getElementById('calc-chips-container');
 
-    if (subtitle) subtitle.textContent = `${group.symbol} #${recordIdx + 1} (${rec.type || 'Target'})`;
+    if (subtitle) subtitle.textContent = `${group.symbol} ${group.name || ''}`.trim();
     if (typeInput) typeInput.value = rec.type || '';
 
     // Render Label Chips

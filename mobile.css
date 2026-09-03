@@ -584,7 +584,6 @@ html, body {
   position: fixed;
   left: 0;
   right: 0;
-  top: 14vh;
   bottom: 0;
   z-index: 8001;
   background: #0a0a0a;
@@ -600,6 +599,17 @@ html, body {
 .bottom-sheet.visible {
   transform: translateY(0);
   pointer-events: auto;
+}
+
+/* Stock Metadata Sheet spans full height for long notes */
+#stock-edit-sheet {
+  top: 14vh;
+}
+
+/* Calculation Target Sheet fits content compactly */
+#calc-edit-sheet {
+  top: auto;
+  max-height: 85vh;
 }
 
 .sheet-handle-bar {
