@@ -134,6 +134,39 @@
     }
   }
 
+  // Silky Smooth Sibling Reorder Animation (Zero Shake, Zero Bounce)
+  function smoothMove(container, draggingEl, afterElement) {
+    if (!container || !draggingEl) return;
+    if (afterElement == null && draggingEl === container.lastElementChild) return;
+    if (afterElement && draggingEl.nextElementSibling === afterElement) return;
+
+    const siblings = [...container.children].filter(el => el !== draggingEl);
+    const firsts = new Map();
+    siblings.forEach(el => firsts.set(el, el.getBoundingClientRect()));
+
+    if (afterElement == null) {
+      container.appendChild(draggingEl);
+    } else {
+      container.insertBefore(draggingEl, afterElement);
+    }
+
+    siblings.forEach(el => {
+      const first = firsts.get(el);
+      if (!first) return;
+      const last = el.getBoundingClientRect();
+      const dx = first.left - last.left;
+      const dy = first.top - last.top;
+
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+        el.style.transition = 'none';
+        el.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
+        void el.offsetHeight; // Force reflow
+        el.style.transition = 'transform 0.22s cubic-bezier(0.2, 0, 0, 1)';
+        el.style.transform = '';
+      }
+    });
+  }
+
   function setupQuickTagsDragAndDrop() {
     const container = document.getElementById('mobile-quick-tags');
     if (!container || container.dataset.dragInitialized) return;
@@ -187,7 +220,7 @@
       pushDataToServer(appState);
     }
 
-    // Touch Support for Mobile (Stable, Zero-Bounce)
+    // Touch Support for Mobile (Stable & Silky Smooth)
     container.addEventListener('touchstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
@@ -228,17 +261,11 @@
           return;
         }
       } else {
-        // Stable, zero-displacement slot insertion
+        // Silky smooth sibling reorder
         if (e.cancelable) e.preventDefault();
         hasMoved = true;
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
-        if (afterElement !== draggingTag && afterElement !== draggingTag.nextElementSibling) {
-          if (afterElement == null) {
-            container.appendChild(draggingTag);
-          } else {
-            container.insertBefore(draggingTag, afterElement);
-          }
-        }
+        smoothMove(container, draggingTag, afterElement);
       }
     }, { passive: false });
 
@@ -285,13 +312,7 @@
       const dragging = container.querySelector('.dragging-tag');
       if (!dragging) return;
       const afterElement = getDragAfterTag(container, e.clientX, e.clientY);
-      if (afterElement !== dragging && afterElement !== dragging.nextElementSibling) {
-        if (afterElement == null) {
-          container.appendChild(dragging);
-        } else {
-          container.insertBefore(dragging, afterElement);
-        }
-      }
+      smoothMove(container, dragging, afterElement);
     });
 
     container.addEventListener('dragend', (e) => {
@@ -562,17 +583,11 @@
             return;
           }
         } else {
-          // Instant, rock-solid desktop-identical slot insertion
+          // Silky smooth sibling reorder
           if (e.cancelable) e.preventDefault();
           hasMoved = true;
           const afterElement = getDragAfterElement(ledger, touch.clientY);
-          if (afterElement !== draggingRow && afterElement !== draggingRow.nextElementSibling) {
-            if (afterElement == null) {
-              ledger.appendChild(draggingRow);
-            } else {
-              ledger.insertBefore(draggingRow, afterElement);
-            }
-          }
+          smoothMove(ledger, draggingRow, afterElement);
         }
       }, { passive: false });
 
@@ -614,10 +629,7 @@
           clearTimeout(dragHoldTimer);
           dragHoldTimer = null;
         }
-        if (draggingRow) {
-          draggingRow.style.transform = '';
-          draggingRow.classList.remove('dragging');
-        }
+        if (draggingRow) draggingRow.classList.remove('dragging');
         draggingRow = null;
         isDragging = false;
       });
@@ -653,11 +665,7 @@
           const dragging = ledger.querySelector('.dragging');
           if (!dragging) return;
           const afterElement = getDragAfterElement(ledger, e.clientY);
-          if (afterElement == null) {
-            ledger.appendChild(dragging);
-          } else {
-            ledger.insertBefore(dragging, afterElement);
-          }
+          smoothMove(ledger, dragging, afterElement);
         });
 
         ledger.addEventListener('dragend', (e) => {

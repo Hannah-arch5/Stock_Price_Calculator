@@ -563,11 +563,13 @@ html, body {
   transform: scale(0.96);
 }
 
-/* Clean, stable, zero-bounce tag dragging state */
+/* Rich, solid, high-contrast tag dragging state */
 .quick-tag.dragging-tag {
-  opacity: 0.45 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  background: #222222 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+  z-index: 100;
 }
 
 @keyframes slideUpFade {
@@ -802,11 +804,13 @@ html, body {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-/* Clean, stable, zero-bounce dragging state */
+/* Rich, solid, high-contrast dragging state (no washed-out pale colors) */
 .record-row.dragging {
-  opacity: 0.45 !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-left-color: #ffffff !important;
+  background: #1e1e1e !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  border-left: 3px solid #ffffff !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.85);
+  z-index: 100;
 }
 
 .record-left {
