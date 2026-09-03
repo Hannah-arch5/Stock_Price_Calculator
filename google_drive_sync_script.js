@@ -59,3 +59,18 @@ function doPost(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
+
+/**
+ * 目标价邮件提醒通道（通过 Google Apps Script 原生 MailApp 发送）
+ */
+function sendPriceAlertEmail(symbol, name, targetPrice, currentPrice, note) {
+  try {
+    const userEmail = Session.getActiveUser().getEmail();
+    if (!userEmail) return;
+    const subject = `【Ticker 目标价提醒】${symbol} ${name || ''} 已达到目标价 ${targetPrice}`;
+    const body = `你的股票已达到目标价：\n\n• 股票代码：${symbol} (${name || ''})\n• 目标价位：${targetPrice}\n• 现价监控：${currentPrice || '已触发'}\n• 操盘备忘：${note || '无'}\n\n通知时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}\n\n—— Ticker Studio Noir`;
+    MailApp.sendEmail(userEmail, subject, body);
+  } catch (e) {
+    console.error("Send alert email error:", e);
+  }
+}
