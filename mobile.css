@@ -245,20 +245,40 @@ html, body {
   transform: scale(0.96);
 }
 
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-stagger-card {
+  animation: slideUpFade 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
 @keyframes cardHighlightPulse {
   0% {
     background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3), 0 8px 32px rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+  }
+  50% {
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15), 0 4px 16px rgba(255, 255, 255, 0.02);
   }
   100% {
     background: transparent;
-    border-color: var(--border);
+    box-shadow: 0 0 0 1px transparent;
   }
 }
 
 .card-highlight-flash {
-  animation: cardHighlightPulse 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  border-radius: 8px;
+  animation: cardHighlightPulse 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Feed & Cards Stack */
@@ -276,7 +296,6 @@ html, body {
 .stock-card {
   border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
-  scroll-margin-top: calc(env(safe-area-inset-top, 44px) + 24px);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

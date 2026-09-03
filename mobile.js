@@ -832,6 +832,33 @@
     }
   }
 
+  // Physics-based luxury smooth scroll matching desktop Studio Noir
+  function smoothScrollContainer(container, targetY, duration = 650) {
+    const startY = container.scrollTop;
+    const difference = targetY - startY;
+    if (Math.abs(difference) < 2) return;
+
+    const startTime = performance.now();
+
+    function easeOutQuint(t) {
+      return 1 - Math.pow(1 - t, 4.5);
+    }
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = easeOutQuint(progress);
+
+      container.scrollTop = startY + difference * ease;
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
   // Setup UI Listeners with Robust Global Event Delegation
   function initListeners() {
     // 1. Top-Level Unified Click Delegation (works 100% on iOS PWA)
@@ -912,18 +939,18 @@
           const card = document.querySelector(`.stock-card[data-symbol="${symbol}"]`);
           const container = document.querySelector('.mobile-container');
           if (card && container) {
-            const cardTop = card.getBoundingClientRect().top;
-            const containerTop = container.getBoundingClientRect().top;
-            // Generous offset below the dynamic island and sticky header
-            const targetScroll = container.scrollTop + (cardTop - containerTop) - 24;
-            container.scrollTo({
-              top: Math.max(0, targetScroll),
-              behavior: 'smooth'
-            });
+            const cardRect = card.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            // Generous 110px top clearance: ensures card header lands comfortably below Dynamic Island
+            const topClearance = 110;
+            const targetScroll = container.scrollTop + (cardRect.top - containerRect.top) - topClearance;
+
+            smoothScrollContainer(container, Math.max(0, targetScroll), 650);
+
             card.classList.remove('card-highlight-flash');
-            void card.offsetWidth; // Trigger reflow for re-animation
+            void card.offsetWidth; // Force reflow
             card.classList.add('card-highlight-flash');
-            setTimeout(() => card.classList.remove('card-highlight-flash'), 1200);
+            setTimeout(() => card.classList.remove('card-highlight-flash'), 1700);
           }
         }
         return;
