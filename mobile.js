@@ -223,7 +223,7 @@
       pushDataToServer(appState);
     }
 
-    // Touch Drag Support for iOS / Mobile (Strict Long-Press Guard)
+    // Touch Drag Support for iOS / Mobile (Responsive Spring Drag)
     container.addEventListener('touchstart', (e) => {
       const tag = e.target.closest('.quick-tag');
       if (!tag) return;
@@ -235,7 +235,7 @@
       isDragging = false;
       hasMoved = false;
 
-      // Require deliberate 380ms long-press before drag mode is activated
+      // 240ms responsive hold before drag mode is activated
       dragHoldTimer = setTimeout(() => {
         if (draggingTag) {
           isDragging = true;
@@ -244,18 +244,18 @@
             try { navigator.vibrate(30); } catch (_) {}
           }
         }
-      }, 380);
+      }, 240);
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
       if (!draggingTag) return;
       const touch = e.touches[0];
-      const deltaX = Math.abs(touch.clientX - touchStartX);
-      const deltaY = Math.abs(touch.clientY - touchStartY);
+      const deltaX = touch.clientX - touchStartX;
+      const deltaY = touch.clientY - touchStartY;
 
       // If user moves finger BEFORE long-press completes, cancel drag timer immediately to allow natural vertical scrolling
       if (!isDragging) {
-        if (deltaX > 6 || deltaY > 6) {
+        if (Math.abs(deltaX) > 7 || Math.abs(deltaY) > 7) {
           if (dragHoldTimer) {
             clearTimeout(dragHoldTimer);
             dragHoldTimer = null;
@@ -264,9 +264,12 @@
           return;
         }
       } else {
-        // Drag mode is active after holding for 380ms
+        // Direct 1:1 finger follow + smooth spring FLIP layout swap
         if (e.cancelable) e.preventDefault();
         hasMoved = true;
+        draggingTag.style.transition = 'none';
+        draggingTag.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(1.1)`;
+
         const afterElement = getDragAfterTag(container, touch.clientX, touch.clientY);
         animateFLIP(container, draggingTag, afterElement);
       }
@@ -278,14 +281,25 @@
         dragHoldTimer = null;
       }
       if (isDragging && draggingTag) {
-        draggingTag.classList.remove('is-dragging');
+        const tag = draggingTag;
         draggingTag = null;
         isDragging = false;
-        if (hasMoved) {
-          commitReorderedTags();
-        }
+
+        tag.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.45, 0.64, 1)';
+        tag.style.transform = '';
+
+        setTimeout(() => {
+          tag.classList.remove('is-dragging');
+          tag.style.transition = '';
+          if (hasMoved) {
+            commitReorderedTags();
+          }
+        }, 180);
       } else {
-        if (draggingTag) draggingTag.classList.remove('is-dragging');
+        if (draggingTag) {
+          draggingTag.style.transform = '';
+          draggingTag.classList.remove('is-dragging');
+        }
         draggingTag = null;
         isDragging = false;
       }
@@ -296,7 +310,10 @@
         clearTimeout(dragHoldTimer);
         dragHoldTimer = null;
       }
-      if (draggingTag) draggingTag.classList.remove('is-dragging');
+      if (draggingTag) {
+        draggingTag.style.transform = '';
+        draggingTag.classList.remove('is-dragging');
+      }
       draggingTag = null;
       isDragging = false;
     });
@@ -555,7 +572,7 @@
         isDragging = false;
         hasMoved = false;
 
-        // 350ms deliberate hold to activate drag
+        // 240ms responsive hold to activate drag
         dragHoldTimer = setTimeout(() => {
           if (draggingRow) {
             isDragging = true;
@@ -564,18 +581,18 @@
               try { navigator.vibrate(30); } catch (_) {}
             }
           }
-        }, 350);
+        }, 240);
       }, { passive: true });
 
       ledger.addEventListener('touchmove', (e) => {
         if (!draggingRow) return;
         const touch = e.touches[0];
-        const deltaX = Math.abs(touch.clientX - touchStartX);
-        const deltaY = Math.abs(touch.clientY - touchStartY);
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
 
-        // Cancel hold if finger moved before 350ms hold (allows normal vertical page scroll)
+        // Cancel hold if finger moved before 240ms hold (allows normal vertical page scroll)
         if (!isDragging) {
-          if (deltaX > 6 || deltaY > 6) {
+          if (Math.abs(deltaX) > 7 || Math.abs(deltaY) > 7) {
             if (dragHoldTimer) {
               clearTimeout(dragHoldTimer);
               dragHoldTimer = null;
@@ -584,9 +601,12 @@
             return;
           }
         } else {
-          // In drag mode with fluid spring FLIP animation
+          // Direct 1:1 finger follow + smooth spring FLIP layout swap
           if (e.cancelable) e.preventDefault();
           hasMoved = true;
+          draggingRow.style.transition = 'none';
+          draggingRow.style.transform = `translate3d(0, ${deltaY}px, 0) scale(1.03)`;
+
           const afterElement = getDragAfterRecord(ledger, touch.clientY);
           animateFLIP(ledger, draggingRow, afterElement);
         }
@@ -599,12 +619,20 @@
         }
 
         if (isDragging && draggingRow) {
-          draggingRow.classList.remove('is-dragging');
+          const row = draggingRow;
           draggingRow = null;
           isDragging = false;
-          if (hasMoved) {
-            commitReorderedRecords();
-          }
+
+          row.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.45, 0.64, 1)';
+          row.style.transform = '';
+
+          setTimeout(() => {
+            row.classList.remove('is-dragging');
+            row.style.transition = '';
+            if (hasMoved) {
+              commitReorderedRecords();
+            }
+          }, 180);
         } else if (draggingRow) {
           // Check for Double-Tap on Mobile
           const row = draggingRow;
@@ -630,7 +658,10 @@
           clearTimeout(dragHoldTimer);
           dragHoldTimer = null;
         }
-        if (draggingRow) draggingRow.classList.remove('is-dragging');
+        if (draggingRow) {
+          draggingRow.style.transform = '';
+          draggingRow.classList.remove('is-dragging');
+        }
         draggingRow = null;
         isDragging = false;
       });
