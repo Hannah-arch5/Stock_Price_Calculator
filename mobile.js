@@ -1298,6 +1298,265 @@
     }, { passive: true });
   }
 
+  // ─── Export Portfolio & Research Functions ────────────────────────────────
+  let currentExportContext = 'all'; // 'all' or 'stock'
+
+  function openExportSheet(context = 'all') {
+    currentExportContext = context;
+    const sheet = document.getElementById('export-options-sheet');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+    const subtitle = document.getElementById('export-sheet-subtitle');
+
+    if (subtitle) {
+      if (context === 'stock' && currentResearchStock) {
+        subtitle.textContent = `${currentResearchStock.symbol} ${currentResearchStock.name || ''}`;
+      } else {
+        subtitle.textContent = 'ALL PORTFOLIO & NOTES';
+      }
+    }
+
+    if (sheet && backdrop) {
+      backdrop.classList.remove('hidden');
+      sheet.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        backdrop.classList.add('visible');
+        sheet.classList.add('visible');
+      });
+    }
+  }
+
+  function closeExportSheet() {
+    const sheet = document.getElementById('export-options-sheet');
+    const backdrop = document.getElementById('edit-sheet-backdrop');
+    if (!sheet || !backdrop) return;
+    sheet.classList.remove('visible');
+    backdrop.classList.remove('visible');
+    setTimeout(() => {
+      sheet.classList.add('hidden');
+      backdrop.classList.add('hidden');
+    }, 300);
+  }
+
+  function buildPortfolioPlainText() {
+    const records = appState.historyRecords || [];
+    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
+    let text = `==================================================\n`;
+    text += `【TICKER 策略测算与投资看板研报】\n`;
+    text += `生成时间: ${dateStr}\n`;
+    text += `总持仓/关注标的数: ${records.length}\n`;
+    text += `==================================================\n\n`;
+
+    records.forEach((g, idx) => {
+      text += `【${idx + 1}. ${g.symbol}${g.name ? ' - ' + g.name : ''}】\n`;
+      if (g.cost || g.qty) {
+        text += `• 持仓成本: ${g.cost ? '¥/$ ' + g.cost : '--'} | 持仓数量: ${g.qty ? g.qty + ' 股' : '--'}\n`;
+      }
+      if (g.tf_w || g.tf_d || g.tf_30) {
+        text += `• 级别周期分析: W: ${g.tf_w || '--'} | D: ${g.tf_d || '--'} | 30m: ${g.tf_30 || '--'}\n`;
+      }
+
+      if (g.records && g.records.length > 0) {
+        text += `• 策略买卖点测算点位:\n`;
+        g.records.forEach((r, rIdx) => {
+          const detail = cleanDetails(r.details, r);
+          text += `  [${rIdx + 1}] ${r.type || '点位'}: ${detail} => ${r.result || '--'}${r.shares ? ' (' + r.shares + ' 股)' : ''}\n`;
+        });
+      }
+
+      if (g.note && g.note.trim()) {
+        text += `• 交易策略与备忘 (STRATEGY NOTES):\n${g.note.trim()}\n`;
+      }
+
+      if (g.research_notes && g.research_notes.trim()) {
+        text += `• 研报剪藏重点 (RESEARCH CLIPPINGS):\n${g.research_notes.trim()}\n`;
+      }
+
+      text += `\n--------------------------------------------------\n\n`;
+    });
+
+    return text;
+  }
+
+  function buildStockResearchPlainText(stock) {
+    if (!stock) return buildPortfolioPlainText();
+    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
+    const sym = stock.symbol || 'STOCK';
+    const name = stock.name || sym;
+    const m = stock.metrics || {};
+    const bi = stock.businessIndustry || {};
+    const il = stock.investmentLogic || {};
+    const prof = stock.companyProfile || {};
+    const ta = stock.technicalAnalysis || {};
+
+    let text = `==================================================\n`;
+    text += `【TICKER 机构级个股深度投研报告】\n`;
+    text += `标的代码: ${sym}\n`;
+    text += `公司名称: ${name}\n`;
+    text += `当前价格: ${stock.currency || '$'}${stock.currentPrice || '--'} (${stock.changePercent ? (stock.changePercent > 0 ? '+' : '') + parseFloat(stock.changePercent).toFixed(2) + '%' : '--'})\n`;
+    text += `所属板块: ${prof.sector || '--'} | 细分赛道: ${prof.industry || '--'}\n`;
+    text += `报告生成时间: ${dateStr}\n`;
+    text += `==================================================\n\n`;
+
+    text += `【一、核心财务与估值矩阵 (FINANCIAL MATRIX)】\n`;
+    text += `• 总市值: ${m.marketCap || '--'}\n`;
+    text += `• 营收同比增速: ${m.revenueGrowth || '--'}\n`;
+    text += `• 净利润同比增速: ${m.earningsGrowth || '--'}\n`;
+    text += `• 净利率 / 毛利率: ${m.profitMargins || '--'}\n`;
+    text += `• 净资产收益率 (ROE): ${m.returnOnEquity || '--'}\n`;
+    text += `• 资产负债率: ${m.debtToEquity || '--'}\n`;
+    text += `• 市盈率 (TTM / Forward): ${m.pe || '--'}\n`;
+    text += `• 股息率: ${m.dividendYield || '--'}\n`;
+    text += `• 机构一致目标价: ${m.targetMeanPrice ? (stock.currency || '$') + m.targetMeanPrice : '--'}\n`;
+    text += `• 下次财报日期: ${stock.nextEarningsFormatted || '--'}\n\n`;
+
+    text += `【二、业务模型与行业格局 (BUSINESS & INDUSTRY)】\n`;
+    if (bi.coreHeadline) text += `【${bi.coreHeadline}】\n`;
+    (bi.coreBullets || []).forEach(b => text += `• ${b}\n`);
+    if (bi.industryHeadline) text += `\n【${bi.industryHeadline}】\n`;
+    (bi.industryBullets || []).forEach(b => text += `• ${b}\n`);
+    text += `\n`;
+
+    text += `【三、核心投资逻辑 (INVESTMENT LOGIC)】\n`;
+    if (il.coreHeadline) text += `【${il.coreHeadline}】\n`;
+    (il.coreBullets || []).forEach(b => text += `• ${b}\n`);
+    if (il.shortTermHeadline) text += `\n【${il.shortTermHeadline}】\n`;
+    (il.shortTermBullets || []).forEach(b => text += `• ${b}\n`);
+    if (il.longTermHeadline) text += `\n【${il.longTermHeadline}】\n`;
+    (il.longTermBullets || []).forEach(b => text += `• ${b}\n`);
+    if (il.valuationHeadline) text += `\n【${il.valuationHeadline}】\n`;
+    (il.valuationBullets || []).forEach(b => text += `• ${b}\n`);
+    text += `\n`;
+
+    if (stock.newsBrief && stock.newsBrief.length > 0) {
+      text += `【四、精选要闻简报 (NEWS BRIEF)】\n`;
+      stock.newsBrief.forEach(n => {
+        text += `• [${n.time || ''}] ${n.title}\n  解读: ${n.summary || ''}\n`;
+      });
+      text += `\n`;
+    }
+
+    if (stock.institutionalView && stock.institutionalView.length > 0) {
+      text += `【五、机构观点与研报共识 (INSTITUTIONAL VIEW)】\n`;
+      stock.institutionalView.forEach(v => {
+        text += `• ${v.title}:\n  ${v.body || ''}\n`;
+      });
+      text += `\n`;
+    }
+
+    text += `【六、技术面研判 (TECHNICAL ANALYSIS)】\n`;
+    text += `• 关键支撑区间: ${ta.supportBand || '--'}\n`;
+    text += `• 第一阻力区间: ${ta.resistanceBand || '--'}\n`;
+    text += `• 中期趋势信号: ${ta.trendSignal || '--'}\n`;
+    text += `• RSI 强弱指标: ${ta.rsiStatus || '--'}\n`;
+    (ta.bullets || []).forEach(b => text += `• ${b}\n`);
+    text += `\n`;
+
+    const group = (appState.historyRecords || []).find(g => g.symbol.toUpperCase() === sym.toUpperCase());
+    if (group) {
+      if (group.note && group.note.trim()) {
+        text += `【七、我的策略备忘 (STRATEGY & TRADING NOTES)】\n${group.note.trim()}\n\n`;
+      }
+      if (group.research_notes && group.research_notes.trim()) {
+        text += `【八、个股剪藏笔记 (RESEARCH CLIPPINGS)】\n${group.research_notes.trim()}\n\n`;
+      }
+    }
+
+    return text;
+  }
+
+  function buildHtmlReport(isStock, stock) {
+    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
+    const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
+    const title = isStock ? `${stock?.symbol || 'STOCK'}_深度投研报告` : `Ticker_投资测算与策略账本`;
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${title}</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 800px; margin: 30px auto; padding: 0 20px; background: #ffffff; }
+  h1 { font-size: 22px; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
+  .header-meta { font-size: 12px; color: #666; margin-bottom: 24px; }
+  pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit; font-size: 13.5px; line-height: 1.65; background: #f9f9fb; border: 1px solid #e1e4e8; border-radius: 6px; padding: 18px; }
+  @media print {
+    body { max-width: 100%; margin: 0; padding: 10mm; background: #ffffff; color: #000000; }
+    pre { border: none; background: transparent; padding: 0; font-size: 11pt; }
+  }
+</style>
+</head>
+<body>
+  <h1>${title.replace(/_/g, ' ')}</h1>
+  <div class="header-meta">Generated by Ticker Pocket &bull; ${dateStr}</div>
+  <pre>${escapeHtml(plainText)}</pre>
+</body>
+</html>`;
+  }
+
+  async function handleExportAction(type) {
+    const isStock = currentExportContext === 'stock';
+    const stock = currentResearchStock;
+    const title = isStock ? `${stock?.symbol || 'STOCK'}_深度投研研报` : `Ticker_投资策略账本`;
+    const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
+
+    closeExportSheet();
+
+    if (type === 'notes') {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: title,
+            text: plainText
+          });
+          showAlert('已打开系统分享，可直接存储至备忘录', 'success');
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            copyToClipboard(plainText);
+            showAlert('已复制完整内容至剪贴板，可粘贴到手机备忘录', 'success');
+          }
+        }
+      } else {
+        copyToClipboard(plainText);
+        showAlert('已复制完整研报内容至剪贴板，可直接粘贴到备忘录', 'success');
+      }
+    } else if (type === 'word') {
+      const html = buildHtmlReport(isStock, stock);
+      const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${title}.doc`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showAlert(`已开始下载 Word 文档: ${title}.doc`, 'success');
+    } else if (type === 'pdf') {
+      const html = buildHtmlReport(isStock, stock);
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+        showAlert('已调起打印与 PDF 导出页面', 'success');
+      } else {
+        const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${title}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showAlert('已下载可打印导出为 PDF 的研报文档', 'success');
+      }
+    }
+  }
+
   // Load from local storage cache
   function loadFromCache() {
     try {
@@ -2319,6 +2578,29 @@
         if (deltaResEl) deltaResEl.textContent = '0.00%';
       };
     }
+
+    // ─── Export Actions Setup ──────────────────────────────────
+    const mainExportBtn = document.getElementById('main-export-btn');
+    if (mainExportBtn) {
+      mainExportBtn.onclick = () => openExportSheet('all');
+    }
+
+    const resExportBtn = document.getElementById('res-export-btn');
+    if (resExportBtn) {
+      resExportBtn.onclick = () => openExportSheet('stock');
+    }
+
+    const exportCancelBtn = document.getElementById('export-sheet-cancel-btn');
+    if (exportCancelBtn) {
+      exportCancelBtn.onclick = closeExportSheet;
+    }
+
+    document.querySelectorAll('.export-card-btn').forEach(btn => {
+      btn.onclick = function () {
+        const type = this.getAttribute('data-export-type');
+        if (type) handleExportAction(type);
+      };
+    });
   }
 
   // ─── Populate Mobile Calculator from Ledger Record ─────────────

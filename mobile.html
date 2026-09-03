@@ -28,6 +28,13 @@
             <div class="brand-row">
                 <div class="brand-title">TICKER</div>
                 <div class="header-status">
+                    <button type="button" id="main-export-btn" class="header-export-btn" title="导出数据 (Export to Notes / Word / PDF)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </button>
                     <div id="sync-indicator" class="status-pill status-offline">
                         <span class="status-dot"></span>
                         <span id="sync-text" class="status-text">CONNECTING</span>
@@ -246,6 +253,13 @@
                     <div id="res-modal-price" class="research-price mono">$118.20</div>
                     <div id="res-modal-chg" class="research-chg mono">+2.45%</div>
                 </div>
+                <button type="button" id="res-export-btn" class="res-action-icon-btn" title="导出个股深度研报 (Export Research)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </button>
                 <button id="res-modal-close" class="research-close-btn">&times;</button>
             </div>
         </div>
@@ -560,6 +574,62 @@
         <div class="sheet-footer">
             <button id="add-label-cancel-btn" class="sheet-btn sheet-btn-cancel">CANCEL</button>
             <button id="add-label-confirm-btn" class="sheet-btn sheet-btn-save">ADD LABEL</button>
+        </div>
+    </div>
+
+    <!-- 4. Export Options Bottom Sheet -->
+    <div id="export-options-sheet" class="bottom-sheet hidden">
+        <div class="sheet-handle-bar"></div>
+        <div class="sheet-header">
+            <div class="sheet-title-tag">EXPORT OPTIONS</div>
+            <div id="export-sheet-subtitle" class="sheet-symbol mono">ALL PORTFOLIO</div>
+        </div>
+        <div class="sheet-body export-sheet-body">
+            <div class="export-options-grid">
+                <button type="button" class="export-card-btn" data-export-type="notes">
+                    <div class="export-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                    </div>
+                    <div class="export-card-info">
+                        <div class="export-card-title">📱 导出到手机备忘录 (Apple Notes / Share)</div>
+                        <div class="export-card-desc">一键分享或保存至 iPhone 原生备忘录 / 剪贴板</div>
+                    </div>
+                </button>
+
+                <button type="button" class="export-card-btn" data-export-type="word">
+                    <div class="export-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="export-card-info">
+                        <div class="export-card-title">📄 导出为 Word 文档 (.doc / .docx)</div>
+                        <div class="export-card-desc">生成排版精美的 Word 策略测算账本与研报</div>
+                    </div>
+                </button>
+
+                <button type="button" class="export-card-btn" data-export-type="pdf">
+                    <div class="export-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="export-card-info">
+                        <div class="export-card-title">📑 导出为 PDF 文档 (.pdf)</div>
+                        <div class="export-card-desc">生成高清排版 PDF 文档或调用系统打印预览</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+        <div class="sheet-footer">
+            <button id="export-sheet-cancel-btn" class="sheet-btn sheet-btn-cancel">CLOSE</button>
         </div>
     </div>
 
