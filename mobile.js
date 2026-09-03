@@ -2213,43 +2213,80 @@
     if (closeBtn) closeBtn.onclick = closeStockResearch;
     if (backdrop) backdrop.onclick = closeStockResearch;
 
-    // Add to My Calculations Button
-    if (addBtn) {
-      addBtn.onclick = function () {
-        if (!currentResearchStock) return;
-        const sym = currentResearchStock.symbol;
-        if (!appState.historyRecords) appState.historyRecords = [];
+    // 6 Quick Navigation Tabs & Modal Floating Scroll-To-Top
+    const navTabsContainer = document.getElementById('res-nav-tabs');
+    const researchBody = document.querySelector('.research-sheet-body');
+    const modalScrollTopBtn = document.getElementById('res-modal-scroll-to-top-btn');
 
-        let existing = appState.historyRecords.find(g => g.symbol === sym);
-        if (!existing) {
-          existing = {
-            symbol: sym,
-            name: currentResearchStock.name || sym,
-            currency: currentResearchStock.currency || '$',
-            records: []
-          };
-          appState.historyRecords.unshift(existing);
-          saveToCache(appState);
-          renderApp();
-          pushDataToServer(appState);
-          showAlert(`已将 ${sym} 添加到您的测算看板！`, 'success');
-        } else {
-          showAlert(`${sym} 已存在于测算看板中`, 'info');
+    if (navTabsContainer && researchBody) {
+      navTabsContainer.addEventListener('click', function (e) {
+        const tabBtn = e.target.closest('.res-nav-tab');
+        if (!tabBtn) return;
+
+        // Update active class
+        navTabsContainer.querySelectorAll('.res-nav-tab').forEach(b => b.classList.remove('active'));
+        tabBtn.classList.add('active');
+
+        const targetId = tabBtn.getAttribute('data-target');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          const targetY = targetEl.offsetTop - researchBody.offsetTop - 55;
+          smoothScrollContainer(researchBody, Math.max(0, targetY), 1150);
+
+          if (targetId === 'res-section-ai') {
+            const aiInputEl = document.getElementById('res-ai-input');
+            if (aiInputEl) setTimeout(() => aiInputEl.focus(), 400);
+          }
+        }
+      });
+
+      // Scroll listener on modal body for Scroll-To-Top button & ScrollSpy
+      researchBody.addEventListener('scroll', function () {
+        const top = researchBody.scrollTop;
+        if (modalScrollTopBtn) {
+          if (top > 160) {
+            modalScrollTopBtn.classList.remove('hidden');
+          } else {
+            modalScrollTopBtn.classList.add('hidden');
+          }
         }
 
-        closeStockResearch();
-
-        // Scroll to card
-        setTimeout(() => {
-          const card = document.querySelector(`.stock-card[data-symbol="${sym}"]`);
-          const container = document.querySelector('.mobile-container');
-          if (card && container) {
-            const cardRect = card.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
-            smoothScrollContainer(container, Math.max(0, container.scrollTop + (cardRect.top - containerRect.top) - 110), 1000);
+        // ScrollSpy to highlight corresponding tab
+        const sections = [
+          'res-section-profile',
+          'res-section-logic',
+          'res-section-news',
+          'res-section-inst',
+          'res-section-tech',
+          'res-section-ai'
+        ];
+        let currentSec = sections[0];
+        for (const sId of sections) {
+          const el = document.getElementById(sId);
+          if (el) {
+            const elTop = el.offsetTop - researchBody.offsetTop - 75;
+            if (top >= elTop) {
+              currentSec = sId;
+            }
           }
-        }, 300);
-      };
+        }
+        navTabsContainer.querySelectorAll('.res-nav-tab').forEach(b => {
+          if (b.getAttribute('data-target') === currentSec) {
+            b.classList.add('active');
+          } else {
+            b.classList.remove('active');
+          }
+        });
+      }, { passive: true });
+
+      // Modal Floating Scroll-To-Top button
+      if (modalScrollTopBtn) {
+        modalScrollTopBtn.onclick = function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          smoothScrollContainer(researchBody, 0, 1150);
+        };
+      }
     }
 
     // Add to iPhone Calendar Button
@@ -2271,17 +2308,6 @@
         document.body.removeChild(link);
 
         showAlert(`正在打开 iPhone 日历日程，请在弹窗中点击“添加”`, 'success');
-      };
-    }
-
-    // Open AI section button
-    if (openAiBtn) {
-      openAiBtn.onclick = function () {
-        const aiSection = document.getElementById('research-ai-section');
-        if (aiSection) {
-          aiSection.scrollIntoView({ behavior: 'smooth' });
-          if (aiInput) setTimeout(() => aiInput.focus(), 300);
-        }
       };
     }
 
@@ -2320,6 +2346,16 @@
 
     modal.classList.remove('hidden');
     backdrop.classList.remove('hidden');
+
+    const researchBody = document.querySelector('.research-sheet-body');
+    if (researchBody) researchBody.scrollTop = 0;
+    const navTabs = document.getElementById('res-nav-tabs');
+    if (navTabs) {
+      navTabs.querySelectorAll('.res-nav-tab').forEach((b, idx) => {
+        if (idx === 0) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+    }
 
     // Set Loading State
     const symEl = document.getElementById('res-modal-symbol');

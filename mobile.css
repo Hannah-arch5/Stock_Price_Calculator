@@ -1599,34 +1599,86 @@ html, body {
   padding-bottom: max(env(safe-area-inset-bottom, 24px), 32px);
 }
 
-.research-actions-bar {
-  display: flex;
-  gap: 10px;
+/* 6 Quick Navigation Tabs Bar */
+.research-tabs-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(3, 3, 3, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 6px 0 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: -8px;
 }
 
-.research-action-btn {
-  flex: 1;
-  padding: 10px 8px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+.research-nav-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 0 2px;
+}
+
+.research-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.res-nav-tab {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.04);
-  color: #ffffff;
-  font-size: 0.76rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--fg-dim);
+  font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
   font-family: inherit;
-  transition: all 0.15s;
 }
 
-.research-action-btn.primary {
+.res-nav-tab.active, .res-nav-tab:active {
   background: #ffffff;
   color: #000000;
   border-color: #ffffff;
   font-weight: 700;
 }
 
-.research-action-btn:active {
-  transform: scale(0.98);
+/* Modal Floating Scroll-To-Top Button */
+.res-scroll-to-top-btn {
+  position: absolute;
+  bottom: max(env(safe-area-inset-bottom, 24px), 28px);
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.res-scroll-to-top-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.9);
+}
+
+.res-scroll-to-top-btn:active {
+  transform: scale(0.92);
+  background: #ffffff;
+  color: #000000;
 }
 
 .research-section-box {

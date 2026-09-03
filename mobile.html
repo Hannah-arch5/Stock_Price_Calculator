@@ -240,10 +240,16 @@
         </div>
 
         <div class="research-sheet-body">
-            <!-- Top Action Bar -->
-            <div class="research-actions-bar">
-                <button id="res-modal-add-btn" class="research-action-btn primary">+ 加入我的测算看板</button>
-                <button id="res-modal-open-ai-btn" class="research-action-btn">🤖 AI 深度投研问答</button>
+            <!-- 6 Quick Navigation Tabs -->
+            <div class="research-tabs-wrapper">
+                <div id="res-nav-tabs" class="research-nav-tabs">
+                    <button type="button" class="res-nav-tab active" data-target="res-section-profile">业务洞察</button>
+                    <button type="button" class="res-nav-tab" data-target="res-section-logic">投资逻辑</button>
+                    <button type="button" class="res-nav-tab" data-target="res-section-news">核心要闻</button>
+                    <button type="button" class="res-nav-tab" data-target="res-section-inst">机构共识</button>
+                    <button type="button" class="res-nav-tab" data-target="res-section-tech">技术研判</button>
+                    <button type="button" class="res-nav-tab" data-target="res-section-ai">AI 对话</button>
+                </div>
             </div>
 
             <!-- Earnings Calendar & Reminder Pill -->
@@ -315,8 +321,8 @@
                 </div>
             </div>
 
-            <!-- 1. Business & Industry (Wind Style) -->
-            <div class="research-section-box">
+            <!-- Tab 1: Business & Industry (Wind Style) -->
+            <div id="res-section-profile" class="research-section-box">
                 <div class="section-title-row">
                     <span class="section-title">BUSINESS & INDUSTRY (公司与行业洞察)</span>
                     <span class="section-badge">PROFILE</span>
@@ -330,8 +336,8 @@
                 </div>
             </div>
 
-            <!-- 1. Investment Logic (Wind Style) -->
-            <div class="research-section-box">
+            <!-- Tab 2: Investment Logic (Wind Style) -->
+            <div id="res-section-logic" class="research-section-box">
                 <div class="section-title-row">
                     <span class="section-title">INVESTMENT LOGIC (核心投资逻辑)</span>
                     <span class="section-badge">WIND 3C</span>
@@ -341,8 +347,8 @@
                 </div>
             </div>
 
-            <!-- 2. News Brief (Real-time Key Events) -->
-            <div class="research-section-box">
+            <!-- Tab 3: News Brief (Real-time Key Events) -->
+            <div id="res-section-news" class="research-section-box">
                 <div class="section-title-row">
                     <span class="section-title">NEWS BRIEF (精选要闻简报)</span>
                     <span class="section-badge">REAL-TIME</span>
@@ -352,8 +358,8 @@
                 </div>
             </div>
 
-            <!-- 3. Institutional View (Consensus & Wall Street) -->
-            <div class="research-section-box">
+            <!-- Tab 4: Institutional View (Consensus & Wall Street) -->
+            <div id="res-section-inst" class="research-section-box">
                 <div class="section-title-row">
                     <span class="section-title">INSTITUTIONAL VIEW (机构观点与研报共识)</span>
                     <span class="section-badge">CONSENSUS</span>
@@ -363,8 +369,8 @@
                 </div>
             </div>
 
-            <!-- 4. Technical Analysis (Support, Resistance & Trend) -->
-            <div class="research-section-box">
+            <!-- Tab 5: Technical Analysis (Support, Resistance & Trend) -->
+            <div id="res-section-tech" class="research-section-box">
                 <div class="section-title-row">
                     <span class="section-title">TECHNICAL ANALYSIS (技术面研判)</span>
                     <span class="section-badge">PRICE ACTION</span>
@@ -374,8 +380,8 @@
                 </div>
             </div>
 
-            <!-- Embedded AI Research Chat -->
-            <div id="research-ai-section" class="research-section-box ai-box">
+            <!-- Tab 6: Embedded AI Research Chat -->
+            <div id="res-section-ai" class="research-section-box ai-box">
                 <div class="section-title-row">
                     <span class="section-title">AI COMPANION (智能投研问答)</span>
                     <span class="section-badge ai-badge">GEMINI FLASH</span>
@@ -396,6 +402,13 @@
                 </div>
             </div>
         </div>
+
+        <!-- Floating Scroll-To-Top Button inside Modal -->
+        <button id="res-modal-scroll-to-top-btn" class="res-scroll-to-top-btn hidden" aria-label="Scroll to top" title="Back to top">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+        </button>
     </div>
 
     <!-- 1. Stock Metadata Edit Sheet -->
