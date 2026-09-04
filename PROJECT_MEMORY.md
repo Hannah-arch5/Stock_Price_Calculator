@@ -155,6 +155,13 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
+### v5.9.4: Harmonized Earnings Calendar & Responsive Bracket Wrapping
+- **Earnings Date Distinction**:
+  - **`EARNINGS CALENDAR` Badge (右上角)**: 指**目前的最新财报**（最新已披露报告期，如 `2024 年报 / 2025 一季报 (截至 2025-03-31)` 或 `FY2025 Q1 季报 (截至 2024-12-28)`）。
+  - **`Est. Release Date` (下方日期)**: 指**下一个财报的发布日期**（即将披露排期，如 `2025-04-28 (2025 一季报披露)` 或 `2025-05-01 (Q2 FY25 财报披露)`）。
+- **Unified Format**: 统一样式为 `主信息 (括号辅助说明)`。
+- **Responsive Bracket Wrapping**: 采用 flex 容器配合 `white-space: nowrap`，一行能容纳时保持一行；屏幕空间受限时**从左括号 `(` 开始自动换到第二行**，括号内部文字（如 `(2025 一季报披露)`）作为一个原子单元，绝不在汉字中间截断换行。
+
 ---
 
 ## 6. Build & Deployment
@@ -165,3 +172,4 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 - **Git Workflow**:
   - Project repo uses `Hannah-arch5/Stock_Price_Calculator_Ticker`
   - Release branches tagged (e.g., `v5.3.0`).
+
