@@ -2236,7 +2236,13 @@
         return;
       }
 
-      // (j) Manual Sync Trigger (Tap on Sync Pill or Empty State Button)
+      // (j) Brand Title Tap (Hard Refresh App)
+      if (e.target.closest('.brand-title')) {
+        window.location.href = window.location.pathname + '?_ts=' + Date.now();
+        return;
+      }
+
+      // (k) Manual Sync Trigger (Tap on Sync Pill or Empty State Button)
       if (e.target.closest('#sync-indicator') || e.target.id === 'force-sync-empty-btn') {
         e.preventDefault();
         e.stopPropagation();
