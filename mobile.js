@@ -1410,12 +1410,16 @@
 
   function buildPortfolioPlainText() {
     const records = appState.historyRecords || [];
-    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
-    let text = `==================================================\n`;
-    text += `【TICKER 策略测算与投资看板研报】\n`;
-    text += `生成时间: ${dateStr}\n`;
-    text += `总持仓/关注标的数: ${records.length}\n`;
-    text += `==================================================\n\n`;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayFormatted = `${year}/${month}/${day}`;
+    const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+
+    let text = `${todayFormatted} TICKER 策略测算与投资看板研报\n\n`;
+    text += `生成时间: ${todayFormatted} ${timeStr} | 关注/持仓标的: ${records.length} 只\n`;
+    text += `--------------------------------------------------\n\n`;
 
     records.forEach((g, idx) => {
       text += `【${idx + 1}. ${g.symbol}${g.name ? ' - ' + g.name : ''}】\n`;
@@ -1450,7 +1454,12 @@
 
   function buildStockResearchPlainText(stock) {
     if (!stock) return buildPortfolioPlainText();
-    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayFormatted = `${year}/${month}/${day}`;
+    const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
     const sym = stock.symbol || 'STOCK';
     const name = stock.name || sym;
     const m = stock.metrics || {};
@@ -1459,15 +1468,12 @@
     const prof = stock.companyProfile || {};
     const ta = stock.technicalAnalysis || {};
 
-    let text = `==================================================\n`;
-    text += `【TICKER 机构级个股深度投研报告】\n`;
-    text += `标的代码: ${sym}\n`;
-    text += `公司名称: ${name}\n`;
+    let text = `${todayFormatted} 【${sym} - ${name}】TICKER 机构级深度投研研报\n\n`;
+    text += `标的代码: ${sym} | 公司名称: ${name}\n`;
     text += `当前价格: ${stock.currency || '$'}${stock.currentPrice || '--'} (${stock.changePercent ? (stock.changePercent > 0 ? '+' : '') + parseFloat(stock.changePercent).toFixed(2) + '%' : '--'})\n`;
-    text += `行情说明: ${window.TickerQuotes.statusText(stock)}\n`;
-    text += `所属板块: ${prof.sector || '--'} | 细分赛道: ${prof.industry || '--'}\n`;
-    text += `报告生成时间: ${dateStr}\n`;
-    text += `==================================================\n\n`;
+    text += `所属板块: ${prof.sector || '--'} | 细分行业: ${prof.industry || '--'}\n`;
+    text += `生成时间: ${todayFormatted} ${timeStr}\n`;
+    text += `--------------------------------------------------\n\n`;
 
     text += `【一、核心财务与估值矩阵 (FINANCIAL MATRIX)】\n`;
     text += `• 总市值: ${m.marketCap || '--'}\n`;
@@ -1766,7 +1772,6 @@
     if (type === 'notes') {
       // 1. Immediately copy complete text to clipboard
       copyTextToClipboard(plainText);
-      showAlert('已复制全部账本与研报内容！可直接在 iPhone 打开「备忘录」粘贴', 'success');
 
       // 2. Try native system share modal (which includes Apple Notes)
       if (navigator.share) {
