@@ -2157,6 +2157,8 @@
   // ─── Part 1: Quick Calculators Controller ──────────────────────
   let targetCalcDir = 'up'; // 'up' | 'down'
   let isChipsEditMode = false;
+  let triggerCalcTarget = null;
+  let triggerCalcDelta = null;
 
   function renderPart1Chips() {
     const defaultLabels = ['D买点1', 'D买点2', 'D卖点1', 'D卖点2', 'W买点1', 'W买点2', 'W卖点1', 'W卖点2', '30买点1', '30买点2', '30卖点1', '30卖点2'];
@@ -2336,6 +2338,7 @@
       const res = isUp ? base * (1 + perc / 100) : base * (1 - perc / 100);
       if (targetResEl) targetResEl.textContent = `${cur}${res.toFixed(2)}`;
     }
+    triggerCalcTarget = calcTargetLive;
 
     if (targetDirBtn) {
       targetDirBtn.onclick = () => {
@@ -2461,6 +2464,7 @@
 
         const newRecord = {
           type: labelType,
+          mode: 'target',
           result: resultStr,
           details: detailsStr,
           timestamp: new Date().toISOString(),
@@ -2468,7 +2472,11 @@
           targetPrice: resVal,
           percentage: perc,
           isUp: isUp,
+          direction: targetCalcDir,
           inputs: {
+            base: base,
+            perc: perc,
+            isUp: isUp,
             basePrice: base,
             percentage: perc,
             direction: targetCalcDir,
@@ -2554,6 +2562,7 @@
         }
       }
     }
+    triggerCalcDelta = calcDeltaLive;
 
     // Rev. Calc for Delta Initial Price
     const deltaRevInitBtn = document.getElementById('m-delta-rev-init-btn');
@@ -2703,6 +2712,7 @@
 
         const newRecord = {
           type: labelType,
+          mode: 'percentage',
           result: resultStr,
           details: detailsStr,
           timestamp: new Date().toISOString(),
@@ -2711,6 +2721,8 @@
           percentage: Math.abs(diff),
           isUp: isUp,
           inputs: {
+            initial: init,
+            final: fin,
             initialPrice: init,
             finalPrice: fin,
             shares: ''
@@ -2773,28 +2785,190 @@
     });
   }
 
+  // ─── Extract Record Values Accurately (Universal Schema Parser) ─
+  function extractRecordData(record) {
+    if (!record) return null;
+
+    // Convert HTML details to clean plain text (removes all <span> tags)
+    let plainDetails = '';
+    if (record.details) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = record.details;
+      plainDetails = tmp.textContent.replace(/\s+/g, ' ').trim();
+    }
+
+    // 1. Determine if this record is a Percentage Delta record
+    let isPercentage = false;
+    if (record.mode === 'percentage') {
+      isPercentage = true;
+    } else if (record.type && (record.type.includes('已涨') || record.type.includes('已跌') || record.type === 'Percentage Delta' || record.type === 'Percentage Change')) {
+      isPercentage = true;
+    } else if (record.inputs && (record.inputs.initial !== undefined || record.inputs.initialPrice !== undefined)) {
+      isPercentage = true;
+    } else if (record.result && String(record.result).includes('%') && (record.inputs?.base === undefined && record.basePrice === undefined)) {
+      isPercentage = true;
+    } else if (plainDetails.includes('Target:') || plainDetails.includes('->') || plainDetails.includes('→')) {
+      isPercentage = true;
+    }
+
+    if (isPercentage) {
+      let initial = '';
+      let final = '';
+
+      if (record.inputs) {
+        if (record.inputs.initial !== undefined && record.inputs.initial !== null && record.inputs.initial !== '') {
+          initial = record.inputs.initial;
+        } else if (record.inputs.initialPrice !== undefined && record.inputs.initialPrice !== null && record.inputs.initialPrice !== '') {
+          initial = record.inputs.initialPrice;
+        }
+
+        if (record.inputs.final !== undefined && record.inputs.final !== null && record.inputs.final !== '') {
+          final = record.inputs.final;
+        } else if (record.inputs.finalPrice !== undefined && record.inputs.finalPrice !== null && record.inputs.finalPrice !== '') {
+          final = record.inputs.finalPrice;
+        }
+      }
+
+      if (initial === '' && record.basePrice !== undefined && record.basePrice !== null && record.basePrice !== '') {
+        initial = record.basePrice;
+      }
+      if (final === '' && record.targetPrice !== undefined && record.targetPrice !== null && record.targetPrice !== '') {
+        final = record.targetPrice;
+      }
+
+      // Regex fallbacks from cleaned plainDetails
+      if (initial === '' || final === '') {
+        const baseTargetMatch = plainDetails.match(/Base:\s*[^0-9.]*([0-9.]+)\s*Target:\s*[^0-9.]*([0-9.]+)/i);
+        if (baseTargetMatch) {
+          if (initial === '') initial = baseTargetMatch[1];
+          if (final === '') final = baseTargetMatch[2];
+        } else {
+          const arrowMatch = plainDetails.match(/([^0-9.]*)([0-9.]+)\s*(?:->|→)\s*([^0-9.]*)([0-9.]+)/);
+          if (arrowMatch) {
+            if (initial === '') initial = arrowMatch[2];
+            if (final === '') final = arrowMatch[4];
+          } else {
+            const bMatch = plainDetails.match(/Base:\s*[^0-9.]*([0-9.]+)/i);
+            const tMatch = plainDetails.match(/Target:\s*[^0-9.]*([0-9.]+)/i);
+            if (bMatch && initial === '') initial = bMatch[1];
+            if (tMatch && final === '') final = tMatch[1];
+          }
+        }
+      }
+
+      const numInit = parseFloat(initial) || 0;
+      const numFinal = parseFloat(final) || 0;
+      let pctStr = '0.00%';
+      let diff = 0;
+      if (numInit > 0 && numFinal > 0) {
+        diff = ((numFinal - numInit) / numInit) * 100;
+        pctStr = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
+      } else if (record.result && String(record.result).includes('%')) {
+        pctStr = String(record.result).trim();
+      }
+
+      return {
+        isPercentage: true,
+        initial: initial !== '' ? initial : '',
+        final: final !== '' ? final : '',
+        pctStr: pctStr,
+        diff: diff,
+        type: record.type || ''
+      };
+    } else {
+      // Target Projection
+      let base = '';
+      let perc = '';
+      let isUp = true;
+      let targetPrice = '';
+
+      if (record.inputs) {
+        if (record.inputs.base !== undefined && record.inputs.base !== null && record.inputs.base !== '') {
+          base = record.inputs.base;
+        }
+        if (record.inputs.perc !== undefined && record.inputs.perc !== null && record.inputs.perc !== '') {
+          perc = record.inputs.perc;
+        }
+        if (record.inputs.isUp !== undefined) {
+          isUp = record.inputs.isUp !== false;
+        }
+      }
+
+      if (base === '' && record.basePrice !== undefined && record.basePrice !== null && record.basePrice !== '') {
+        base = record.basePrice;
+      }
+      if (perc === '' && record.percentage !== undefined && record.percentage !== null && record.percentage !== '') {
+        perc = record.percentage;
+      }
+      if (record.isUp !== undefined) {
+        isUp = record.isUp !== false;
+      } else if (record.direction) {
+        isUp = record.direction === 'up';
+      }
+
+      // Regex fallbacks from cleaned plainDetails
+      if (base === '' || perc === '') {
+        const bMatch = plainDetails.match(/Base:\s*[^0-9.]*([0-9.]+)/i) || plainDetails.match(/^[^\d]*([0-9.]+)/);
+        if (bMatch && base === '') base = bMatch[1];
+
+        const pMatch = plainDetails.match(/(Up|Down|▲|▼|\+|-)\s*([0-9.]+)%/i) || plainDetails.match(/([0-9.]+)%/);
+        if (pMatch) {
+          if (perc === '') perc = pMatch[2] || pMatch[1];
+          if (pMatch[1]) {
+            const dirStr = pMatch[1].toLowerCase();
+            if (dirStr === 'down' || dirStr === '▼' || dirStr === '-') {
+              isUp = false;
+            } else if (dirStr === 'up' || dirStr === '▲' || dirStr === '+') {
+              isUp = true;
+            }
+          }
+        }
+      }
+
+      // Check if targetPrice or result exists
+      if (record.targetPrice !== undefined && record.targetPrice !== null && record.targetPrice !== '') {
+        targetPrice = record.targetPrice;
+      } else if (record.result && !String(record.result).includes('%')) {
+        const numMatch = String(record.result).replace(/,/g, '').match(/[0-9.]+/);
+        if (numMatch) targetPrice = numMatch[0];
+      }
+
+      const numBase = parseFloat(base) || 0;
+      const numPerc = parseFloat(perc) || 0;
+      let calculatedTarget = 0;
+      if (numBase > 0) {
+        calculatedTarget = isUp ? numBase * (1 + numPerc / 100) : numBase * (1 - numPerc / 100);
+      } else if (targetPrice !== '') {
+        calculatedTarget = parseFloat(targetPrice) || 0;
+      }
+
+      return {
+        isPercentage: false,
+        base: base !== '' ? base : '',
+        perc: perc !== '' ? perc : '',
+        isUp: isUp,
+        targetPrice: calculatedTarget,
+        type: record.type || ''
+      };
+    }
+  }
+
   // ─── Populate Mobile Calculator from Ledger Record ─────────────
   function populateMobileCalculator(record, symbol) {
     if (!record) return;
     const sym = symbol || record.symbol || '';
+    const data = extractRecordData(record);
+    if (!data) return;
 
-    let isPercentage = false;
-    if (record.mode === 'percentage') {
-      isPercentage = true;
-    } else if (record.inputs && (record.inputs.initial !== undefined || record.inputs.initialPrice !== undefined)) {
-      isPercentage = true;
-    } else if (record.result && record.result.includes('%')) {
-      isPercentage = true;
-    } else if (record.type === 'Percentage Delta' || record.type === 'Percentage Change') {
-      isPercentage = true;
-    }
+    const isChina = detectMarket(sym).market === 'A';
+    const cur = isChina ? '¥' : '$';
 
     const modeTargetBtn = document.getElementById('m-mode-target');
     const modeDeltaBtn = document.getElementById('m-mode-delta');
     const panelTarget = document.getElementById('m-panel-target');
     const panelDelta = document.getElementById('m-panel-delta');
 
-    if (!isPercentage) {
+    if (!data.isPercentage) {
       // 1. Switch to Target Projection tab
       if (modeTargetBtn) modeTargetBtn.classList.add('active');
       if (modeDeltaBtn) modeDeltaBtn.classList.remove('active');
@@ -2808,25 +2982,15 @@
       const targetTypeInput = document.getElementById('m-target-type');
       const targetCurSym = document.getElementById('m-target-cur');
       const targetResEl = document.getElementById('m-target-res-val');
+      const targetChipsRow = document.getElementById('m-target-chips-container');
 
       if (targetSymInput) targetSymInput.value = sym;
-      if (targetTypeInput) targetTypeInput.value = record.type || '';
+      if (targetBaseInput) targetBaseInput.value = data.base;
+      if (targetPercInput) targetPercInput.value = data.perc;
+      if (targetTypeInput) targetTypeInput.value = data.type || '';
+      if (targetCurSym) targetCurSym.textContent = cur;
 
-      if (record.inputs && record.inputs.base !== undefined) {
-        if (targetBaseInput) targetBaseInput.value = record.inputs.base;
-        if (targetPercInput) targetPercInput.value = record.inputs.perc;
-        targetCalcDir = record.inputs.isUp !== false ? 'up' : 'down';
-      } else {
-        const baseMatch = (record.details || '').match(/Base:\s*([^\s\d]*)\s*([\d.]+)/);
-        const percMatch = (record.details || '').match(/(Up|Down|▲|▼|\+|-)\s*([\d.]+)%/i);
-        if (baseMatch && targetBaseInput) targetBaseInput.value = baseMatch[2];
-        if (percMatch && targetPercInput) {
-          targetPercInput.value = percMatch[2];
-          const isDown = /Down|▼|-/i.test(percMatch[1]);
-          targetCalcDir = isDown ? 'down' : 'up';
-        }
-      }
-
+      targetCalcDir = data.isUp ? 'up' : 'down';
       if (targetDirBtn) {
         targetDirBtn.setAttribute('data-dir', targetCalcDir);
         targetDirBtn.textContent = targetCalcDir === 'up' ? '▲ UP' : '▼ DOWN';
@@ -2834,20 +2998,19 @@
         targetDirBtn.classList.toggle('is-down', targetCalcDir === 'down');
       }
 
-      const isChina = detectMarket(sym).market === 'A';
-      const cur = isChina ? '¥' : '$';
-      if (targetCurSym) targetCurSym.textContent = cur;
+      if (targetChipsRow && data.type) {
+        targetChipsRow.querySelectorAll('.calc-chip').forEach(c => {
+          c.classList.toggle('selected', c.textContent.trim() === data.type);
+        });
+      }
 
-      const base = parseFloat(targetBaseInput ? targetBaseInput.value : 0) || 0;
-      const perc = parseFloat(targetPercInput ? targetPercInput.value : 0) || 0;
-      const isUp = targetCalcDir === 'up';
+      // Display Target Price immediately
       if (targetResEl) {
-        if (base > 0) {
-          const res = isUp ? base * (1 + perc / 100) : base * (1 - perc / 100);
-          targetResEl.textContent = `${cur}${res.toFixed(2)}`;
-        } else {
-          targetResEl.textContent = `${cur}0.00`;
-        }
+        targetResEl.textContent = `${cur}${parseFloat(data.targetPrice || 0).toFixed(2)}`;
+      }
+
+      if (triggerCalcTarget) {
+        triggerCalcTarget();
       }
     } else {
       // 2. Switch to Percentage Delta tab
@@ -2863,36 +3026,33 @@
       const deltaCur1 = document.getElementById('m-delta-cur-1');
       const deltaCur2 = document.getElementById('m-delta-cur-2');
       const deltaResEl = document.getElementById('m-delta-res-val');
+      const deltaChipsRow = document.getElementById('m-delta-chips-container');
 
       if (deltaSymInput) deltaSymInput.value = sym;
-      if (deltaTypeInput) deltaTypeInput.value = record.type || '';
-
-      const isChina = detectMarket(sym).market === 'A';
-      const cur = isChina ? '¥' : '$';
+      if (deltaInitialInput) deltaInitialInput.value = data.initial;
+      if (deltaFinalInput) deltaFinalInput.value = data.final;
+      if (deltaTypeInput) deltaTypeInput.value = data.type || '';
       if (deltaCur1) deltaCur1.textContent = cur;
       if (deltaCur2) deltaCur2.textContent = cur;
 
-      if (record.inputs && (record.inputs.initial !== undefined || record.inputs.initialPrice !== undefined)) {
-        if (deltaInitialInput) deltaInitialInput.value = record.inputs.initial !== undefined ? record.inputs.initial : record.inputs.initialPrice;
-        if (deltaFinalInput) deltaFinalInput.value = record.inputs.final !== undefined ? record.inputs.final : record.inputs.finalPrice;
-      } else {
-        const initMatch = (record.details || '').match(/Base:\s*([^\s\d]*)\s*([\d.]+)/) || (record.details || '').match(/([\d.]+)\s*(?:->|→)/);
-        const finalMatch = (record.details || '').match(/Target:\s*([^\s\d]*)\s*([\d.]+)/) || (record.details || '').match(/(?:->|→)\s*([^\s\d]*)\s*([\d.]+)/);
-        if (initMatch && deltaInitialInput) deltaInitialInput.value = initMatch[2] || initMatch[1];
-        if (finalMatch && deltaFinalInput) deltaFinalInput.value = finalMatch[2] || finalMatch[1];
+      if (deltaChipsRow && data.type) {
+        deltaChipsRow.querySelectorAll('.calc-chip').forEach(c => {
+          c.classList.toggle('selected', c.textContent.trim() === data.type);
+        });
       }
 
-      const init = parseFloat(deltaInitialInput ? deltaInitialInput.value : 0) || 0;
-      const fin = parseFloat(deltaFinalInput ? deltaFinalInput.value : 0) || 0;
+      // Display Percentage Delta immediately
       if (deltaResEl) {
-        if (init > 0 && fin > 0) {
-          const diff = ((fin - init) / init) * 100;
-          deltaResEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
-          deltaResEl.style.color = isChina ? (diff >= 0 ? '#ff453a' : '#32d74b') : (diff >= 0 ? '#32d74b' : '#ff453a');
+        deltaResEl.textContent = data.pctStr;
+        if (isChina) {
+          deltaResEl.style.color = data.diff >= 0 ? '#ff453a' : '#32d74b';
         } else {
-          deltaResEl.textContent = '0.00%';
-          deltaResEl.style.color = '#ffffff';
+          deltaResEl.style.color = data.diff >= 0 ? '#32d74b' : '#ff453a';
         }
+      }
+
+      if (triggerCalcDelta) {
+        triggerCalcDelta();
       }
     }
 
@@ -2905,7 +3065,7 @@
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
 
-    showToast(`已将 ${sym} [${record.type || '测算'}] 导回上方计算器`);
+    showToast(`已将 ${sym} [${data.type || '测算'}] 导回上方计算器`);
   }
 
   // ==========================================================================
