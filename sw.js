@@ -1,9 +1,9 @@
-const CACHE_NAME = 'ticker-pocket-v5.4.2';
+const CACHE_NAME = 'ticker-pocket-v5.4.3';
 const STATIC_ASSETS = [
   './',
   './mobile.html',
-  './mobile.css?v=5.4.2',
-  './mobile.js?v=5.4.2',
+  './mobile.css?v=5.4.3',
+  './mobile.js?v=5.4.3',
   './manifest.json',
   './apple-touch-icon.png'
 ];

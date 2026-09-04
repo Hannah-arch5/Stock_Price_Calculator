@@ -1755,8 +1755,10 @@
     }
   }
 
+  const DEFAULT_GDRIVE_URL = 'https://script.google.com/macros/s/AKfycbzNLUFsji7FFW8Qvwr_IDTuenRsKuVkjetOeTatG9i5V_T2Pt3h-UmK8Yw2HS6NtMlQ/exec';
+
   function getGDriveUrl() {
-    return localStorage.getItem(GDRIVE_CACHE_KEY) || null;
+    return localStorage.getItem(GDRIVE_CACHE_KEY) || DEFAULT_GDRIVE_URL;
   }
 
   async function fetchFromGDrive(gdriveUrl) {
@@ -1803,7 +1805,7 @@
         const indicator = document.getElementById('sync-indicator');
         const syncText = document.getElementById('sync-text');
         if (indicator) indicator.className = 'status-pill status-live';
-        if (syncText) syncText.textContent = 'GDRIVE';
+        if (syncText) syncText.textContent = 'LIVE';
         return;
       }
     }
@@ -1852,13 +1854,33 @@
       };
 
       eventSource.onerror = function () {
-        updateStatus(false, 'CACHED');
         eventSource.close();
-        setTimeout(setupEventStream, 4000);
+        const gdriveUrl = getGDriveUrl();
+        if (gdriveUrl) {
+          fetchFromGDrive(gdriveUrl).then(ok => {
+            if (ok) {
+              updateStatus(true, 'LIVE');
+            } else {
+              updateStatus(false, 'CACHED');
+            }
+          }).catch(() => {
+            updateStatus(false, 'CACHED');
+          });
+        } else {
+          updateStatus(false, 'CACHED');
+        }
+        setTimeout(setupEventStream, 15000);
       };
     } catch (e) {
-      updateStatus(false, 'CACHED');
-      setTimeout(setupEventStream, 5000);
+      const gdriveUrl = getGDriveUrl();
+      if (gdriveUrl) {
+        fetchFromGDrive(gdriveUrl).then(ok => {
+          updateStatus(ok, ok ? 'LIVE' : 'CACHED');
+        }).catch(() => updateStatus(false, 'CACHED'));
+      } else {
+        updateStatus(false, 'CACHED');
+      }
+      setTimeout(setupEventStream, 15000);
     }
   }
 
