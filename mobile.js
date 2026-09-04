@@ -412,7 +412,21 @@
 
     if (filtered.length === 0) {
       container.innerHTML = '';
-      if (emptyState) emptyState.classList.remove('hidden');
+      if (emptyState) {
+        emptyState.classList.remove('hidden');
+        if (records.length === 0) {
+          emptyState.innerHTML = `
+            <div class="empty-title">正在连接云端同步标的</div>
+            <div class="empty-desc">正在拉取 Google 云端 13+ 标的与测算记录...</div>
+            <button type="button" id="force-sync-empty-btn" class="sheet-btn sheet-btn-primary" style="margin: 16px auto 0 auto; max-width: 220px; display: block;">立即从云端拉取</button>
+          `;
+        } else {
+          emptyState.innerHTML = `
+            <div class="empty-title">NO MATCHING SYMBOLS</div>
+            <div class="empty-desc">Check your search filter or tap "全网深度研报" in the search box.</div>
+          `;
+        }
+      }
       return;
     }
 
@@ -1766,30 +1780,46 @@
 
   async function fetchFromGDrive(gdriveUrl) {
     try {
-      const res = await fetch(gdriveUrl, { cache: 'no-store' });
+      // Append cache-busting timestamp to avoid stale caches without triggering CORS errors
+      const fetchUrl = gdriveUrl + (gdriveUrl.includes('?') ? '&' : '?') + '_ts=' + Date.now();
+      const res = await fetch(fetchUrl, {
+        method: 'GET',
+        redirect: 'follow'
+      });
       if (res.ok) {
         const json = await res.json();
-        if (json && json.historyRecords !== undefined) {
+        if (json && Array.isArray(json.historyRecords)) {
           saveToCache(json);
           return true;
         }
       }
     } catch (e) {
-      console.log('[GDrive] fetch error:', e);
+      console.warn('[GDrive] fetch error:', e);
     }
     return false;
   }
 
-  async function fetchLatestData() {
+  async function fetchLatestData(isManual = false) {
+    const indicator = document.getElementById('sync-indicator');
+    const syncText = document.getElementById('sync-text');
+
+    if (isManual) {
+      showToast('正在从 Google 云端同步最新数据...');
+      if (syncText) syncText.textContent = 'SYNCING';
+    }
+
     const isGitHubPages = window.location.hostname.includes('github.io');
 
-    // 1. Try home Wi-Fi first if on LAN and not GitHub Pages
+    // 1. Try home Wi-Fi / local Mac server first if on LAN and not GitHub Pages
     if (!isGitHubPages) {
       try {
         const res = await fetch('/api/data', { signal: AbortSignal.timeout(2000) });
         if (res.ok) {
           const json = await res.json();
           saveToCache(json);
+          if (indicator) indicator.className = 'status-pill status-live';
+          if (syncText) syncText.textContent = 'LIVE';
+          if (isManual) showToast(`已从电脑同步 ${json.historyRecords ? json.historyRecords.length : 0} 只标的`);
           try {
             const infoRes = await fetch('/api/server-info', { signal: AbortSignal.timeout(1500) });
             if (infoRes.ok) {
@@ -1804,30 +1834,39 @@
       }
     }
 
-    // 2. Fetch directly from Google Drive Web App
+    // 2. Fetch directly from Google Drive Web App (works on 5G / Mac off!)
     const gdriveUrl = getGDriveUrl();
     if (gdriveUrl) {
       const ok = await fetchFromGDrive(gdriveUrl);
       if (ok) {
-        const indicator = document.getElementById('sync-indicator');
-        const syncText = document.getElementById('sync-text');
         if (indicator) indicator.className = 'status-pill status-live';
         if (syncText) syncText.textContent = 'LIVE';
+        if (isManual) showToast(`云端同步成功: 已加载 ${appState.historyRecords ? appState.historyRecords.length : 0} 只标的`);
         return;
       }
     }
 
-    console.log('[Mobile] All sync sources unavailable, using cached data.');
-  }
-
-  // Setup Server-Sent Events (SSE) for Real-Time Sync (home Wi-Fi only)
-  function setupEventStream() {
-    // If on GitHub Pages, do not attempt local SSE /api/events
-    if (window.location.hostname.includes('github.io')) {
-      const indicator = document.getElementById('sync-indicator');
-      const syncText = document.getElementById('sync-text');
+    // Fallback: If cache has records, display them and mark status
+    if (appState.historyRecords && appState.historyRecords.length > 0) {
       if (indicator) indicator.className = 'status-pill status-live';
       if (syncText) syncText.textContent = 'LIVE';
+      if (isManual) showToast('已载入本地离线数据');
+    } else {
+      if (indicator) indicator.className = 'status-pill status-offline';
+      if (syncText) syncText.textContent = 'OFFLINE';
+      if (isManual) showToast('网络连接失败，请检查网络设置');
+    }
+  }
+
+  // Setup Real-Time Sync & Background Polling
+  function setupEventStream() {
+    const isGitHubPages = window.location.hostname.includes('github.io');
+
+    if (isGitHubPages) {
+      // On GitHub Pages, periodically refresh from Google Drive every 45s
+      setInterval(() => {
+        fetchLatestData(false);
+      }, 45000);
       return;
     }
 
@@ -1854,7 +1893,7 @@
 
       eventSource.onopen = function () {
         updateStatus(true, 'LIVE');
-        fetchLatestData();
+        fetchLatestData(false);
       };
 
       eventSource.onmessage = function (event) {
@@ -2143,6 +2182,14 @@
         if (container) {
           smoothScrollContainer(container, 0, 1150);
         }
+        return;
+      }
+
+      // (j) Manual Sync Trigger (Tap on Sync Pill or Empty State Button)
+      if (e.target.closest('#sync-indicator') || e.target.id === 'force-sync-empty-btn') {
+        e.preventDefault();
+        e.stopPropagation();
+        fetchLatestData(true);
         return;
       }
     });
