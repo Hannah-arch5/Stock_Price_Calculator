@@ -155,9 +155,19 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
+### v6.0.4: Clean Title Formatting for Notes & PDF Export [LOCKED & TAGGED: v6.0.4]
+- **Official Version Name**: `Ticker Pocket v6.0.4` (Mobile Edition).
+- **Tag**: `v6.0.4` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Clean Notes & PDF Title (纯净标题格式)**:
+  - 彻底去除备忘录与各级导出大标题中多余的括号 `【` 与 `】`。
+  - 首行大标题统一为标准纯净格式：`${todayFormatted} TICKER 策略测算与投资看板研报`（个股研报为 `${todayFormatted} ${sym} - ${name} TICKER 机构级深度投研研报`）。
+- **Version Indicator & Script Bumping**:
+  - 主页最下方右下角版本升级为 `TICKER POCKET v6.0.4`。
+  - 脚本与缓存引用升级为 `mobile.js?v=6.0.4` 与 `mobile-quotes.js?v=6.0.4`。
+
 ### v6.0.3: Streamlined Export Menu & Clean PDF Print Preview [LOCKED & TAGGED: v6.0.3]
 - **Official Version Name**: `Ticker Pocket v6.0.3` (Mobile Edition).
-- **Tag**: `v6.0.3` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Tag**: `v6.0.3` | **Commit**: `8bff239` | **Date**: `2026-09-05`
 - **Streamlined Export Sheet (精简导出选项)**:
   - 移除了使用率较低的 Word (.doc) 导出选项，聚焦于「导出到备忘录」与「导出为 PDF 文档 (.pdf)」两大核心场景。
 - **Clean PDF Preview (纯净 PDF 打印与预览)**:
@@ -198,7 +208,8 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 
 | 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v6.0.3`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：精简导出菜单（保留备忘录与 PDF）、纯净 PDF 打印预览（去除顶部悬浮黑框）、版本号 `v6.0.3`。 | `git checkout v6.0.3` |
+| **`v6.0.4`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：纯净备忘录大标题（去除多余括号）、版本号 `v6.0.4`。 | `git checkout v6.0.4` |
+| **`v6.0.3`** | `8bff239` | 2026-09-05 | **导出精简版**：精简导出菜单（保留备忘录与 PDF）、纯净 PDF 打印预览（去除顶部悬浮黑框）。 | `git checkout v6.0.3` |
 | **`v6.0.1`** | `81cca8a` | 2026-09-05 | **加粗加大大标题版**：标题醒目标识、富文本 HTML 剪贴板复制。 | `git checkout v6.0.1` |
 | **`v6.0.0`** | `f419cab` | 2026-09-05 | **备忘录标题规范版**：去除首行虚线、首行标准大标题、静默极简导出。 | `git checkout v6.0.0` |
 | **`v5.9.9`** | `cbd5778` | 2026-09-05 | **多格式导出整合版**：主页右上角导出入口（支持 Apple Notes、Word、PDF 打印导出）。 | `git checkout v5.9.9` |
