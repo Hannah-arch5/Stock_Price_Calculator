@@ -4003,18 +4003,32 @@
     return URL.createObjectURL(blob);
   }
 
-  function formatBilingualDateBadge(str, mainClass, subClass) {
+  function formatPeriodBadge(str) {
     if (!str) return '';
     const match = str.match(/^([^(（]+)([\(（][^)）]+[\)）])?$/);
     if (match) {
       const mainText = (match[1] || '').trim();
       const subText = (match[2] || '').trim();
       if (subText) {
-        return `<div class="${mainClass}" style="white-space: nowrap; line-height: 1.25;">${mainText}</div><div class="${subClass}" style="white-space: nowrap; line-height: 1.25; margin-top: 3px;">${subText}</div>`;
+        return `<span style="white-space: nowrap;">${mainText}</span> <span style="white-space: nowrap;">${subText}</span>`;
       }
-      return `<div class="${mainClass}" style="white-space: nowrap; line-height: 1.25;">${mainText}</div>`;
+      return `<span style="white-space: nowrap;">${mainText}</span>`;
     }
-    return `<div class="${mainClass}" style="white-space: nowrap; line-height: 1.25;">${str}</div>`;
+    return `<span style="white-space: nowrap;">${str}</span>`;
+  }
+
+  function formatEarningsDateBadge(str) {
+    if (!str) return '';
+    const match = str.match(/^([^(（]+)([\(（][^)）]+[\)）])?$/);
+    if (match) {
+      const mainText = (match[1] || '').trim();
+      const subText = (match[2] || '').trim();
+      if (subText) {
+        return `<span class="date-main" style="white-space: nowrap;">${mainText}</span> <span class="date-sub" style="white-space: nowrap;">${subText}</span>`;
+      }
+      return `<span class="date-main" style="white-space: nowrap;">${mainText}</span>`;
+    }
+    return `<span class="date-main" style="white-space: nowrap;">${str}</span>`;
   }
 
   const KNOWN_STOCK_PROFILES = {
@@ -4672,8 +4686,8 @@
     if (mktEl) mktEl.textContent = 'SYNC';
     if (priceEl) priceEl.textContent = '--';
     if (chgEl) chgEl.textContent = '--';
-    if (periodEl) periodEl.innerHTML = '<div class="period-main" style="white-space: nowrap;">LOADING</div>';
-    if (earnDateEl) earnDateEl.innerHTML = '<div class="date-main" style="white-space: nowrap;">正在获取发布排期...</div>';
+    if (periodEl) periodEl.innerHTML = '<span style="white-space: nowrap;">LOADING</span>';
+    if (earnDateEl) earnDateEl.innerHTML = '<span class="date-main" style="white-space: nowrap;">正在获取发布排期...</span>';
     if (sectorEl) sectorEl.textContent = '板块: 检索中';
     if (indEl) indEl.textContent = '细分行业: 检索中';
     if (sumEl) sumEl.textContent = '正在获取公司业务模型与最新财务数据...';
@@ -4744,8 +4758,8 @@
       }
 
       // Period & Next Earnings
-      if (periodEl) periodEl.innerHTML = formatBilingualDateBadge(data.periodLabel || '最新财报', 'period-main', 'period-sub');
-      if (earnDateEl) earnDateEl.innerHTML = formatBilingualDateBadge(data.nextEarningsFormatted || '暂无排期', 'date-main', 'date-sub');
+      if (periodEl) periodEl.innerHTML = formatPeriodBadge(data.periodLabel || '最新财报');
+      if (earnDateEl) earnDateEl.innerHTML = formatEarningsDateBadge(data.nextEarningsFormatted || '暂无排期');
 
       // 3x3 Grid
       const m = data.metrics || {};
@@ -4896,7 +4910,7 @@
       if (priceEl) priceEl.textContent = '--';
       if (chgEl) chgEl.textContent = '--';
       if (quoteStatusEl) quoteStatusEl.textContent = '行情暂不可用，请稍后重试';
-      if (periodEl) periodEl.innerHTML = '<div class="period-main" style="white-space: nowrap;">数据加载失败</div>';
+      if (periodEl) periodEl.innerHTML = '<span style="white-space: nowrap;">数据加载失败</span>';
     }
   }
 

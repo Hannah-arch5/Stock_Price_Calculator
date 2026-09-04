@@ -1931,30 +1931,24 @@ html, body {
 .section-badge {
   font-size: 0.62rem;
   font-family: 'JetBrains Mono', monospace;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 2px 6px;
+  border-radius: 3px;
   background: rgba(255, 255, 255, 0.06);
   color: var(--fg-dim);
-  line-height: 1.35;
   display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px 4px;
   max-width: 100%;
+  text-align: right;
+  line-height: 1.35;
 }
 
-.section-badge .period-main {
-  white-space: nowrap;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.section-badge .period-sub {
-  display: block;
-  white-space: nowrap;
-  font-size: 0.58rem;
-  color: var(--fg-subtle, #8e8e93);
+.section-badge span {
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
 }
 
 /* Earnings Highlight Box */
@@ -1982,11 +1976,11 @@ html, body {
   font-weight: 700;
   color: #ffffff;
   margin-top: 2px;
-  line-height: 1.35;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  line-height: 1.35;
 }
 
 .earnings-date .date-main {
@@ -1995,7 +1989,6 @@ html, body {
 }
 
 .earnings-date .date-sub {
-  display: block;
   white-space: nowrap;
   font-size: 0.72rem;
   font-weight: 500;

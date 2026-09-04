@@ -155,21 +155,15 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
-### v5.9.6: 2026 Fiscal Year Realignment & Mobile Inline Style Synchronization
-- **2026 Fiscal Year Realignment**:
-  - 当前时间已进入 2026 年（9月），所有财报期间与披露排期全部纠正并同步为 **2026 财年当前最新周期**：
-    - **美股 (以 AAPL 为例)**：
-      - `EARNINGS CALENDAR`（最新财报）：`FY2026 Q3 季报 (截至 2026-06-27)`
-      - `Est. Release Date`（下次披露）：`2026-10-29 (FY2026 Q4 年报披露)`
-    - **美股 (以 APP 为例)**：
-      - `EARNINGS CALENDAR`（最新财报）：`FY2026 Q2 季报 (截至 2026-06-30)`
-      - `Est. Release Date`（下次披露）：`2026-11-05 (FY2026 Q3 季报披露)`
-    - **A股 (以三角防务、双良节能等为例)**：
-      - `EARNINGS CALENDAR`（最新财报）：`2026 中报 (截至 2026-06-30)`
-      - `Est. Release Date`（下次披露）：`2026-10-28 (2026 三季报披露)`
-- **Mobile HTML Inline Style Synchronization**:
-  - 同步更新了 `mobile.html` 内部内联 `<style>` 样式中的 `.section-badge` 与 `.earnings-date` 垂直双行排版（`flex-direction: column`），确保手机 Safari / PWA 无论屏幕宽度，括号内容都严格展示在第二行。
-  - 递增 `mobile.html` 脚本版本号至 `?v=5.9.6`。
+### v5.9.8: Restore Classic Badge Typography & Dynamic Single/Two-Line Wrap
+- **Classic Typography Restoration**:
+  - 恢复 EARNINGS CALENDAR 徽章的原版经典暗黑极简字体与配色（`font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; color: var(--fg-dim); background: rgba(255,255,255,0.06); padding: 2px 6px;`），消除大号白色粗体与突兀的双色对比。
+- **Dynamic Responsive Layout**:
+  - 当屏幕空间足够时，徽章内容保持单行完整展示（如 `FY2026 Q3 季报 (截至 2026-06-27)`）。
+  - 当在小屏设备（如 iPhone 15）宽度不足时，括号内容 `(截至 2026-06-27)` 作为一个整体自然换行至第二行，且永不拆开词语。
+  - 下方 `Est. Release Date` 同样支持单行自适应以及小屏括号平滑换行。
+- **Script & Cache Bumping**:
+  - `mobile.html` 引用版本升级至 `v5.9.8`。
 
 ---
 
