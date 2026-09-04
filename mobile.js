@@ -3200,8 +3200,6 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
-
-    showToast(`已将 ${sym} [${data.type || '测算'}] 导回上方计算器`);
   }
 
   // ==========================================================================
