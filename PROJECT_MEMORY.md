@@ -157,7 +157,7 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 
 ### v6.0.6: US Market Full Real-time Quotes Integration [LOCKED & TAGGED: v6.0.6]
 - **Official Version Name**: `Ticker Pocket v6.0.6` (Mobile Edition).
-- **Tag**: `v6.0.6` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Tag**: `v6.0.6` | **Commit**: `aa39a87` | **Date**: `2026-09-05`
 - **US Stocks Real-Time Market Quotes (全美股实时行情全接入)**:
   - 接入东方财富与腾讯行情双备用通道（`105.<SYMBOL>` / `us<SYMBOL>`），全面支持美股（`AAPL`、`APP`、`NVDA`、`TSLA`、`BABA` 等）独立网页端秒级实时行情与涨跌幅获取。
   - 自动识别美股中英文名称、最新股价（美元 `$`）、涨跌幅（绿涨红跌）与收盘时间戳。
@@ -227,7 +227,7 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 
 | 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v6.0.6`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：美股全实时行情接入（AAPL、APP、NVDA 等）、版本号 `v6.0.6`。 | `git checkout v6.0.6` |
+| **`v6.0.6`** | `aa39a87` | 2026-09-05 | **当前最新稳定版**：美股全实时行情接入（AAPL、APP、NVDA 等）、版本号 `v6.0.6`。 | `git checkout v6.0.6` |
 | **`v6.0.5`** | `7545114` | 2026-09-05 | **静默导出版**：静默 PDF 导出（彻底去除顶部绿色横幅）。 | `git checkout v6.0.5` |
 | **`v6.0.4`** | `d3b74b5` | 2026-09-05 | **纯净标题版**：去除备忘录大标题多余括号。 | `git checkout v6.0.4` |
 | **`v6.0.3`** | `8bff239` | 2026-09-05 | **导出精简版**：精简导出菜单（保留备忘录与 PDF）、纯净 PDF 打印预览（去除顶部悬浮黑框）。 | `git checkout v6.0.3` |
