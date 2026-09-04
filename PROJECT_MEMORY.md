@@ -155,9 +155,21 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
+### v6.0.0: Native Apple Notes Optimized Export & Title Harmonization [LOCKED & TAGGED: v6.0.0]
+- **Official Version Name**: `Ticker Pocket v6.0.0` (Mobile Edition).
+- **Tag**: `v6.0.0` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Apple Notes Native Title Harmonization (备忘录大标题自动识别)**:
+  - 彻底去除首行虚线分割线，首行直接生成标准大标题（如 `2026/09/05 TICKER 策略测算与投资看板研报`）。
+  - 导入或粘贴至 iPhone 备忘录时，首行自动被 Apple Notes 渲染为加粗大字号标题。
+- **Silent & Clean Export Interaction (极简静默交互)**:
+  - 导出到备忘录时静默执行剪贴板写入与系统分享调起，不再触发多余的顶部悬浮横幅。
+- **Version Indicator & Script Bumping**:
+  - 主页最下方右下角版本升级为 `TICKER POCKET v6.0.0`。
+  - 脚本与缓存引用升级为 `mobile.js?v=6.0.0` 与 `mobile-quotes.js?v=6.0.0`。
+
 ### v5.9.9: Homepage Multi-Format Export Integration (Notes, Word, PDF) [LOCKED & TAGGED: v5.9.9]
 - **Official Version Name**: `Ticker Pocket v5.9.9` (Mobile Edition).
-- **Tag**: `v5.9.9` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Tag**: `v5.9.9` | **Commit**: `cbd5778` | **Date**: `2026-09-05`
 - **Homepage Export Button (首页右上角导出入口)**:
   - 位于主页顶部 Header 右上角（LIVE 状态指示灯左侧），采用 Studio Noir 极简矢量图标。
   - 严格限定仅在主页出现，股票分析研报详情弹窗内不设导出按钮。
@@ -165,26 +177,10 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   1. **Apple Notes / 手机备忘录**: 支持调用 iOS 原生 `navigator.share` 系统分享面板或一键复制完整研报排版至剪贴板，可直接粘贴进 iPhone 备忘录。
   2. **Word 文档 (.doc)**: 生成带结构化样式（大标题、粗体小节、缩进点位清单）的标准 Word XML 文档并一键下载。
   3. **PDF 文档 (.pdf)**: 生成高清打印版式并调起系统打印/保存为 PDF 预览窗口。
-- **Version Indicator & Script Bumping**:
-  - 主页最下方右下角版本更新为 `TICKER POCKET v5.9.9`。
-  - 脚本与缓存引用升级为 `mobile.js?v=5.9.9` 与 `mobile-quotes.js?v=5.9.9`。
 
 ### v5.9.8: Restore Classic Badge Typography, Seamless Splash Background & Footer Version Placement [LOCKED & TAGGED: v5.9.8]
 - **Official Version Name**: `Ticker Pocket v5.9.8` (Mobile Edition).
 - **Tag**: `v5.9.8` | **Commit**: `04bd71a` | **Date**: `2026-09-05`
-- **Classic Typography Restoration**:
-  - 恢复 EARNINGS CALENDAR 徽章的原版经典暗黑极简字体与配色（`font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; color: var(--fg-dim); background: rgba(255,255,255,0.06); padding: 2px 6px;`），消除大号白色粗体与突兀的双色对比。
-- **Dynamic Responsive Layout**:
-  - 当屏幕空间足够时，徽章内容保持单行完整展示（如 `FY2026 Q3 季报 (截至 2026-06-27)`）。
-  - 当在小屏设备（如 iPhone 15）宽度不足时，括号内容 `(截至 2026-06-27)` 作为一个整体自然换行至第二行，且永不拆开词语。
-  - 下方 `Est. Release Date` 同样支持单行自适应以及小屏括号平滑换行。
-- **Seamless Splash Background & Full-Size Icon**:
-  - 彻底解决 App 启动欢迎屏（Splash Screen）的色差与方框轮廓问题：使用纯透明母版图标通过 Alpha 渐变合成至精准 `#030303` 底色，消除原图标暗灰方框残留。
-  - 恢复 iPhone 主屏幕图标（`apple-touch-icon.png`）的满格大尺寸设计，不再缩小。
-- **Version Indicator Relocation**:
-  - 顶部 Logo 保持纯粹 `TICKER`，版本号按原设计放置于主页最底部右下角 `TICKER POCKET v5.9.8`。
-- **Script & Cache Bumping**:
-  - `mobile.html` 引用版本与启动图链接全面升级至 `v5.9.8`。
 
 ---
 
@@ -192,8 +188,9 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 
 | 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v5.9.9`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：主页右上角导出入口（支持 Apple Notes、Word、PDF 打印导出），股票分析页保持纯净无多余按钮。 | `git checkout v5.9.9` |
-| **`v5.9.8`** | `04bd71a` | 2026-09-05 | **里程碑版本**：2026 财报周期统一、经典暗黑极简徽章字阶、自适应单双行排版、全尺寸桌面图标、纯黑无色差启动欢迎页、右下角版本号。 | `git checkout v5.9.8` |
+| **`v6.0.0`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：Apple Notes 首行标准大标题格式、静默极简导出交互、右下角版本号 `v6.0.0`。 | `git checkout v6.0.0` |
+| **`v5.9.9`** | `cbd5778` | 2026-09-05 | **多格式导出整合版**：主页右上角导出入口（支持 Apple Notes、Word、PDF 打印导出）。 | `git checkout v5.9.9` |
+| **`v5.9.8`** | `04bd71a` | 2026-09-05 | **里程碑版本**：2026 财报周期统一、经典暗黑极简徽章字阶、自适应单双行排版、全尺寸桌面图标、纯黑无色差启动欢迎页。 | `git checkout v5.9.8` |
 | **`v5.3.0`** | `e0cafd5` | 2026-09-04 | **纯测算看板移动版**：首个稳定手机 PWA 版本，包含买卖点双向测算、局域网多设备同步与卡片颜色独立隔离。 | `git checkout v5.3.0` |
 | **`v5.0.0`** | `b0eb3eb` | 2026-09-03 | **桌面端多重行情重构版**：接入东方财富与腾讯行情双备用通道、修复休市状态判定与零买入成本计算。 | `git checkout v5.0.0` |
 | **`v3.2.0`** | `4b47db9` | 2026-09-02 | **双向联动测算器**：目标价测算与涨跌幅测算双向自动切换、网格化买卖点管理。 | `git checkout v3.2.0` |
