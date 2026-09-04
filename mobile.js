@@ -1967,7 +1967,6 @@
       if (!win) {
         window.location.href = blobUrl;
       }
-      showAlert('已打开 PDF 预览页面，支持直接打印或存储为 PDF', 'success');
     }
   }
 
