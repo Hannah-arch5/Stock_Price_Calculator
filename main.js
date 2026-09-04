@@ -265,12 +265,12 @@ async function getStockResearchData(rawSymbol) {
 
         // Forecast & Next Earnings Date
         let nextEarnings = null;
-        let nextEarningsFormatted = '2026-10-28 (2026Q3 三季报披露)';
+        let nextEarningsFormatted = '2025-04-28 (2025 一季报披露)';
         if (forecastRes?.result?.data && forecastRes.result.data.length > 0) {
             const pred = forecastRes.result.data[0];
             if (pred.NOTICE_DATE) {
                 nextEarnings = pred.NOTICE_DATE;
-                nextEarningsFormatted = pred.NOTICE_DATE.substring(0, 10) + ' (官方披露)';
+                nextEarningsFormatted = pred.NOTICE_DATE.substring(0, 10) + ' (官方披露排期)';
             }
         }
 
@@ -284,7 +284,7 @@ async function getStockResearchData(rawSymbol) {
             changePercent: chgPct,
             nextEarnings: nextEarnings,
             nextEarningsFormatted: nextEarningsFormatted,
-            periodLabel: periodLabel ? `2026 最新中报 / 三季报 (${periodLabel})` : '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+            periodLabel: periodLabel ? `2024 年报 / 2025 一季报 (${periodLabel})` : '2024 年报 / 2025 一季报 (最新报告期)',
             companyProfile: {
                 summary: companySummary,
                 sector: sector,
@@ -332,10 +332,11 @@ async function getStockResearchData(rawSymbol) {
     };
 
     let nextEarnings = null;
-    let nextEarningsFormatted = '暂无发布排期 (No earnings date)';
+    let nextEarningsFormatted = '暂无发布排期';
     if (cal.earningsDate && cal.earningsDate.length > 0) {
         nextEarnings = cal.earningsDate[0];
-        nextEarningsFormatted = cal.earningsDate.map(d => new Date(d).toISOString().substring(0, 10)).join(' ~ ');
+        const dateStr = cal.earningsDate.map(d => new Date(d).toISOString().substring(0, 10)).join(' ~ ');
+        nextEarningsFormatted = `${dateStr} (预计披露排期)`;
     }
 
     let periodLabel = '';
@@ -344,7 +345,8 @@ async function getStockResearchData(rawSymbol) {
             const qDate = new Date(keyStats.mostRecentQuarter);
             const m = qDate.getMonth() + 1;
             const q = m <= 3 ? 'Q1' : (m <= 6 ? 'Q2' : (m <= 9 ? 'Q3' : 'Q4'));
-            periodLabel = `最新财报: ${q} ${qDate.getFullYear()} (TTM Data)`;
+            const dateISO = qDate.toISOString().substring(0, 10);
+            periodLabel = `FY${qDate.getFullYear()} ${q} 季报 (截至 ${dateISO})`;
         } catch(e) {}
     }
 
