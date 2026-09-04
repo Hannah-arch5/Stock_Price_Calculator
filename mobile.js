@@ -4010,11 +4010,11 @@
       const mainText = (match[1] || '').trim();
       const subText = (match[2] || '').trim();
       if (subText) {
-        return `<span class="${mainClass}">${mainText}</span> <span class="${subClass}">${subText}</span>`;
+        return `<div class="${mainClass}" style="white-space: nowrap; line-height: 1.25;">${mainText}</div><div class="${subClass}" style="white-space: nowrap; line-height: 1.25; margin-top: 3px;">${subText}</div>`;
       }
-      return `<span class="${mainClass}">${mainText}</span>`;
+      return `<div class="${mainClass}" style="white-space: nowrap; line-height: 1.25;">${mainText}</div>`;
     }
-    return `<span class="${mainClass}">${str}</span>`;
+    return `<div class="${mainClass}" style="white-space: nowrap; line-height: 1.25;">${str}</div>`;
   }
 
   const KNOWN_STOCK_PROFILES = {
@@ -4672,8 +4672,8 @@
     if (mktEl) mktEl.textContent = 'SYNC';
     if (priceEl) priceEl.textContent = '--';
     if (chgEl) chgEl.textContent = '--';
-    if (periodEl) periodEl.innerHTML = '<span class="period-main">LOADING</span>';
-    if (earnDateEl) earnDateEl.innerHTML = '<span class="date-main">正在获取发布排期...</span>';
+    if (periodEl) periodEl.innerHTML = '<div class="period-main" style="white-space: nowrap;">LOADING</div>';
+    if (earnDateEl) earnDateEl.innerHTML = '<div class="date-main" style="white-space: nowrap;">正在获取发布排期...</div>';
     if (sectorEl) sectorEl.textContent = '板块: 检索中';
     if (indEl) indEl.textContent = '细分行业: 检索中';
     if (sumEl) sumEl.textContent = '正在获取公司业务模型与最新财务数据...';
@@ -4896,7 +4896,7 @@
       if (priceEl) priceEl.textContent = '--';
       if (chgEl) chgEl.textContent = '--';
       if (quoteStatusEl) quoteStatusEl.textContent = '行情暂不可用，请稍后重试';
-      if (periodEl) periodEl.innerHTML = '<span class="period-main">数据加载失败</span>';
+      if (periodEl) periodEl.innerHTML = '<div class="period-main" style="white-space: nowrap;">数据加载失败</div>';
     }
   }
 
