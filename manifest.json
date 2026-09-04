@@ -2,19 +2,34 @@
   "name": "Ticker",
   "short_name": "Ticker",
   "description": "Financial Research Dashboard & Target Price Calculator",
-  "start_url": "/",
-  "scope": "/",
-  "id": "/",
+  "start_url": "./mobile.html",
+  "scope": "./",
+  "id": "ticker-pocket",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#030303",
   "theme_color": "#030303",
   "icons": [
     {
-      "src": "/apple-touch-icon.png",
-      "sizes": "512x512",
+      "src": "./apple-touch-icon.png?v=5.7.1",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "./apple-touch-icon.png?v=5.7.1",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./apple-touch-icon.png?v=5.7.1",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./apple-touch-icon.png?v=5.7.1",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ]
 }
