@@ -155,12 +155,21 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
-### v5.9.4: Harmonized Earnings Calendar & Responsive Bracket Wrapping
-- **Earnings Date Distinction**:
-  - **`EARNINGS CALENDAR` Badge (右上角)**: 指**目前的最新财报**（最新已披露报告期，如 `2024 年报 / 2025 一季报 (截至 2025-03-31)` 或 `FY2025 Q1 季报 (截至 2024-12-28)`）。
-  - **`Est. Release Date` (下方日期)**: 指**下一个财报的发布日期**（即将披露排期，如 `2025-04-28 (2025 一季报披露)` 或 `2025-05-01 (Q2 FY25 财报披露)`）。
-- **Unified Format**: 统一样式为 `主信息 (括号辅助说明)`。
-- **Responsive Bracket Wrapping**: 采用 flex 容器配合 `white-space: nowrap`，一行能容纳时保持一行；屏幕空间受限时**从左括号 `(` 开始自动换到第二行**，括号内部文字（如 `(2025 一季报披露)`）作为一个原子单元，绝不在汉字中间截断换行。
+### v5.9.6: 2026 Fiscal Year Realignment & Mobile Inline Style Synchronization
+- **2026 Fiscal Year Realignment**:
+  - 当前时间已进入 2026 年（9月），所有财报期间与披露排期全部纠正并同步为 **2026 财年当前最新周期**：
+    - **美股 (以 AAPL 为例)**：
+      - `EARNINGS CALENDAR`（最新财报）：`FY2026 Q3 季报 (截至 2026-06-27)`
+      - `Est. Release Date`（下次披露）：`2026-10-29 (FY2026 Q4 年报披露)`
+    - **美股 (以 APP 为例)**：
+      - `EARNINGS CALENDAR`（最新财报）：`FY2026 Q2 季报 (截至 2026-06-30)`
+      - `Est. Release Date`（下次披露）：`2026-11-05 (FY2026 Q3 季报披露)`
+    - **A股 (以三角防务、双良节能等为例)**：
+      - `EARNINGS CALENDAR`（最新财报）：`2026 中报 (截至 2026-06-30)`
+      - `Est. Release Date`（下次披露）：`2026-10-28 (2026 三季报披露)`
+- **Mobile HTML Inline Style Synchronization**:
+  - 同步更新了 `mobile.html` 内部内联 `<style>` 样式中的 `.section-badge` 与 `.earnings-date` 垂直双行排版（`flex-direction: column`），确保手机 Safari / PWA 无论屏幕宽度，括号内容都严格展示在第二行。
+  - 递增 `mobile.html` 脚本版本号至 `?v=5.9.6`。
 
 ---
 
