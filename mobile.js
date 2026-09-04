@@ -1180,18 +1180,21 @@
   // ─── Push Data To Servers (Mac & GDrive) ─────────────────────
   async function pushDataToServer(data) {
     const payloadStr = JSON.stringify(data);
+    const isGitHubPages = window.location.hostname.includes('github.io');
 
-    // 1. Try local Mac server if on LAN
-    try {
-      await fetch('/api/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payloadStr,
-        signal: AbortSignal.timeout(2500)
-      });
-      console.log('[Mobile] Saved to local Mac server');
-    } catch(e) {
-      console.log('[Mobile] Local server unreachable, pushing to cloud...');
+    // 1. Try local Mac server if on LAN and not on GitHub Pages
+    if (!isGitHubPages) {
+      try {
+        await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payloadStr,
+          signal: AbortSignal.timeout(2000)
+        });
+        console.log('[Mobile] Saved to local Mac server');
+      } catch(e) {
+        console.log('[Mobile] Local server unreachable, pushing to cloud...');
+      }
     }
 
     // 2. Also push to Google Drive Web App (works on 5G!)
@@ -1778,26 +1781,30 @@
   }
 
   async function fetchLatestData() {
-    // Try home Wi-Fi first (fast & direct)
-    try {
-      const res = await fetch('/api/data', { signal: AbortSignal.timeout(3000) });
-      if (res.ok) {
-        const json = await res.json();
-        saveToCache(json);
-        try {
-          const infoRes = await fetch('/api/server-info', { signal: AbortSignal.timeout(2000) });
-          if (infoRes.ok) {
-            const info = await infoRes.json();
-            if (info.gdriveUrl) localStorage.setItem(GDRIVE_CACHE_KEY, info.gdriveUrl);
-          }
-        } catch(_) {}
-        return;
+    const isGitHubPages = window.location.hostname.includes('github.io');
+
+    // 1. Try home Wi-Fi first if on LAN and not GitHub Pages
+    if (!isGitHubPages) {
+      try {
+        const res = await fetch('/api/data', { signal: AbortSignal.timeout(2000) });
+        if (res.ok) {
+          const json = await res.json();
+          saveToCache(json);
+          try {
+            const infoRes = await fetch('/api/server-info', { signal: AbortSignal.timeout(1500) });
+            if (infoRes.ok) {
+              const info = await infoRes.json();
+              if (info.gdriveUrl) localStorage.setItem(GDRIVE_CACHE_KEY, info.gdriveUrl);
+            }
+          } catch(_) {}
+          return;
+        }
+      } catch (e) {
+        console.log('[Mobile] Mac server unreachable, trying Google Drive...');
       }
-    } catch (e) {
-      console.log('[Mobile] Mac server unreachable, trying Google Drive...');
     }
 
-    // Home Wi-Fi failed → try Google Drive (5G / away from home)
+    // 2. Fetch directly from Google Drive Web App
     const gdriveUrl = getGDriveUrl();
     if (gdriveUrl) {
       const ok = await fetchFromGDrive(gdriveUrl);
@@ -1815,6 +1822,15 @@
 
   // Setup Server-Sent Events (SSE) for Real-Time Sync (home Wi-Fi only)
   function setupEventStream() {
+    // If on GitHub Pages, do not attempt local SSE /api/events
+    if (window.location.hostname.includes('github.io')) {
+      const indicator = document.getElementById('sync-indicator');
+      const syncText = document.getElementById('sync-text');
+      if (indicator) indicator.className = 'status-pill status-live';
+      if (syncText) syncText.textContent = 'LIVE';
+      return;
+    }
+
     const indicator = document.getElementById('sync-indicator');
     const syncText = document.getElementById('sync-text');
 
@@ -4140,11 +4156,17 @@
   }
 
   // Init
-  document.addEventListener('DOMContentLoaded', function () {
+  function initApp() {
     loadFromCache();
     initListeners();
     setupGlobalStockResearchAndSearch();
     fetchLatestData();
     setupEventStream();
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
 })();
