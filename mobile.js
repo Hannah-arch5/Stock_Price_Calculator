@@ -1793,17 +1793,36 @@
     return localStorage.getItem(GDRIVE_CACHE_KEY) || DEFAULT_GDRIVE_URL;
   }
 
+  async function fetchFromTickerData() {
+    try {
+      const res = await fetch('./ticker-data.json?_ts=' + Date.now());
+      if (res.ok) {
+        const json = await res.json();
+        if (json && Array.isArray(json.historyRecords) && json.historyRecords.length > 0) {
+          saveToCache(json);
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('[TickerData] fetch error:', e);
+    }
+    return false;
+  }
+
   async function fetchFromGDrive(gdriveUrl) {
     try {
-      // Append cache-busting timestamp to avoid stale caches without triggering CORS errors
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4500); // 4.5s max timeout
       const fetchUrl = gdriveUrl + (gdriveUrl.includes('?') ? '&' : '?') + '_ts=' + Date.now();
       const res = await fetch(fetchUrl, {
         method: 'GET',
-        redirect: 'follow'
+        redirect: 'follow',
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       if (res.ok) {
         const json = await res.json();
-        if (json && Array.isArray(json.historyRecords)) {
+        if (json && Array.isArray(json.historyRecords) && json.historyRecords.length > 0) {
           saveToCache(json);
           return true;
         }
@@ -1819,24 +1838,35 @@
     const syncText = document.getElementById('sync-text');
 
     if (isManual) {
-      showToast('正在从 Google 云端同步最新数据...');
+      showToast('正在同步最新标的数据...');
       if (syncText) syncText.textContent = 'SYNCING';
     }
 
     const isGitHubPages = window.location.hostname.includes('github.io');
 
-    // 1. Try home Wi-Fi / local Mac server first if on LAN and not GitHub Pages
-    if (!isGitHubPages) {
+    // 1. If on GitHub Pages, load same-origin ./ticker-data.json immediately (50ms, zero lag, no VPN needed!)
+    if (isGitHubPages) {
+      const cdnOk = await fetchFromTickerData();
+      if (cdnOk) {
+        if (indicator) indicator.className = 'status-pill status-live';
+        if (syncText) syncText.textContent = 'LIVE';
+        if (isManual) showToast(`已加载 ${appState.historyRecords.length} 只标的`);
+      }
+    } else {
+      // If on home LAN, try local Mac server first
       try {
-        const res = await fetch('/api/data', { signal: AbortSignal.timeout(2000) });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const res = await fetch('/api/data', { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (res.ok) {
           const json = await res.json();
           saveToCache(json);
           if (indicator) indicator.className = 'status-pill status-live';
           if (syncText) syncText.textContent = 'LIVE';
-          if (isManual) showToast(`已从电脑同步 ${json.historyRecords ? json.historyRecords.length : 0} 只标的`);
+          if (isManual) showToast(`已从电脑同步 ${json.historyRecords.length} 只标的`);
           try {
-            const infoRes = await fetch('/api/server-info', { signal: AbortSignal.timeout(1500) });
+            const infoRes = await fetch('/api/server-info', { signal: AbortSignal.timeout(1000) });
             if (infoRes.ok) {
               const info = await infoRes.json();
               if (info.gdriveUrl) localStorage.setItem(GDRIVE_CACHE_KEY, info.gdriveUrl);
@@ -1845,7 +1875,7 @@
           return;
         }
       } catch (e) {
-        console.log('[Mobile] Mac server unreachable, trying Google Drive...');
+        console.log('[Mobile] Mac server unreachable, trying cloud...');
       }
     }
 
@@ -1856,20 +1886,26 @@
       if (ok) {
         if (indicator) indicator.className = 'status-pill status-live';
         if (syncText) syncText.textContent = 'LIVE';
-        if (isManual) showToast(`云端同步成功: 已加载 ${appState.historyRecords ? appState.historyRecords.length : 0} 只标的`);
+        if (isManual) showToast(`云端最新同步: ${appState.historyRecords.length} 只标的`);
         return;
       }
     }
 
-    // Fallback: If cache has records, display them and mark status
+    // 3. Fallback: If cache has records, display them and mark status
     if (appState.historyRecords && appState.historyRecords.length > 0) {
       if (indicator) indicator.className = 'status-pill status-live';
       if (syncText) syncText.textContent = 'LIVE';
-      if (isManual) showToast('已载入本地离线数据');
     } else {
-      if (indicator) indicator.className = 'status-pill status-offline';
-      if (syncText) syncText.textContent = 'OFFLINE';
-      if (isManual) showToast('网络连接失败，请检查网络设置');
+      // Last resort fallback
+      const fallbackOk = await fetchFromTickerData();
+      if (fallbackOk) {
+        if (indicator) indicator.className = 'status-pill status-live';
+        if (syncText) syncText.textContent = 'LIVE';
+      } else {
+        if (indicator) indicator.className = 'status-pill status-offline';
+        if (syncText) syncText.textContent = 'OFFLINE';
+        if (isManual) showToast('连接超时，请检查网络');
+      }
     }
   }
 
