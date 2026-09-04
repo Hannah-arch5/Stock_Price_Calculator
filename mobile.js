@@ -4023,8 +4023,8 @@
       sector: '国防军工 / 航空装备 (Defense & Aerospace Equipment)',
       industry: '大型航空锻件与特种合金关键结构件 (Aviation Large Die Forgings & Special Alloys)',
       summary: '西安三角防务股份有限公司专业从事航空、航天、船舶等领域锻件产品的研发、生产和销售。拥有400MN大型精密模锻液压机等核心战略装备，为我国军用战斗机、大型运输机、直升机及航空发动机提供核心主承力大型模锻件。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-28 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-28 (2026 三季报披露)',
       metrics: {
         marketCap: '119.59亿',
         revenueGrowth: '稳健恢复 (Steady Recovery)',
@@ -4060,8 +4060,8 @@
       sector: '新能源 / 光伏储能 (Renewable Energy & Solar Storage)',
       industry: '高效异质结(HJT)光伏组件与一体化储能系统 (High-Efficiency HJT Modules & ESS)',
       summary: '东方日升新能源股份有限公司主要从事高效太阳能电池、组件以及光伏储能一体化系统的研发、生产和销售，是全球领先的异质结(HJT)技术创新与产业化领军企业。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-29 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-29 (2026 三季报披露)',
       metrics: {
         marketCap: '128.60亿',
         revenueGrowth: '环比向好 (QoQ Improvement)',
@@ -4097,8 +4097,8 @@
       sector: '绿色低碳 / 节能节水 (Green Low-Carbon & Clean Tech)',
       industry: '光伏多晶硅还原炉系统、节能节水系统与单晶硅片 (Polysilicon Reduction Furnaces & Eco Systems)',
       summary: '双良节能系统股份有限公司专注于节能节水系统、光伏新能源核心装备（多晶硅还原炉）及高效单晶硅片的研发、制造与服务，是国内新能源与工业节能领域的领军企业。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-30 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-30 (2026 三季报披露)',
       metrics: {
         marketCap: '85.40亿',
         revenueGrowth: '周期底部企稳 (Cyclical Bottoming)',
@@ -4134,8 +4134,8 @@
       sector: '国防军工 / 航空发动机 (Defense & Aero-Engines)',
       industry: '航空发动机主承力总装与核心零部件制造 (Aero-Engine Final Assembly & Critical Components)',
       summary: '中国航发动力股份有限公司是我国航空发动机制造核心整机平台，具备涡喷、涡扇、涡桨、涡轴全谱系航空发动机的研制、生产与维修保障能力，是国防航空动力的基石。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-29 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-29 (2026 三季报披露)',
       metrics: {
         marketCap: '1120.40亿',
         revenueGrowth: '12.4% YoY',
@@ -4171,8 +4171,8 @@
       sector: '新能源 / 光伏电池 (Solar Photovoltaic Cells)',
       industry: 'N型TOPCon高效太阳能电池研发制造 (N-Type TOPCon Solar Cells)',
       summary: '海南钧达新能源科技股份有限公司是全球领先的专业化光伏电池制造商，专注于高效N型TOPCon太阳能电池的研发、生产与销售，量产效率与出货规模稳居全球前列。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-28 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-28 (2026 三季报披露)',
       metrics: {
         marketCap: '125.80亿',
         revenueGrowth: '24.2% YoY',
@@ -4208,8 +4208,8 @@
       sector: '先进制造 / 环保治理 (Advanced Manufacturing & Environmental Tech)',
       industry: '重大技术装备大型精密铸钢件与工业烟气环保装备 (Heavy Equipment Steel Castings & Eco Tech)',
       summary: '辽宁福鞍重工股份有限公司主要从事重大技术装备大型铸钢件的研发制造，以及工业烟气治理与环境工程综合服务。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-29 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-29 (2026 三季报披露)',
       metrics: {
         marketCap: '42.80亿',
         revenueGrowth: '7.2% YoY',
@@ -4245,8 +4245,8 @@
       sector: '电力电子 / 数字能源 (Power Electronics & Digital Energy)',
       industry: '数据中心基础设施、工商业储能与光伏逆变器 (Data Center Infrastructure, ESS & Inverters)',
       summary: '深圳科士达科技股份有限公司是行业领先的电力电子与数字能源解决方案提供商，专注于数据中心关键基础设施、光伏逆变器及储能系统的研发与制造。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-28 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-28 (2026 三季报披露)',
       metrics: {
         marketCap: '196.40亿',
         revenueGrowth: '15.6% YoY',
@@ -4282,8 +4282,8 @@
       sector: '高端制造 / 动力装备 (Marine Power & Clean Energy Systems)',
       industry: '综合舰船动力、特种电池与清洁能源装备 (Integrated Marine Propulsion & Advanced Batteries)',
       summary: '中国船舶重工集团动力股份有限公司是中国船舶集团旗下动力业务核心平台，业务涵盖燃气动力、蒸汽动力、柴油动力、电力推进及化学电源全产业链。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-30 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-30 (2026 三季报披露)',
       metrics: {
         marketCap: '768.50亿',
         revenueGrowth: '18.2% YoY',
@@ -4319,8 +4319,8 @@
       sector: '通信网络 / 光通信 (Optical Communications & Telecom Infrastructure)',
       industry: '光纤光缆、光模块与数据中心基础设施综合运营 (Optical Fibers, Optical Transceivers & IDC)',
       summary: '深圳市特发信息股份有限公司主要从事光纤、光缆、光电子器件、通信设备以及数据中心综合运营等数字化基础设施服务。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-29 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-29 (2026 三季报披露)',
       metrics: {
         marketCap: '124.60亿',
         revenueGrowth: '6.4% YoY',
@@ -4356,8 +4356,8 @@
       sector: '集成电路 / 芯片半导体 (Integrated Circuits & Semiconductors)',
       industry: 'DDR5内存接口芯片(RCD/DB)、PCIe Retimer与CXL互联芯片全球龙头 (Memory Interface & CXL Interconnect ICs)',
       summary: '澜起科技股份有限公司是全球领先的内存接口芯片与互连芯片供应商，专注于为云计算、AI服务器及数据中心提供高速、大容量、低延迟的高性能芯片解决方案。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-28 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-28 (2026 三季报披露)',
       metrics: {
         marketCap: '2145.80亿',
         revenueGrowth: '68.4% YoY',
@@ -4393,8 +4393,8 @@
       sector: '科技硬件 / AI算力制造 (Tech Hardware & AI Computing Manufacturing)',
       industry: 'AI服务器、高速交换机及工业互联网全栈系统级制造 (AI Servers, High-Speed Switches & Industrial IoT)',
       summary: '富士康工业互联网股份有限公司是全球领先的智能制造与工业互联网服务商，专注于高端AI服务器、高速交换机、云计算设备及精密机构件的研发与制造。',
-      periodLabel: '2024 年报 / 2025 一季报 (截至 2025-03-31)',
-      nextEarningsFormatted: '2025-04-30 (2025 一季报披露)',
+      periodLabel: '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-10-30 (2026 三季报披露)',
       metrics: {
         marketCap: '12850亿',
         revenueGrowth: '32.5% YoY',
@@ -4430,8 +4430,8 @@
       sector: 'Consumer Tech & Ecosystem (消费电子与全球订阅生态)',
       industry: 'Personal Computing, iPhone Hardware & Global Subscription Ecosystem (个人计算设备、iPhone 硬件与全栈订阅生态)',
       summary: 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories, and sells a variety of related services globally. (苹果公司设计、制造和销售智能手机、个人电脑、平板电脑、可穿戴设备及相关配件，并在全球范围内运营高黏性数字服务生态。)',
-      periodLabel: 'FY2025 Q1 季报 (截至 2024-12-28)',
-      nextEarningsFormatted: '2025-05-01 (FY2025 Q2 季报披露)',
+      periodLabel: 'FY2026 Q3 季报 (截至 2026-06-27)',
+      nextEarningsFormatted: '2026-10-29 (FY2026 Q4 年报披露)',
       metrics: {
         marketCap: '3.45T',
         revenueGrowth: '6.1% YoY',
@@ -4467,8 +4467,8 @@
       sector: 'Technology & AI Advertising (科技软件与 AI 驱动数字营销)',
       industry: 'Mobile Marketing Platform & AXON 2.0 AI Advertising Engine (移动营销平台与 AXON 2.0 AI 广告匹配引擎)',
       summary: 'AppLovin Corporation builds software-based marketing and monetization tools that enable mobile app and game developers to grow, optimize, and monetize their audiences. (AppLovin Corporation 构建基于软件的营销与变现工具，通过 AXON 2.0 AI 深度神经网络引擎赋能移动应用开发者与全域广告主实现高投资回报率投放。)',
-      periodLabel: 'FY2024 Q4 年报 (截至 2024-12-31)',
-      nextEarningsFormatted: '2025-05-07 (FY2025 Q1 季报披露)',
+      periodLabel: 'FY2026 Q2 季报 (截至 2026-06-30)',
+      nextEarningsFormatted: '2026-11-05 (FY2026 Q3 季报披露)',
       metrics: {
         marketCap: '128.50B',
         revenueGrowth: '38.6% YoY',
@@ -4550,8 +4550,8 @@
 
     return {
       name: name,
-      periodLabel: profile?.periodLabel || stockData.periodLabel || '2024 年报 / 2025 一季报 (最新报告期)',
-      nextEarningsFormatted: profile?.nextEarningsFormatted || stockData.nextEarningsFormatted || '2025-04-28 (2025 一季报披露)',
+      periodLabel: profile?.periodLabel || stockData.periodLabel || '2026 中报 (截至 2026-06-30)',
+      nextEarningsFormatted: profile?.nextEarningsFormatted || stockData.nextEarningsFormatted || '2026-10-28 (2026 三季报披露)',
       companyProfile: {
         summary: summary,
         sector: sector,

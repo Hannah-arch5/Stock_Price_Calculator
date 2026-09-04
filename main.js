@@ -265,7 +265,7 @@ async function getStockResearchData(rawSymbol) {
 
         // Forecast & Next Earnings Date
         let nextEarnings = null;
-        let nextEarningsFormatted = '2025-04-28 (2025 一季报披露)';
+        let nextEarningsFormatted = '2026-10-28 (2026 三季报披露)';
         if (forecastRes?.result?.data && forecastRes.result.data.length > 0) {
             const pred = forecastRes.result.data[0];
             if (pred.NOTICE_DATE) {
@@ -284,7 +284,7 @@ async function getStockResearchData(rawSymbol) {
             changePercent: chgPct,
             nextEarnings: nextEarnings,
             nextEarningsFormatted: nextEarningsFormatted,
-            periodLabel: periodLabel ? `2024 年报 / 2025 一季报 (${periodLabel})` : '2024 年报 / 2025 一季报 (最新报告期)',
+            periodLabel: periodLabel ? `2026 中报 (${periodLabel})` : '2026 中报 (最新报告期)',
             companyProfile: {
                 summary: companySummary,
                 sector: sector,
