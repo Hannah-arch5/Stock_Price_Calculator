@@ -155,9 +155,22 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
+### v6.0.1: Large Bold Title & Dual Rich HTML/Markdown Apple Notes Export Engine [LOCKED & TAGGED: v6.0.1]
+- **Official Version Name**: `Ticker Pocket v6.0.1` (Mobile Edition).
+- **Tag**: `v6.0.1` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Large Bold Title Formatting (加粗加大标题导出)**:
+  - 导出纯文本采用 Markdown 一级大标题语法 `# ${todayFormatted} TICKER 策略测算与投资看板研报`，在系统分享或导入 Apple Notes 时原生呈现为加粗特大标题。
+  - 同步生成富文本 HTML 结构，首行注入 `<h1 style="font-size: 26px; font-weight: 800; ...">`，各标的与章节采用 `<h2>`、`<strong>`、`<ul>` 等结构化样式。
+- **Dual Clipboard Copying (富文本+纯文本双通道剪贴板)**:
+  - 导出到备忘录时，通过 ClipboardItem / execCommand 将 `text/html` 和 `text/plain` 同时写入系统剪贴板。
+  - 用户直接粘贴到 Apple Notes、Pages、飞书或任何笔记软件时，标题自动以特大粗体显示，各小节与排版条理分明。
+- **Version Indicator & Script Bumping**:
+  - 主页最下方右下角版本升级为 `TICKER POCKET v6.0.1`。
+  - 脚本与缓存引用升级为 `mobile.js?v=6.0.1` 与 `mobile-quotes.js?v=6.0.1`。
+
 ### v6.0.0: Native Apple Notes Optimized Export & Title Harmonization [LOCKED & TAGGED: v6.0.0]
 - **Official Version Name**: `Ticker Pocket v6.0.0` (Mobile Edition).
-- **Tag**: `v6.0.0` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Tag**: `v6.0.0` | **Commit**: `f419cab` | **Date**: `2026-09-05`
 - **Apple Notes Native Title Harmonization (备忘录大标题自动识别)**:
   - 彻底去除首行虚线分割线，首行直接生成标准大标题（如 `2026/09/05 TICKER 策略测算与投资看板研报`）。
   - 导入或粘贴至 iPhone 备忘录时，首行自动被 Apple Notes 渲染为加粗大字号标题。
@@ -188,7 +201,8 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 
 | 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v6.0.0`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：Apple Notes 首行标准大标题格式、静默极简导出交互、右下角版本号 `v6.0.0`。 | `git checkout v6.0.0` |
+| **`v6.0.1`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：加粗加大大标题、Markdown `# ` + 富文本 HTML 双通道剪贴板、版本号 `v6.0.1`。 | `git checkout v6.0.1` |
+| **`v6.0.0`** | `f419cab` | 2026-09-05 | **备忘录标题规范版**：去除首行虚线、首行标准大标题、静默极简导出。 | `git checkout v6.0.0` |
 | **`v5.9.9`** | `cbd5778` | 2026-09-05 | **多格式导出整合版**：主页右上角导出入口（支持 Apple Notes、Word、PDF 打印导出）。 | `git checkout v5.9.9` |
 | **`v5.9.8`** | `04bd71a` | 2026-09-05 | **里程碑版本**：2026 财报周期统一、经典暗黑极简徽章字阶、自适应单双行排版、全尺寸桌面图标、纯黑无色差启动欢迎页。 | `git checkout v5.9.8` |
 | **`v5.3.0`** | `e0cafd5` | 2026-09-04 | **纯测算看板移动版**：首个稳定手机 PWA 版本，包含买卖点双向测算、局域网多设备同步与卡片颜色独立隔离。 | `git checkout v5.3.0` |

@@ -1417,7 +1417,7 @@
     const todayFormatted = `${year}/${month}/${day}`;
     const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
 
-    let text = `${todayFormatted} TICKER 策略测算与投资看板研报\n\n`;
+    let text = `# ${todayFormatted} TICKER 策略测算与投资看板研报\n\n`;
     text += `生成时间: ${todayFormatted} ${timeStr} | 关注/持仓标的: ${records.length} 只\n`;
     text += `--------------------------------------------------\n\n`;
 
@@ -1452,6 +1452,47 @@
     return text;
   }
 
+  function buildPortfolioRichHtml() {
+    const records = appState.historyRecords || [];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayFormatted = `${year}/${month}/${day}`;
+    const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+
+    let html = `<h1 style="font-size: 26px; font-weight: 800; color: #000000; margin: 0 0 10px 0; line-height: 1.3;">${todayFormatted} TICKER 策略测算与投资看板研报</h1>`;
+    html += `<p style="font-size: 13px; color: #666666; margin: 0 0 16px 0;">生成时间: ${todayFormatted} ${timeStr} | 关注/持仓标的: ${records.length} 只</p>`;
+    html += `<hr style="border: none; border-top: 1px solid #e0e0e0; margin: 16px 0;" />`;
+
+    records.forEach((g, idx) => {
+      html += `<h2 style="font-size: 18px; font-weight: 700; color: #111111; margin: 18px 0 8px 0;">【${idx + 1}. ${escapeHtml(g.symbol)}${g.name ? ' - ' + escapeHtml(g.name) : ''}】</h2>`;
+      if (g.cost || g.qty) {
+        html += `<p style="margin: 4px 0; font-size: 14px; color: #333333;">• <strong>持仓成本:</strong> ${g.cost ? '¥/$ ' + escapeHtml(g.cost) : '--'} | <strong>持仓数量:</strong> ${g.qty ? escapeHtml(g.qty) + ' 股' : '--'}</p>`;
+      }
+      if (g.tf_w || g.tf_d || g.tf_30) {
+        html += `<p style="margin: 4px 0; font-size: 14px; color: #333333;">• <strong>级别周期分析:</strong> W: ${escapeHtml(g.tf_w || '--')} | D: ${escapeHtml(g.tf_d || '--')} | 30m: ${escapeHtml(g.tf_30 || '--')}</p>`;
+      }
+      if (g.records && g.records.length > 0) {
+        html += `<p style="margin: 4px 0 2px 0; font-size: 14px; color: #333333;">• <strong>策略买卖点测算点位:</strong></p><ul style="margin: 4px 0 8px 20px; padding: 0; font-size: 13px; color: #444444;">`;
+        g.records.forEach((r, rIdx) => {
+          const detail = cleanDetails(r.details, r);
+          html += `<li>[${rIdx + 1}] <strong>${escapeHtml(r.type || '点位')}</strong>: ${escapeHtml(detail)} &rArr; <strong>${escapeHtml(r.result || '--')}</strong>${r.shares ? ' (' + escapeHtml(r.shares) + ' 股)' : ''}</li>`;
+        });
+        html += `</ul>`;
+      }
+      if (g.note && g.note.trim()) {
+        html += `<p style="margin: 6px 0 2px 0; font-size: 14px; color: #333333;">• <strong>交易策略与备忘 (STRATEGY NOTES):</strong></p><div style="font-size: 13px; color: #555555; background: #f8f8f8; padding: 8px 12px; border-left: 3px solid #333333; margin: 4px 0 8px 0; white-space: pre-wrap;">${escapeHtml(g.note.trim())}</div>`;
+      }
+      if (g.research_notes && g.research_notes.trim()) {
+        html += `<p style="margin: 6px 0 2px 0; font-size: 14px; color: #333333;">• <strong>研报剪藏重点 (RESEARCH CLIPPINGS):</strong></p><div style="font-size: 13px; color: #555555; background: #f8f8f8; padding: 8px 12px; border-left: 3px solid #666666; margin: 4px 0 8px 0; white-space: pre-wrap;">${escapeHtml(g.research_notes.trim())}</div>`;
+      }
+      html += `<hr style="border: none; border-top: 1px dashed #dddddd; margin: 16px 0;" />`;
+    });
+
+    return html;
+  }
+
   function buildStockResearchPlainText(stock) {
     if (!stock) return buildPortfolioPlainText();
     const now = new Date();
@@ -1468,7 +1509,7 @@
     const prof = stock.companyProfile || {};
     const ta = stock.technicalAnalysis || {};
 
-    let text = `${todayFormatted} 【${sym} - ${name}】TICKER 机构级深度投研研报\n\n`;
+    let text = `# ${todayFormatted} 【${sym} - ${name}】TICKER 机构级深度投研研报\n\n`;
     text += `标的代码: ${sym} | 公司名称: ${name}\n`;
     text += `当前价格: ${stock.currency || '$'}${stock.currentPrice || '--'} (${stock.changePercent ? (stock.changePercent > 0 ? '+' : '') + parseFloat(stock.changePercent).toFixed(2) + '%' : '--'})\n`;
     text += `所属板块: ${prof.sector || '--'} | 细分行业: ${prof.industry || '--'}\n`;
@@ -1542,6 +1583,116 @@
     return text;
   }
 
+  function buildStockResearchRichHtml(stock) {
+    if (!stock) return buildPortfolioRichHtml();
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayFormatted = `${year}/${month}/${day}`;
+    const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+    const sym = stock.symbol || 'STOCK';
+    const name = stock.name || sym;
+    const m = stock.metrics || {};
+    const bi = stock.businessIndustry || {};
+    const il = stock.investmentLogic || {};
+    const prof = stock.companyProfile || {};
+    const ta = stock.technicalAnalysis || {};
+
+    let html = `<h1 style="font-size: 26px; font-weight: 800; color: #000000; margin: 0 0 10px 0; line-height: 1.3;">${todayFormatted} 【${escapeHtml(sym)} - ${escapeHtml(name)}】TICKER 机构级深度投研研报</h1>`;
+    html += `<p style="font-size: 13px; color: #666666; margin: 0 0 12px 0;">标的代码: <strong>${escapeHtml(sym)}</strong> | 公司名称: <strong>${escapeHtml(name)}</strong> | 现价: <strong>${stock.currency || '$'}${stock.currentPrice || '--'}</strong> (${stock.changePercent ? (stock.changePercent > 0 ? '+' : '') + parseFloat(stock.changePercent).toFixed(2) + '%' : '--'}) | 所属板块: ${escapeHtml(prof.sector || '--')} | 生成时间: ${todayFormatted} ${timeStr}</p>`;
+    html += `<hr style="border: none; border-top: 1px solid #e0e0e0; margin: 16px 0;" />`;
+
+    html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【一、核心财务与估值矩阵 (FINANCIAL MATRIX)】</h2><ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+    html += `<li><strong>总市值:</strong> ${escapeHtml(m.marketCap || '--')}</li>`;
+    html += `<li><strong>营收同比增速:</strong> ${escapeHtml(m.revenueGrowth || '--')}</li>`;
+    html += `<li><strong>净利润同比增速:</strong> ${escapeHtml(m.earningsGrowth || '--')}</li>`;
+    html += `<li><strong>净利率 / 毛利率:</strong> ${escapeHtml(m.profitMargins || '--')}</li>`;
+    html += `<li><strong>净资产收益率 (ROE):</strong> ${escapeHtml(m.returnOnEquity || '--')}</li>`;
+    html += `<li><strong>资产负债率:</strong> ${escapeHtml(m.debtToEquity || '--')}</li>`;
+    html += `<li><strong>市盈率 (TTM / Forward):</strong> ${escapeHtml(m.pe || '--')}</li>`;
+    html += `<li><strong>股息率:</strong> ${escapeHtml(m.dividendYield || '--')}</li>`;
+    html += `<li><strong>机构一致目标价:</strong> ${m.targetMeanPrice ? (stock.currency || '$') + escapeHtml(m.targetMeanPrice) : '--'}</li>`;
+    html += `<li><strong>下次财报日期:</strong> ${escapeHtml(stock.nextEarningsFormatted || '--')}</li>`;
+    html += `</ul>`;
+
+    html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【二、业务模型与行业格局 (BUSINESS & INDUSTRY)】</h2>`;
+    if (bi.coreHeadline) html += `<h3 style="font-size: 14px; font-weight: 700; color: #222222; margin: 8px 0 4px 0;">【${escapeHtml(bi.coreHeadline)}】</h3>`;
+    if (bi.coreBullets && bi.coreBullets.length > 0) {
+      html += `<ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+      bi.coreBullets.forEach(b => html += `<li>${escapeHtml(b)}</li>`);
+      html += `</ul>`;
+    }
+    if (bi.industryHeadline) html += `<h3 style="font-size: 14px; font-weight: 700; color: #222222; margin: 8px 0 4px 0;">【${escapeHtml(bi.industryHeadline)}】</h3>`;
+    if (bi.industryBullets && bi.industryBullets.length > 0) {
+      html += `<ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+      bi.industryBullets.forEach(b => html += `<li>${escapeHtml(b)}</li>`);
+      html += `</ul>`;
+    }
+
+    html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【三、核心投资逻辑 (INVESTMENT LOGIC)】</h2>`;
+    if (il.coreHeadline) html += `<h3 style="font-size: 14px; font-weight: 700; color: #222222; margin: 8px 0 4px 0;">【${escapeHtml(il.coreHeadline)}】</h3>`;
+    if (il.coreBullets && il.coreBullets.length > 0) {
+      html += `<ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+      il.coreBullets.forEach(b => html += `<li>${escapeHtml(b)}</li>`);
+      html += `</ul>`;
+    }
+    if (il.shortTermHeadline) html += `<h3 style="font-size: 14px; font-weight: 700; color: #222222; margin: 8px 0 4px 0;">【${escapeHtml(il.shortTermHeadline)}】</h3>`;
+    if (il.shortTermBullets && il.shortTermBullets.length > 0) {
+      html += `<ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+      il.shortTermBullets.forEach(b => html += `<li>${escapeHtml(b)}</li>`);
+      html += `</ul>`;
+    }
+    if (il.longTermHeadline) html += `<h3 style="font-size: 14px; font-weight: 700; color: #222222; margin: 8px 0 4px 0;">【${escapeHtml(il.longTermHeadline)}】</h3>`;
+    if (il.longTermBullets && il.longTermBullets.length > 0) {
+      html += `<ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+      il.longTermBullets.forEach(b => html += `<li>${escapeHtml(b)}</li>`);
+      html += `</ul>`;
+    }
+    if (il.valuationHeadline) html += `<h3 style="font-size: 14px; font-weight: 700; color: #222222; margin: 8px 0 4px 0;">【${escapeHtml(il.valuationHeadline)}】</h3>`;
+    if (il.valuationBullets && il.valuationBullets.length > 0) {
+      html += `<ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+      il.valuationBullets.forEach(b => html += `<li>${escapeHtml(b)}</li>`);
+      html += `</ul>`;
+    }
+
+    if (stock.newsBrief && stock.newsBrief.length > 0) {
+      html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【四、精选要闻简报 (NEWS BRIEF)】</h2><ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+      stock.newsBrief.forEach(n => {
+        html += `<li><strong>[${escapeHtml(n.time || '')}] ${escapeHtml(n.title)}</strong><br/><span style="color: #555555;">解读: ${escapeHtml(n.summary || '')}</span></li>`;
+      });
+      html += `</ul>`;
+    }
+
+    if (stock.institutionalView && stock.institutionalView.length > 0) {
+      html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【五、机构观点与研报共识 (INSTITUTIONAL VIEW)】</h2><ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+      stock.institutionalView.forEach(v => {
+        html += `<li><strong>${escapeHtml(v.title)}:</strong><br/><span style="color: #555555;">${escapeHtml(v.body || '')}</span></li>`;
+      });
+      html += `</ul>`;
+    }
+
+    html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【六、技术面研判 (TECHNICAL ANALYSIS)】</h2><ul style="margin: 4px 0 12px 20px; padding: 0; font-size: 13px; color: #333333; line-height: 1.6;">`;
+    html += `<li><strong>关键支撑区间:</strong> ${escapeHtml(ta.supportBand || '--')}</li>`;
+    html += `<li><strong>第一阻力区间:</strong> ${escapeHtml(ta.resistanceBand || '--')}</li>`;
+    html += `<li><strong>中期趋势信号:</strong> ${escapeHtml(ta.trendSignal || '--')}</li>`;
+    html += `<li><strong>RSI 强弱指标:</strong> ${escapeHtml(ta.rsiStatus || '--')}</li>`;
+    (ta.bullets || []).forEach(b => html += `<li>${escapeHtml(b)}</li>`);
+    html += `</ul>`;
+
+    const group = (appState.historyRecords || []).find(g => g.symbol.toUpperCase() === sym.toUpperCase());
+    if (group) {
+      if (group.note && group.note.trim()) {
+        html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【七、我的策略备忘 (STRATEGY & TRADING NOTES)】</h2><div style="font-size: 13px; color: #555555; background: #f8f8f8; padding: 8px 12px; border-left: 3px solid #333333; margin: 4px 0 12px 0; white-space: pre-wrap;">${escapeHtml(group.note.trim())}</div>`;
+      }
+      if (group.research_notes && group.research_notes.trim()) {
+        html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【八、个股剪藏笔记 (RESEARCH CLIPPINGS)】</h2><div style="font-size: 13px; color: #555555; background: #f8f8f8; padding: 8px 12px; border-left: 3px solid #666666; margin: 4px 0 12px 0; white-space: pre-wrap;">${escapeHtml(group.research_notes.trim())}</div>`;
+      }
+    }
+
+    return html;
+  }
+
   function escapeXml(unsafe) {
     if (!unsafe) return '';
     return String(unsafe).replace(/[<>&'"]/g, function (c) {
@@ -1558,102 +1709,93 @@
   function buildWordDocumentXml(isStock, stock) {
     const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
     const title = isStock ? `${stock?.symbol || 'STOCK'} 深度投研研报` : `Ticker 投资策略账本`;
-    const dateStr = new Date().toLocaleString('zh-CN', { hour12: false });
-
     const lines = plainText.split('\n');
-    let xmlBody = '';
 
+    let paragraphsXml = '';
     lines.forEach(line => {
-      const clean = line.trim();
-      if (!clean) {
-        xmlBody += '<w:p/>';
+      const trimmed = line.trim();
+      if (!trimmed) {
+        paragraphsXml += '<w:p><w:pPr><w:spacing w:after="120"/></w:pPr></w:p>';
         return;
       }
-      const isHeader = clean.startsWith('【') || clean.startsWith('===');
-      const isBullet = clean.startsWith('•') || clean.startsWith('-') || clean.startsWith('[');
-      
-      if (isHeader) {
-        xmlBody += `
-          <w:p>
-            <w:pPr>
-              <w:spacing w:before="180" w:after="60"/>
-            </w:pPr>
-            <w:r>
-              <w:rPr>
-                <w:b/>
-                <w:sz w:val="26"/>
-                <w:color w:val="000000"/>
-              </w:rPr>
-              <w:t>${escapeXml(line)}</w:t>
-            </w:r>
-          </w:p>
-        `;
-      } else if (isBullet) {
-        xmlBody += `
-          <w:p>
-            <w:pPr>
-              <w:ind w:left="240"/>
-              <w:spacing w:before="30" w:after="30"/>
-            </w:pPr>
-            <w:r>
-              <w:rPr>
-                <w:sz w:val="22"/>
-                <w:color w:val="222222"/>
-              </w:rPr>
-              <w:t>${escapeXml(line)}</w:t>
-            </w:r>
-          </w:p>
-        `;
-      } else {
-        xmlBody += `
-          <w:p>
-            <w:pPr>
-              <w:spacing w:before="30" w:after="30"/>
-            </w:pPr>
-            <w:r>
-              <w:rPr>
-                <w:sz w:val="22"/>
-                <w:color w:val="333333"/>
-              </w:rPr>
-              <w:t>${escapeXml(line)}</w:t>
-            </w:r>
-          </w:p>
-        `;
+
+      if (trimmed.startsWith('# ')) {
+        const h1Text = trimmed.replace(/^#\s*/, '');
+        paragraphsXml += `<w:p>
+          <w:pPr>
+            <w:jc w:val="left"/>
+            <w:spacing w:before="240" w:after="140"/>
+            <w:rPr>
+              <w:rFonts w:ascii="Helvetica Neue" w:h-ansi="Helvetica Neue" w:fareast="PingFang SC"/>
+              <w:b/>
+              <w:sz w:val="36"/>
+              <w:color w:val="111111"/>
+            </w:rPr>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Helvetica Neue" w:h-ansi="Helvetica Neue" w:fareast="PingFang SC"/>
+              <w:b/>
+              <w:sz w:val="36"/>
+              <w:color w:val="111111"/>
+            </w:rPr>
+            <w:t>${escapeXml(h1Text)}</w:t>
+          </w:r>
+        </w:p>`;
+        return;
       }
+
+      if (trimmed.startsWith('【') && trimmed.endsWith('】')) {
+        paragraphsXml += `<w:p>
+          <w:pPr>
+            <w:spacing w:before="180" w:after="80"/>
+            <w:rPr>
+              <w:rFonts w:ascii="Helvetica Neue" w:h-ansi="Helvetica Neue" w:fareast="PingFang SC"/>
+              <w:b/>
+              <w:sz w:val="24"/>
+              <w:color w:val="222222"/>
+            </w:rPr>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Helvetica Neue" w:h-ansi="Helvetica Neue" w:fareast="PingFang SC"/>
+              <w:b/>
+              <w:sz w:val="24"/>
+              <w:color w:val="222222"/>
+            </w:rPr>
+            <w:t>${escapeXml(trimmed)}</w:t>
+          </w:r>
+        </w:p>`;
+        return;
+      }
+
+      const isSub = trimmed.startsWith('•') || trimmed.startsWith('  [');
+      paragraphsXml += `<w:p>
+        <w:pPr>
+          <w:spacing w:after="60"/>
+          ${isSub ? '<w:ind w:left="240"/>' : ''}
+          <w:rPr>
+            <w:rFonts w:ascii="Helvetica Neue" w:h-ansi="Helvetica Neue" w:fareast="PingFang SC"/>
+            <w:sz w:val="21"/>
+            <w:color w:val="333333"/>
+          </w:rPr>
+        </w:pPr>
+        <w:r>
+          <w:rPr>
+            <w:rFonts w:ascii="Helvetica Neue" w:h-ansi="Helvetica Neue" w:fareast="PingFang SC"/>
+            <w:sz w:val="21"/>
+            <w:color w:val="333333"/>
+          </w:rPr>
+          <w:t xml:space="preserve">${escapeXml(line)}</w:t>
+        </w:r>
+      </w:p>`;
     });
 
     return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <?mso-application progid="Word.Document"?>
 <w:wordDocument xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:sl="http://schemas.microsoft.com/schemaLibrary/2003/core" xmlns:aml="http://schemas.microsoft.com/aml/2001/core" xmlns:wx="http://schemas.microsoft.com/office/word/2003/auxHint" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882" w:macrosPresent="no" w:embeddedObjPresent="no" w:ocxPresent="no" xml:space="preserve">
   <w:body>
-    <w:p>
-      <w:pPr>
-        <w:jc w:val="center"/>
-        <w:spacing w:after="100"/>
-      </w:pPr>
-      <w:r>
-        <w:rPr>
-          <w:b/>
-          <w:sz w:val="34"/>
-          <w:color w:val="000000"/>
-        </w:rPr>
-        <w:t>${escapeXml(title)}</w:t>
-      </w:r>
-    </w:p>
-    <w:p>
-      <w:pPr>
-        <w:jc w:val="center"/>
-        <w:spacing w:after="200"/>
-      </w:pPr>
-      <w:r>
-        <w:rPr>
-          <w:sz w:val="18"/>
-          <w:color w:val="666666"/>
-        </w:rPr>
-        <w:t>生成平台: Ticker Pocket | 日期: ${escapeXml(dateStr)}</w:t>
-      </w:r>
-    </w:p>
-    ${xmlBody}
+    ${paragraphsXml}
   </w:body>
 </w:wordDocument>`;
   }
@@ -1685,6 +1827,44 @@
     } catch (e) {}
     document.body.removeChild(t);
     return ok;
+  }
+
+  function copyRichTextToClipboard(plainText, htmlText) {
+    if (navigator.clipboard && window.ClipboardItem) {
+      try {
+        const plainBlob = new Blob([plainText], { type: 'text/plain' });
+        const htmlBlob = new Blob([htmlText || plainText], { type: 'text/html' });
+        const data = [new ClipboardItem({
+          'text/plain': plainBlob,
+          'text/html': htmlBlob
+        })];
+        navigator.clipboard.write(data).catch(() => {
+          fallbackRichCopy(plainText, htmlText);
+        });
+        return;
+      } catch (e) {
+        fallbackRichCopy(plainText, htmlText);
+        return;
+      }
+    }
+    fallbackRichCopy(plainText, htmlText);
+  }
+
+  function fallbackRichCopy(plainText, htmlText) {
+    const listener = function(e) {
+      if (e.clipboardData) {
+        e.clipboardData.setData('text/html', htmlText || plainText);
+        e.clipboardData.setData('text/plain', plainText);
+        e.preventDefault();
+      }
+    };
+    document.addEventListener('copy', listener);
+    try {
+      document.execCommand('copy');
+    } catch (e) {
+      copyTextToClipboard(plainText);
+    }
+    document.removeEventListener('copy', listener);
   }
 
   function buildPdfHtmlReport(isStock, stock) {
@@ -1766,12 +1946,13 @@
     const stock = currentResearchStock;
     const title = isStock ? `${stock?.symbol || 'STOCK'} 深度投研研报` : `Ticker 投资策略账本`;
     const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
+    const richHtml = isStock ? buildStockResearchRichHtml(stock) : buildPortfolioRichHtml();
 
     closeExportSheet();
 
     if (type === 'notes') {
-      // 1. Immediately copy complete text to clipboard
-      copyTextToClipboard(plainText);
+      // 1. Immediately copy complete text + rich HTML (with large bold <h1> title) to clipboard
+      copyRichTextToClipboard(plainText, richHtml);
 
       // 2. Try native system share modal (which includes Apple Notes)
       if (navigator.share) {
