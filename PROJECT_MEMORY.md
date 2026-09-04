@@ -155,19 +155,34 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
-### v5.9.8: Restore Classic Badge Typography, Seamless Splash Background & Footer Version Placement
+### v5.9.8: Restore Classic Badge Typography, Seamless Splash Background & Footer Version Placement [LOCKED & TAGGED: v5.9.8]
+- **Official Version Name**: `Ticker Pocket v5.9.8` (Mobile Edition).
+- **Tag**: `v5.9.8` | **Commit**: `04bd71a` | **Date**: `2026-09-05`
 - **Classic Typography Restoration**:
   - 恢复 EARNINGS CALENDAR 徽章的原版经典暗黑极简字体与配色（`font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; color: var(--fg-dim); background: rgba(255,255,255,0.06); padding: 2px 6px;`），消除大号白色粗体与突兀的双色对比。
 - **Dynamic Responsive Layout**:
   - 当屏幕空间足够时，徽章内容保持单行完整展示（如 `FY2026 Q3 季报 (截至 2026-06-27)`）。
   - 当在小屏设备（如 iPhone 15）宽度不足时，括号内容 `(截至 2026-06-27)` 作为一个整体自然换行至第二行，且永不拆开词语。
   - 下方 `Est. Release Date` 同样支持单行自适应以及小屏括号平滑换行。
-- **Seamless Splash Background & Icon Alpha Composition**:
+- **Seamless Splash Background & Full-Size Icon**:
   - 彻底解决 App 启动欢迎屏（Splash Screen）的色差与方框轮廓问题：使用纯透明母版图标通过 Alpha 渐变合成至精准 `#030303` 底色，消除原图标暗灰方框残留。
+  - 恢复 iPhone 主屏幕图标（`apple-touch-icon.png`）的满格大尺寸设计，不再缩小。
 - **Version Indicator Relocation**:
   - 顶部 Logo 保持纯粹 `TICKER`，版本号按原设计放置于主页最底部右下角 `TICKER POCKET v5.9.8`。
 - **Script & Cache Bumping**:
   - `mobile.html` 引用版本与启动图链接全面升级至 `v5.9.8`。
+
+---
+
+## 5. Locked Version Archive & Rollback Guide (锁定版本归档与回退索引)
+
+| 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
+| :--- | :--- | :--- | :--- | :--- |
+| **`v5.9.8`** | `04bd71a` | 2026-09-05 | **当前最新稳定版**：2026 财报周期统一、经典暗黑极简徽章字阶、自适应单双行排版、全尺寸桌面图标、纯黑无色差启动欢迎页、右下角版本号。 | `git checkout v5.9.8` |
+| **`v5.3.0`** | `e0cafd5` | 2026-09-04 | **纯测算看板移动版**：首个稳定手机 PWA 版本，包含买卖点双向测算、局域网多设备同步与卡片颜色独立隔离。 | `git checkout v5.3.0` |
+| **`v5.0.0`** | `b0eb3eb` | 2026-09-03 | **桌面端多重行情重构版**：接入东方财富与腾讯行情双备用通道、修复休市状态判定与零买入成本计算。 | `git checkout v5.0.0` |
+| **`v3.2.0`** | `4b47db9` | 2026-09-02 | **双向联动测算器**：目标价测算与涨跌幅测算双向自动切换、网格化买卖点管理。 | `git checkout v3.2.0` |
+| **`v2.0.0`** | `839da49` | 2026-09-01 | **Studio Noir 架构奠基版**：纯黑极简设计语言、Electron 窗口记忆与无边框质感。 | `git checkout v2.0.0` |
 
 ---
 
@@ -178,5 +193,5 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   ```
 - **Git Workflow**:
   - Project repo uses `Hannah-arch5/Stock_Price_Calculator_Ticker`
-  - Release branches tagged (e.g., `v5.3.0`).
+  - Release tags frozen in Git (e.g., `v5.9.8`, `v5.3.0`, `v5.0.0`, `v3.2.0`, `v2.0.0`).
 
