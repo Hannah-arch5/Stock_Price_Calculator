@@ -1417,7 +1417,7 @@
     const todayFormatted = `${year}/${month}/${day}`;
     const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
 
-    let text = `${todayFormatted} TICKER 策略测算与投资看板研报\n\n`;
+    let text = `【 ${todayFormatted} TICKER 策略测算与投资看板研报 】\n\n`;
     text += `生成时间: ${todayFormatted} ${timeStr} | 关注/持仓标的: ${records.length} 只\n`;
     text += `--------------------------------------------------\n\n`;
 
@@ -1461,7 +1461,8 @@
     const todayFormatted = `${year}/${month}/${day}`;
     const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
 
-    let html = `<h1 style="font-size: 26px; font-weight: 800; color: #000000; margin: 0 0 10px 0; line-height: 1.3;">${todayFormatted} TICKER 策略测算与投资看板研报</h1>`;
+    let html = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #111111;">`;
+    html += `<h1 style="font-size: 26px; font-weight: 800; color: #000000; margin: 0 0 10px 0; line-height: 1.3;">${todayFormatted} TICKER 策略测算与投资看板研报</h1>`;
     html += `<p style="font-size: 13px; color: #666666; margin: 0 0 16px 0;">生成时间: ${todayFormatted} ${timeStr} | 关注/持仓标的: ${records.length} 只</p>`;
     html += `<hr style="border: none; border-top: 1px solid #e0e0e0; margin: 16px 0;" />`;
 
@@ -1489,6 +1490,7 @@
       }
       html += `<hr style="border: none; border-top: 1px dashed #dddddd; margin: 16px 0;" />`;
     });
+    html += `</div>`;
 
     return html;
   }
@@ -1509,7 +1511,7 @@
     const prof = stock.companyProfile || {};
     const ta = stock.technicalAnalysis || {};
 
-    let text = `${todayFormatted} 【${sym} - ${name}】TICKER 机构级深度投研研报\n\n`;
+    let text = `【 ${todayFormatted} ${sym} - ${name} TICKER 机构级深度投研研报 】\n\n`;
     text += `标的代码: ${sym} | 公司名称: ${name}\n`;
     text += `当前价格: ${stock.currency || '$'}${stock.currentPrice || '--'} (${stock.changePercent ? (stock.changePercent > 0 ? '+' : '') + parseFloat(stock.changePercent).toFixed(2) + '%' : '--'})\n`;
     text += `所属板块: ${prof.sector || '--'} | 细分行业: ${prof.industry || '--'}\n`;
@@ -1599,7 +1601,8 @@
     const prof = stock.companyProfile || {};
     const ta = stock.technicalAnalysis || {};
 
-    let html = `<h1 style="font-size: 26px; font-weight: 800; color: #000000; margin: 0 0 10px 0; line-height: 1.3;">${todayFormatted} 【${escapeHtml(sym)} - ${escapeHtml(name)}】TICKER 机构级深度投研研报</h1>`;
+    let html = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #111111;">`;
+    html += `<h1 style="font-size: 26px; font-weight: 800; color: #000000; margin: 0 0 10px 0; line-height: 1.3;">${todayFormatted} 【${escapeHtml(sym)} - ${escapeHtml(name)}】TICKER 机构级深度投研研报</h1>`;
     html += `<p style="font-size: 13px; color: #666666; margin: 0 0 12px 0;">标的代码: <strong>${escapeHtml(sym)}</strong> | 公司名称: <strong>${escapeHtml(name)}</strong> | 现价: <strong>${stock.currency || '$'}${stock.currentPrice || '--'}</strong> (${stock.changePercent ? (stock.changePercent > 0 ? '+' : '') + parseFloat(stock.changePercent).toFixed(2) + '%' : '--'}) | 所属板块: ${escapeHtml(prof.sector || '--')} | 生成时间: ${todayFormatted} ${timeStr}</p>`;
     html += `<hr style="border: none; border-top: 1px solid #e0e0e0; margin: 16px 0;" />`;
 
@@ -1689,6 +1692,7 @@
         html += `<h2 style="font-size: 16px; font-weight: 700; color: #111111; margin: 16px 0 8px 0;">【八、个股剪藏笔记 (RESEARCH CLIPPINGS)】</h2><div style="font-size: 13px; color: #555555; background: #f8f8f8; padding: 8px 12px; border-left: 3px solid #666666; margin: 4px 0 12px 0; white-space: pre-wrap;">${escapeHtml(group.research_notes.trim())}</div>`;
       }
     }
+    html += `</div>`;
 
     return html;
   }
