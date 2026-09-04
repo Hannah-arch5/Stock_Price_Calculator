@@ -1417,7 +1417,7 @@
     const todayFormatted = `${year}/${month}/${day}`;
     const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
 
-    let text = `# ${todayFormatted} TICKER 策略测算与投资看板研报\n\n`;
+    let text = `${todayFormatted} TICKER 策略测算与投资看板研报\n\n`;
     text += `生成时间: ${todayFormatted} ${timeStr} | 关注/持仓标的: ${records.length} 只\n`;
     text += `--------------------------------------------------\n\n`;
 
@@ -1509,7 +1509,7 @@
     const prof = stock.companyProfile || {};
     const ta = stock.technicalAnalysis || {};
 
-    let text = `# ${todayFormatted} 【${sym} - ${name}】TICKER 机构级深度投研研报\n\n`;
+    let text = `${todayFormatted} 【${sym} - ${name}】TICKER 机构级深度投研研报\n\n`;
     text += `标的代码: ${sym} | 公司名称: ${name}\n`;
     text += `当前价格: ${stock.currency || '$'}${stock.currentPrice || '--'} (${stock.changePercent ? (stock.changePercent > 0 ? '+' : '') + parseFloat(stock.changePercent).toFixed(2) + '%' : '--'})\n`;
     text += `所属板块: ${prof.sector || '--'} | 细分行业: ${prof.industry || '--'}\n`;
@@ -1944,7 +1944,15 @@
   function handleExportAction(type) {
     const isStock = currentExportContext === 'stock';
     const stock = currentResearchStock;
-    const title = isStock ? `${stock?.symbol || 'STOCK'} 深度投研研报` : `Ticker 投资策略账本`;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayFormatted = `${year}/${month}/${day}`;
+
+    const title = isStock
+      ? `${todayFormatted} 【${stock?.symbol || 'STOCK'} - ${stock?.name || ''}】TICKER 机构级深度投研研报`
+      : `${todayFormatted} TICKER 策略测算与投资看板研报`;
     const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
     const richHtml = isStock ? buildStockResearchRichHtml(stock) : buildPortfolioRichHtml();
 
