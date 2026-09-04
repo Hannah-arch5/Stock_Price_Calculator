@@ -155,15 +155,19 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
-### v5.9.8: Restore Classic Badge Typography & Dynamic Single/Two-Line Wrap
+### v5.9.8: Restore Classic Badge Typography, Seamless Splash Background & Footer Version Placement
 - **Classic Typography Restoration**:
   - 恢复 EARNINGS CALENDAR 徽章的原版经典暗黑极简字体与配色（`font-size: 0.62rem; font-family: 'JetBrains Mono', monospace; color: var(--fg-dim); background: rgba(255,255,255,0.06); padding: 2px 6px;`），消除大号白色粗体与突兀的双色对比。
 - **Dynamic Responsive Layout**:
   - 当屏幕空间足够时，徽章内容保持单行完整展示（如 `FY2026 Q3 季报 (截至 2026-06-27)`）。
   - 当在小屏设备（如 iPhone 15）宽度不足时，括号内容 `(截至 2026-06-27)` 作为一个整体自然换行至第二行，且永不拆开词语。
   - 下方 `Est. Release Date` 同样支持单行自适应以及小屏括号平滑换行。
+- **Seamless Splash Background & Icon Alpha Composition**:
+  - 彻底解决 App 启动欢迎屏（Splash Screen）的色差与方框轮廓问题：使用纯透明母版图标通过 Alpha 渐变合成至精准 `#030303` 底色，消除原图标暗灰方框残留。
+- **Version Indicator Relocation**:
+  - 顶部 Logo 保持纯粹 `TICKER`，版本号按原设计放置于主页最底部右下角 `TICKER POCKET v5.9.8`。
 - **Script & Cache Bumping**:
-  - `mobile.html` 引用版本升级至 `v5.9.8`。
+  - `mobile.html` 引用版本与启动图链接全面升级至 `v5.9.8`。
 
 ---
 
