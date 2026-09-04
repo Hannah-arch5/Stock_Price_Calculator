@@ -136,8 +136,12 @@ test('server failure plus absent quote is unavailable, not synthesized', async (
   assert.equal(data.currentPrice, null);
   assert.equal(data.quoteStatus, 'unavailable');
 });
-test('unsupported standalone market is explicitly unavailable', async () => {
-  const data = await Q.load('AAPL', [], { standalone: true, fetcher: async () => { throw new Error('must not call'); } });
-  assert.equal(data.currentPrice, null);
-  assert.match(Q.statusText(data), /暂未接入/);
+test('US market standalone quote is supported and parsed correctly', async () => {
+  const fixtureUs = { rc: 0, data: { f57: 'AAPL', f58: '苹果', f43: 319.97, f170: -2.51, f59: 2, f86: 1788552000 } };
+  const data = await Q.load('AAPL', [], { standalone: true, fetcher: async () => response(fixtureUs) });
+  assert.equal(data.currentPrice, '319.97');
+  assert.equal(data.changePercent, '-2.51');
+  assert.equal(data.market, 'US');
+  assert.equal(data.currency, '$');
 });
+

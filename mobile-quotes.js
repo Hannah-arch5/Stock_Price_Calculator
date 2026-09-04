@@ -26,7 +26,7 @@
       return { symbol: code + '.HK', rawCode: code, name: group?.name || code,
         market: 'HK', currency: 'HK$', secid: '116.' + code };
     }
-    return { symbol, rawCode: symbol, name: group?.name || symbol, market: 'US', currency: '$', secid: null };
+    return { symbol, rawCode: symbol, name: group?.name || symbol, market: 'US', currency: '$', secid: '105.' + symbol };
   }
 
   function number(value) {
@@ -38,7 +38,7 @@
   // fltt=2 returns prices and percentage points already scaled. Do not divide by 100.
   function parse(payload, stock) {
     const d = payload?.data;
-    if (payload?.rc !== 0 || !d || String(d.f57) !== stock.rawCode) {
+    if (payload?.rc !== 0 || !d || String(d.f57).toUpperCase() !== stock.rawCode.toUpperCase()) {
       throw new Error('行情响应的股票代码不匹配或不存在');
     }
     const price = number(d.f43);
@@ -66,7 +66,9 @@
     const change = number(parts[32]);
     const dateStr = parts[30];
     let quoteTime = null;
-    if (dateStr && dateStr.length >= 14) {
+    if (dateStr && dateStr.includes('-')) {
+      quoteTime = new Date(dateStr.replace(' ', 'T') + '+08:00').toISOString();
+    } else if (dateStr && dateStr.length >= 14) {
       const y = dateStr.slice(0, 4), m = dateStr.slice(4, 6), d = dateStr.slice(6, 8);
       const h = dateStr.slice(8, 10), min = dateStr.slice(10, 12), s = dateStr.slice(12, 14);
       quoteTime = new Date(`${y}-${m}-${d}T${h}:${min}:${s}+08:00`).toISOString();
@@ -111,6 +113,8 @@
       tSym = p + stock.rawCode;
     } else if (stock.market === 'HK') {
       tSym = 'r_hk' + stock.rawCode;
+    } else if (stock.market === 'US') {
+      tSym = 'us' + stock.rawCode;
     }
     if (!tSym) throw new Error('当前市场不支持备用行情源');
     const controller = new AbortController();
@@ -120,7 +124,13 @@
         signal: controller.signal, cache: 'no-store', credentials: 'omit'
       });
       if (!res.ok) throw new Error('行情服务暂不可用');
-      const text = await res.text();
+      let text;
+      if (typeof res.arrayBuffer === 'function' && typeof TextDecoder !== 'undefined') {
+        const buf = await res.arrayBuffer();
+        text = new TextDecoder('gbk').decode(buf);
+      } else {
+        text = await res.text();
+      }
       return parseTencent(text, stock);
     } finally {
       clearTimeout(timer);

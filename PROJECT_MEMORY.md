@@ -155,9 +155,19 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
+### v6.0.6: US Market Full Real-time Quotes Integration [LOCKED & TAGGED: v6.0.6]
+- **Official Version Name**: `Ticker Pocket v6.0.6` (Mobile Edition).
+- **Tag**: `v6.0.6` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **US Stocks Real-Time Market Quotes (全美股实时行情全接入)**:
+  - 接入东方财富与腾讯行情双备用通道（`105.<SYMBOL>` / `us<SYMBOL>`），全面支持美股（`AAPL`、`APP`、`NVDA`、`TSLA`、`BABA` 等）独立网页端秒级实时行情与涨跌幅获取。
+  - 自动识别美股中英文名称、最新股价（美元 `$`）、涨跌幅（绿涨红跌）与收盘时间戳。
+- **Version Indicator & Script Bumping**:
+  - 主页最下方右下角版本升级为 `TICKER POCKET v6.0.6`。
+  - 脚本与缓存引用升级为 `mobile.js?v=6.0.6` 与 `mobile-quotes.js?v=6.0.6`。
+
 ### v6.0.5: Silent PDF Export & Zero Alert Banners [LOCKED & TAGGED: v6.0.5]
 - **Official Version Name**: `Ticker Pocket v6.0.5` (Mobile Edition).
-- **Tag**: `v6.0.5` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Tag**: `v6.0.5` | **Commit**: `7545114` | **Date**: `2026-09-05`
 - **Silent PDF Export (彻底静默导出 PDF)**:
   - 彻底删除了点击导出 PDF 后的顶部绿色悬浮横幅（`showAlert`），导出交互与备忘录保持一致的纯净静默体验，直接调起系统 PDF 预览。
 - **Version Indicator & Script Bumping**:
@@ -217,7 +227,8 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 
 | 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v6.0.5`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：静默 PDF 导出（彻底去除顶部绿色横幅）、版本号 `v6.0.5`。 | `git checkout v6.0.5` |
+| **`v6.0.6`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：美股全实时行情接入（AAPL、APP、NVDA 等）、版本号 `v6.0.6`。 | `git checkout v6.0.6` |
+| **`v6.0.5`** | `7545114` | 2026-09-05 | **静默导出版**：静默 PDF 导出（彻底去除顶部绿色横幅）。 | `git checkout v6.0.5` |
 | **`v6.0.4`** | `d3b74b5` | 2026-09-05 | **纯净标题版**：去除备忘录大标题多余括号。 | `git checkout v6.0.4` |
 | **`v6.0.3`** | `8bff239` | 2026-09-05 | **导出精简版**：精简导出菜单（保留备忘录与 PDF）、纯净 PDF 打印预览（去除顶部悬浮黑框）。 | `git checkout v6.0.3` |
 | **`v6.0.1`** | `81cca8a` | 2026-09-05 | **加粗加大大标题版**：标题醒目标识、富文本 HTML 剪贴板复制。 | `git checkout v6.0.1` |
