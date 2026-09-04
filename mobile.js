@@ -35,6 +35,16 @@
     return { market: 'US', currency: '$', isCn: false, label: 'US' };
   }
 
+  function detectMarket(symbol) {
+    const info = getMarketInfo(symbol);
+    return {
+      market: info.isCn ? 'A' : info.market,
+      isChina: info.isCn,
+      currency: info.currency,
+      label: info.label
+    };
+  }
+
   // Format Helper
   function escapeHtml(str) {
     if (!str) return '';
@@ -58,8 +68,8 @@
       }
     }
     const tmp = document.createElement('div');
-    tmp.innerHTML = detailsHtml;
-    return tmp.textContent.replace(/\s+/g, ' ').trim();
+    tmp.innerHTML = detailsHtml || '';
+    return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
   }
 
   // Render Functions
@@ -173,7 +183,7 @@
 
   function setupQuickTagsDragAndDrop() {
     const container = document.getElementById('mobile-quick-tags');
-    if (!container || container.dataset.dragInitialized) return;
+    if (!container || !container.dataset || container.dataset.dragInitialized) return;
     container.dataset.dragInitialized = 'true';
 
     let draggingTag = null;
@@ -2273,7 +2283,7 @@
     }
     if (editSheetChipsEl) {
       const typeInput = document.getElementById('calc-edit-type');
-      const currentType = typeInput ? typeInput.value.trim() : '';
+      const currentType = (typeInput && typeInput.value) ? String(typeInput.value).trim() : '';
       const editChipsHtml = customLabels.map((l, idx) => `
         <button type="button" class="calc-chip ${l === currentType ? 'selected' : ''}" data-index="${idx}">${escapeHtml(l)}</button>
       `).join('') + `

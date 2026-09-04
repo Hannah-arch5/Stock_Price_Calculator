@@ -1,9 +1,9 @@
-const CACHE_NAME = 'ticker-pocket-v5.5.0';
+const CACHE_NAME = 'ticker-pocket-v5.5.1';
 const STATIC_ASSETS = [
   './',
   './mobile.html',
-  './mobile.css?v=5.5.0',
-  './mobile.js?v=5.5.0',
+  './mobile.css?v=5.5.1',
+  './mobile.js?v=5.5.1',
   './manifest.json',
   './apple-touch-icon.png'
 ];
@@ -12,7 +12,7 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Pre-caching offline shell v5.5.0');
+      console.log('[SW] Pre-caching offline shell v5.5.1');
       return cache.addAll(STATIC_ASSETS);
     }).then(() => self.skipWaiting())
   );
