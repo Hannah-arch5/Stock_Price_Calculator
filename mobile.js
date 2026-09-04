@@ -1858,12 +1858,32 @@
         e.preventDefault();
       }
     };
-    document.addEventListener('copy', listener);
+    document.addEventListener('copy', listener, { once: true });
+
+    // iOS WebKit requires an active DOM selection to trigger execCommand('copy')
+    const container = document.createElement('div');
+    container.innerHTML = htmlText || plainText;
+    container.style.position = 'fixed';
+    container.style.pointerEvents = 'none';
+    container.style.opacity = '0';
+    container.style.top = '0';
+    container.style.left = '0';
+    document.body.appendChild(container);
+
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(container);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
     try {
       document.execCommand('copy');
     } catch (e) {
       copyTextToClipboard(plainText);
     }
+
+    selection.removeAllRanges();
+    document.body.removeChild(container);
     document.removeEventListener('copy', listener);
   }
 
