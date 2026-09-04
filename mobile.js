@@ -2507,6 +2507,19 @@
       const perc = parseFloat(targetPercInput ? targetPercInput.value : 0) || 0;
       const isUp = targetCalcDir === 'up';
 
+      const hasData = (targetBaseInput && targetBaseInput.value.trim() !== '') ||
+                      (targetPercInput && targetPercInput.value.trim() !== '') ||
+                      (targetSymInput && targetSymInput.value.trim() !== '');
+
+      if (targetDirBtn) {
+        if (!hasData) {
+          targetDirBtn.classList.remove('is-up', 'is-down');
+        } else {
+          targetDirBtn.classList.toggle('is-up', isUp);
+          targetDirBtn.classList.toggle('is-down', !isUp);
+        }
+      }
+
       if (base <= 0) {
         if (targetResEl) targetResEl.textContent = `${cur}0.00`;
         return;
@@ -2522,8 +2535,6 @@
         targetCalcDir = targetCalcDir === 'up' ? 'down' : 'up';
         targetDirBtn.setAttribute('data-dir', targetCalcDir);
         targetDirBtn.textContent = targetCalcDir === 'up' ? '▲ UP' : '▼ DOWN';
-        targetDirBtn.classList.toggle('is-up', targetCalcDir === 'up');
-        targetDirBtn.classList.toggle('is-down', targetCalcDir === 'down');
         calcTargetLive();
       };
     }
@@ -2692,6 +2703,9 @@
         if (targetResEl) {
           const isChina = detectMarket(targetSymInput ? targetSymInput.value : '').market === 'A';
           targetResEl.textContent = `${isChina ? '¥' : '$'}0.00`;
+        }
+        if (targetDirBtn) {
+          targetDirBtn.classList.remove('is-up', 'is-down');
         }
       };
     }
