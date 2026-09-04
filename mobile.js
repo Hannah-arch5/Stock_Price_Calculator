@@ -1721,22 +1721,28 @@
   function handleExportAction(type) {
     const isStock = currentExportContext === 'stock';
     const stock = currentResearchStock;
-    const title = isStock ? `${stock?.symbol || 'STOCK'}_深度投研研报` : `Ticker_投资策略账本`;
+    const title = isStock ? `${stock?.symbol || 'STOCK'} 深度投研研报` : `Ticker 投资策略账本`;
     const plainText = isStock ? buildStockResearchPlainText(stock) : buildPortfolioPlainText();
 
     closeExportSheet();
 
     if (type === 'notes') {
-      copyTextToClipboard(plainText);
-      showAlert('已将全部研报内容复制至剪贴板！可直接在 iPhone 打开「备忘录」粘贴', 'success');
-
+      // Prioritize native Web Share API directly within the user gesture
       if (navigator.share) {
-        try {
-          navigator.share({
-            title: title,
-            text: plainText
-          }).catch(() => {});
-        } catch (e) {}
+        navigator.share({
+          title: title,
+          text: plainText
+        }).then(() => {
+          showAlert('已调起系统分享，可直接选择存储至「备忘录」', 'success');
+        }).catch((err) => {
+          if (!err || err.name !== 'AbortError') {
+            copyTextToClipboard(plainText);
+            showAlert('已复制完整账本内容至剪贴板，可直接在 iPhone 打开「备忘录」粘贴', 'success');
+          }
+        });
+      } else {
+        copyTextToClipboard(plainText);
+        showAlert('已复制完整账本内容至剪贴板，可直接在 iPhone 打开「备忘录」粘贴', 'success');
       }
     } else if (type === 'word') {
       const xmlDoc = buildWordDocumentXml(isStock, stock);
@@ -1744,7 +1750,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${title}.doc`;
+      link.download = `${title.replace(/\s+/g, '_')}.doc`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -2352,6 +2358,22 @@
         }
       }, { passive: true });
     }
+
+    // 8. Export Sheet Buttons & Options Bindings
+    const mainExportBtn = document.getElementById('main-export-btn');
+    if (mainExportBtn) mainExportBtn.onclick = () => openExportSheet('all');
+
+    const exportCancelBtn = document.getElementById('export-sheet-cancel-btn');
+    if (exportCancelBtn) exportCancelBtn.onclick = closeExportSheet;
+
+    document.querySelectorAll('.export-card-btn').forEach(btn => {
+      btn.onclick = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const type = this.getAttribute('data-export-type');
+        if (type) handleExportAction(type);
+      };
+    });
   }
 
   // ─── Part 1: Quick Calculators Controller ──────────────────────
