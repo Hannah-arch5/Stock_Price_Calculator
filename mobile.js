@@ -4431,7 +4431,7 @@
       industry: 'Personal Computing, iPhone Hardware & Global Subscription Ecosystem (个人计算设备、iPhone 硬件与全栈订阅生态)',
       summary: 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories, and sells a variety of related services globally. (苹果公司设计、制造和销售智能手机、个人电脑、平板电脑、可穿戴设备及相关配件，并在全球范围内运营高黏性数字服务生态。)',
       periodLabel: 'FY2025 Q1 季报 (截至 2024-12-28)',
-      nextEarningsFormatted: '2025-05-01 (Q2 FY25 财报披露)',
+      nextEarningsFormatted: '2025-05-01 (FY2025 Q2 季报披露)',
       metrics: {
         marketCap: '3.45T',
         revenueGrowth: '6.1% YoY',
@@ -4468,7 +4468,7 @@
       industry: 'Mobile Marketing Platform & AXON 2.0 AI Advertising Engine (移动营销平台与 AXON 2.0 AI 广告匹配引擎)',
       summary: 'AppLovin Corporation builds software-based marketing and monetization tools that enable mobile app and game developers to grow, optimize, and monetize their audiences. (AppLovin Corporation 构建基于软件的营销与变现工具，通过 AXON 2.0 AI 深度神经网络引擎赋能移动应用开发者与全域广告主实现高投资回报率投放。)',
       periodLabel: 'FY2024 Q4 年报 (截至 2024-12-31)',
-      nextEarningsFormatted: '2025-05-07 (Q1 FY25 财报披露)',
+      nextEarningsFormatted: '2025-05-07 (FY2025 Q1 季报披露)',
       metrics: {
         marketCap: '128.50B',
         revenueGrowth: '38.6% YoY',

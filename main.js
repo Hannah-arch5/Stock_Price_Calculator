@@ -335,8 +335,17 @@ async function getStockResearchData(rawSymbol) {
     let nextEarningsFormatted = '暂无发布排期';
     if (cal.earningsDate && cal.earningsDate.length > 0) {
         nextEarnings = cal.earningsDate[0];
-        const dateStr = cal.earningsDate.map(d => new Date(d).toISOString().substring(0, 10)).join(' ~ ');
-        nextEarningsFormatted = `${dateStr} (预计披露排期)`;
+        try {
+            const nextDate = new Date(nextEarnings);
+            const nextM = nextDate.getMonth() + 1;
+            const nextQ = nextM <= 3 ? 'Q1' : (nextM <= 6 ? 'Q2' : (nextM <= 9 ? 'Q3' : 'Q4'));
+            const nextYear = nextDate.getFullYear();
+            const dateStr = cal.earningsDate.map(d => new Date(d).toISOString().substring(0, 10)).join(' ~ ');
+            nextEarningsFormatted = `${dateStr} (FY${nextYear} ${nextQ} 季报披露)`;
+        } catch (_) {
+            const dateStr = cal.earningsDate.map(d => new Date(d).toISOString().substring(0, 10)).join(' ~ ');
+            nextEarningsFormatted = `${dateStr} (财报披露)`;
+        }
     }
 
     let periodLabel = '';
