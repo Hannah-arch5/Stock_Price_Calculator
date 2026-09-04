@@ -19,7 +19,25 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="mobile.css?v=5.5.1">
+    <script>
+      // Clean any stale service workers & caches on launch
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (var reg of regs) { reg.unregister(); }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (var name of names) { caches.delete(name); }
+        });
+      }
+      window.onerror = function(msg, url, lineNo, colNo, error) {
+        console.error('Ticker Error:', msg, 'line:', lineNo);
+        var errEl = document.getElementById('sync-text');
+        if (errEl) errEl.textContent = 'ERR:' + lineNo;
+      };
+    </script>
+    <link rel="stylesheet" href="mobile.css?v=5.6.0">
 </head>
 <body>
     <div class="mobile-container">
@@ -200,7 +218,7 @@
             <div class="footer-line"></div>
             <div class="footer-info">
                 <span>STUDIO NOIR</span>
-                <span class="mono">TICKER POCKET v5.5.1</span>
+                <span class="mono">TICKER POCKET v5.6.0</span>
             </div>
         </footer>
     </div>
@@ -633,15 +651,14 @@
         </div>
     </div>
 
-    <script src="mobile.js?v=5.5.1"></script>
+    <script src="mobile.js?v=5.6.0"></script>
     <script>
+      // Extra safety: unregister any legacy service workers
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js?v=5.5.1').then(reg => {
-            reg.update();
-          }).catch(err => {
-            console.log('[SW] ServiceWorker note:', err.message);
-          });
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var reg of registrations) {
+            reg.unregister();
+          }
         });
       }
     </script>

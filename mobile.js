@@ -444,7 +444,8 @@
 
     // Build HTML
     container.innerHTML = filtered.map((group, groupIdx) => {
-      const marketInfo = getMarketInfo(group.symbol);
+      try {
+        const marketInfo = getMarketInfo(group.symbol);
       const upColor = marketInfo.isCn ? '#ff453a' : '#32d74b';
       const downColor = marketInfo.isCn ? '#32d74b' : '#ff453a';
 
@@ -574,6 +575,10 @@
           ${researchNotesHtml}
         </article>
       `;
+      } catch (cardErr) {
+        console.error('Render card error for', group ? group.symbol : 'unknown', cardErr);
+        return '';
+      }
     }).join('');
 
     // Setup record double-tap highlight & hold-to-drag reorder
@@ -4214,11 +4219,11 @@
 
   // Init
   function initApp() {
-    loadFromCache();
-    initListeners();
-    setupGlobalStockResearchAndSearch();
-    fetchLatestData();
-    setupEventStream();
+    try { loadFromCache(); } catch (e) { console.error('[Init] loadFromCache:', e); }
+    try { initListeners(); } catch (e) { console.error('[Init] initListeners:', e); }
+    try { setupGlobalStockResearchAndSearch(); } catch (e) { console.error('[Init] setupGlobalStockResearchAndSearch:', e); }
+    try { fetchLatestData(); } catch (e) { console.error('[Init] fetchLatestData:', e); }
+    try { setupEventStream(); } catch (e) { console.error('[Init] setupEventStream:', e); }
   }
 
   if (document.readyState === 'loading') {
