@@ -4671,11 +4671,9 @@
       // A slower previous request must never overwrite a newly selected stock.
       if (requestId !== researchRequestId) return;
 
-      // Populate complete research package if not returned by server
-      if (!data.businessIndustry || !data.businessIndustry.coreBullets || data.businessIndustry.coreBullets.length === 0) {
-        const pkg = buildStockResearchPackage(data);
-        Object.assign(data, pkg);
-      }
+      // Always populate rich bilingual research package
+      const pkg = buildStockResearchPackage(data);
+      Object.assign(data, pkg);
 
       currentResearchStock = data;
 
