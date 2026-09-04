@@ -499,6 +499,16 @@ function startSyncServer() {
                 return;
             }
 
+            if (pathname === '/api/sync-info') {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    httpsUrl: currentHttpsUrl,
+                    localUrl: `http://${getLanIp()}:${SYNC_PORT}`,
+                    clientCount: sseClients.length
+                }));
+                return;
+            }
+
             // SSE Real-time Events
             if (pathname === '/api/events') {
                 res.writeHead(200, {

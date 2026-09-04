@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="mobile.css?v=5.4.2">
 </head>
 <body>
     <div class="mobile-container">
@@ -633,11 +633,13 @@
         </div>
     </div>
 
-    <script src="mobile.js"></script>
+    <script src="mobile.js?v=5.4.2"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch(err => {
+          navigator.serviceWorker.register('./sw.js?v=5.4.2').then(reg => {
+            reg.update();
+          }).catch(err => {
             console.log('[SW] ServiceWorker note:', err.message);
           });
         });
