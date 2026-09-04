@@ -155,6 +155,20 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
+### v5.9.9: Homepage Multi-Format Export Integration (Notes, Word, PDF) [LOCKED & TAGGED: v5.9.9]
+- **Official Version Name**: `Ticker Pocket v5.9.9` (Mobile Edition).
+- **Tag**: `v5.9.9` | **Commit**: `HEAD` | **Date**: `2026-09-05`
+- **Homepage Export Button (首页右上角导出入口)**:
+  - 位于主页顶部 Header 右上角（LIVE 状态指示灯左侧），采用 Studio Noir 极简矢量图标。
+  - 严格限定仅在主页出现，股票分析研报详情弹窗内不设导出按钮。
+- **Tri-Format Export Engine (三大导出格式)**:
+  1. **Apple Notes / 手机备忘录**: 支持调用 iOS 原生 `navigator.share` 系统分享面板或一键复制完整研报排版至剪贴板，可直接粘贴进 iPhone 备忘录。
+  2. **Word 文档 (.doc)**: 生成带结构化样式（大标题、粗体小节、缩进点位清单）的标准 Word XML 文档并一键下载。
+  3. **PDF 文档 (.pdf)**: 生成高清打印版式并调起系统打印/保存为 PDF 预览窗口。
+- **Version Indicator & Script Bumping**:
+  - 主页最下方右下角版本更新为 `TICKER POCKET v5.9.9`。
+  - 脚本与缓存引用升级为 `mobile.js?v=5.9.9` 与 `mobile-quotes.js?v=5.9.9`。
+
 ### v5.9.8: Restore Classic Badge Typography, Seamless Splash Background & Footer Version Placement [LOCKED & TAGGED: v5.9.8]
 - **Official Version Name**: `Ticker Pocket v5.9.8` (Mobile Edition).
 - **Tag**: `v5.9.8` | **Commit**: `04bd71a` | **Date**: `2026-09-05`
@@ -178,7 +192,8 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 
 | 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
 | :--- | :--- | :--- | :--- | :--- |
-| **`v5.9.8`** | `04bd71a` | 2026-09-05 | **当前最新稳定版**：2026 财报周期统一、经典暗黑极简徽章字阶、自适应单双行排版、全尺寸桌面图标、纯黑无色差启动欢迎页、右下角版本号。 | `git checkout v5.9.8` |
+| **`v5.9.9`** | `HEAD` | 2026-09-05 | **当前最新稳定版**：主页右上角导出入口（支持 Apple Notes、Word、PDF 打印导出），股票分析页保持纯净无多余按钮。 | `git checkout v5.9.9` |
+| **`v5.9.8`** | `04bd71a` | 2026-09-05 | **里程碑版本**：2026 财报周期统一、经典暗黑极简徽章字阶、自适应单双行排版、全尺寸桌面图标、纯黑无色差启动欢迎页、右下角版本号。 | `git checkout v5.9.8` |
 | **`v5.3.0`** | `e0cafd5` | 2026-09-04 | **纯测算看板移动版**：首个稳定手机 PWA 版本，包含买卖点双向测算、局域网多设备同步与卡片颜色独立隔离。 | `git checkout v5.3.0` |
 | **`v5.0.0`** | `b0eb3eb` | 2026-09-03 | **桌面端多重行情重构版**：接入东方财富与腾讯行情双备用通道、修复休市状态判定与零买入成本计算。 | `git checkout v5.0.0` |
 | **`v3.2.0`** | `4b47db9` | 2026-09-02 | **双向联动测算器**：目标价测算与涨跌幅测算双向自动切换、网格化买卖点管理。 | `git checkout v3.2.0` |

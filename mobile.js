@@ -2238,11 +2238,38 @@
         return;
       }
 
+      // (export-btn) Main Export Button Trigger
+      if (e.target.closest('#main-export-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        openExportSheet('all');
+        return;
+      }
+
+      // (export-card) Export Options Card Button Trigger
+      const exportCardBtn = e.target.closest('.export-card-btn');
+      if (exportCardBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const type = exportCardBtn.getAttribute('data-export-type');
+        if (type) handleExportAction(type);
+        return;
+      }
+
+      // (export-cancel) Export Sheet Cancel Button Trigger
+      if (e.target.closest('#export-sheet-cancel-btn')) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeExportSheet();
+        return;
+      }
+
       // (g) Backdrop click to close sheets
       if (e.target.id === 'edit-sheet-backdrop') {
         closeStockEditSheet();
         closeCalcEditSheet();
         closeAddLabelSheet();
+        closeExportSheet();
         return;
       }
 
