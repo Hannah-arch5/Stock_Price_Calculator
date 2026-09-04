@@ -1028,6 +1028,8 @@
     if (sheet) {
       sheet.style.setProperty('--modal-up-color', upColor);
       sheet.style.setProperty('--modal-down-color', downColor);
+      sheet.style.setProperty('--modal-up-bg', marketInfo.isCn ? 'rgba(255, 69, 58, 0.08)' : 'rgba(50, 215, 75, 0.08)');
+      sheet.style.setProperty('--modal-down-bg', marketInfo.isCn ? 'rgba(50, 215, 75, 0.08)' : 'rgba(255, 69, 58, 0.08)');
     }
 
     if (subtitle) subtitle.textContent = `${group.symbol} ${group.name || ''}`.trim();
@@ -2484,9 +2486,13 @@
         if (isChina) {
           panel.style.setProperty('--calc-up-color', '#ff453a');
           panel.style.setProperty('--calc-down-color', '#32d74b');
+          panel.style.setProperty('--calc-up-bg', 'rgba(255, 69, 58, 0.12)');
+          panel.style.setProperty('--calc-down-bg', 'rgba(50, 215, 75, 0.12)');
         } else {
           panel.style.setProperty('--calc-up-color', '#32d74b');
           panel.style.setProperty('--calc-down-color', '#ff453a');
+          panel.style.setProperty('--calc-up-bg', 'rgba(50, 215, 75, 0.12)');
+          panel.style.setProperty('--calc-down-bg', 'rgba(255, 69, 58, 0.12)');
         }
       }
     }

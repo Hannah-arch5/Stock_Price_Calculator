@@ -304,14 +304,14 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 .calc-dir-btn.is-up {
-  color: var(--calc-up-color, #32d74b);
-  border-color: rgba(50, 215, 75, 0.4);
-  background: rgba(50, 215, 75, 0.08);
+  color: var(--calc-up-color, #ff453a) !important;
+  border-color: var(--calc-up-color, #ff453a) !important;
+  background: var(--calc-up-bg, rgba(255, 69, 58, 0.12)) !important;
 }
 .calc-dir-btn.is-down {
-  color: var(--calc-down-color, #ff453a);
-  border-color: rgba(255, 69, 58, 0.4);
-  background: rgba(255, 69, 58, 0.08);
+  color: var(--calc-down-color, #32d74b) !important;
+  border-color: var(--calc-down-color, #32d74b) !important;
+  background: var(--calc-down-bg, rgba(50, 215, 75, 0.12)) !important;
 }
 
 .calc-perc-inner {
@@ -1504,14 +1504,14 @@ html, body {
   font-family: 'JetBrains Mono', monospace;
 }
 .dir-toggle-btn[data-dir="up"] {
-  border-color: var(--modal-up-color, #32d74b);
-  color: var(--modal-up-color, #32d74b);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--modal-up-color, var(--up-color, #ff453a)) !important;
+  color: var(--modal-up-color, var(--up-color, #ff453a)) !important;
+  background: var(--modal-up-bg, rgba(255, 69, 58, 0.08)) !important;
 }
 .dir-toggle-btn[data-dir="down"] {
-  border-color: var(--modal-down-color, #ff453a);
-  color: var(--modal-down-color, #ff453a);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--modal-down-color, var(--down-color, #32d74b)) !important;
+  color: var(--modal-down-color, var(--down-color, #32d74b)) !important;
+  background: var(--modal-down-bg, rgba(50, 215, 75, 0.08)) !important;
 }
 .perc-unit {
   font-size: 0.8rem;
