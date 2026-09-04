@@ -1327,9 +1327,46 @@
     banner.addEventListener('touchend', (e) => {
       const touchEndY = e.changedTouches[0].clientY;
       if (touchStartY - touchEndY > 20) {
-        dismissBanner();
+        dismissAllCurrentAlerts();
       }
     }, { passive: true });
+  }
+
+  let alertToastTimer = null;
+  function showAlert(message, type = 'info', duration = 3500) {
+    const banner = document.getElementById('alert-banner');
+    const container = document.getElementById('alert-banner-content');
+    if (!banner || !container) {
+      console.log(`[Alert - ${type}]:`, message);
+      return;
+    }
+
+    if (alertToastTimer) {
+      clearTimeout(alertToastTimer);
+      alertToastTimer = null;
+    }
+
+    let color = 'var(--fg)';
+    if (type === 'success') color = '#32d74b';
+    if (type === 'error' || type === 'danger') color = '#ff453a';
+    if (type === 'warning') color = '#ff9f0a';
+
+    container.innerHTML = `<span style="color: ${color}; font-weight: 500;">${escapeHtml(message)}</span>`;
+    banner.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      banner.classList.add('visible');
+    });
+
+    if (duration > 0) {
+      alertToastTimer = setTimeout(() => {
+        banner.classList.remove('visible');
+        setTimeout(() => {
+          if (!banner.classList.contains('visible')) {
+            banner.classList.add('hidden');
+          }
+        }, 350);
+      }, duration);
+    }
   }
 
   // ─── Export Portfolio & Research Functions ────────────────────────────────
@@ -1727,23 +1764,20 @@
     closeExportSheet();
 
     if (type === 'notes') {
-      // Prioritize native Web Share API directly within the user gesture
+      // 1. Immediately copy complete text to clipboard
+      copyTextToClipboard(plainText);
+      showAlert('已复制全部账本与研报内容！可直接在 iPhone 打开「备忘录」粘贴', 'success');
+
+      // 2. Try native system share modal (which includes Apple Notes)
       if (navigator.share) {
-        navigator.share({
-          title: title,
-          text: plainText
-        }).then(() => {
-          showAlert('已调起系统分享，可直接选择存储至「备忘录」', 'success');
-        }).catch((err) => {
-          if (!err || err.name !== 'AbortError') {
-            copyTextToClipboard(plainText);
-            showAlert('已复制完整账本内容至剪贴板，可直接在 iPhone 打开「备忘录」粘贴', 'success');
-          }
-        });
-      } else {
-        copyTextToClipboard(plainText);
-        showAlert('已复制完整账本内容至剪贴板，可直接在 iPhone 打开「备忘录」粘贴', 'success');
+        try {
+          navigator.share({
+            title: title,
+            text: plainText
+          }).catch(() => {});
+        } catch (e) {}
       }
+      return;
     } else if (type === 'word') {
       const xmlDoc = buildWordDocumentXml(isStock, stock);
       const blob = new Blob(['\ufeff', xmlDoc], { type: 'application/msword;charset=utf-8' });
