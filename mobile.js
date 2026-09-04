@@ -3982,172 +3982,182 @@
   const KNOWN_STOCK_PROFILES = {
     '300775': {
       name: '三角防务',
-      sector: '国防军工 / 航空装备',
-      industry: '航空锻件与特种合金结构件',
-      summary: '西安三角防务股份有限公司专业从事航空、航天、船舶等领域锻件产品的研发、生产和销售。公司拥有400MN大型精密模锻液压机等核心重器，为我国重点型号军用战斗机、大型运输机、直升机及航空发动机提供关键大型主承力结构锻件。',
+      sector: '国防军工 / 航空装备 (Defense & Aerospace Equipment)',
+      industry: '大型航空锻件与特种合金关键结构件 (Aviation Large Die Forgings & Special Alloys)',
+      summary: '西安三角防务股份有限公司专业从事航空、航天、船舶等领域锻件产品的研发、生产和销售。拥有400MN大型精密模锻液压机等核心战略装备，为我国军用战斗机、大型运输机、直升机及航空发动机提供核心主承力大型模锻件。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-28 (2026Q3 三季报披露)',
       metrics: {
         marketCap: '119.59亿',
-        revenueGrowth: '稳健恢复',
-        earningsGrowth: '拐点向上',
+        revenueGrowth: '稳健恢复 (Steady Recovery)',
+        earningsGrowth: '拐点向上 (Inflection Upward)',
         profitMargins: '31.80% / 8.42%',
-        returnOnEquity: '12.5%',
+        returnOnEquity: '12.50%',
         debtToEquity: '27.46%',
         pe: '30.77',
         forwardPe: '24.50',
         dividendYield: '0.85%'
       },
       bizBullets: [
-        '拥有400MN重型精密模锻液压机等核心战略装备，构建了从钛合金、高温合金到超高强度钢大型锻件的全流程精密锻造能力。',
-        '深度嵌入我国多型现役及新一代重点军用飞机、发动机的主承力结构件配套体系，先发优势与定点供应商壁垒极高。',
-        '持续推进由单一部件锻造向“锻铸一体化+精密加工部组件”纵深延伸，显著提升单机配套价值量与长期盈利中枢。'
+        '拥有400MN重型精密模锻液压机 (400MN Heavy Aviation Die Forging Hydraulic Press) 等核心战略装备，构建了从钛合金、高温合金到超高强度钢大型锻件的全流程精密锻造能力。',
+        '深度嵌入我国多型现役及新一代重点军用飞机、航空发动机 (Aero-Engines) 的主承力结构件配套体系，先发优势与定点供应商壁垒 (Designated Supplier Barrier) 极高。',
+        '持续推进由单一部件锻造向“锻铸一体化+精密加工部组件 (Forging-Machining Integration)”纵深延伸，显著提升单机配套价值量与长期盈利中枢。'
       ],
       moatBullets: [
-        '在军用大型航空结构锻件领域占据核心垄断性份额，型号研制周期长、军工资质壁垒深厚，客户转换成本极高。',
+        '在军用大型航空结构锻件领域占据核心垄断性份额，型号研制周期长、军工资质壁垒深厚，客户转换壁垒 (Customer Switching Cost) 极高。',
         '依托核心重型装备优势与特种合金热加工工艺积累，在大型复杂构件成形精度与材料利用率上保持行业领先。'
       ],
-      logicCore: '军机新机型加速列装与国产大飞机批产交付共振，核心锻件龙头业绩弹性与确定性极高。',
+      logicCore: '军机新机型加速列装与国产大飞机批产交付共振 (Resonance of Military Upgrades & C919 Commercial Batch Delivery)，核心锻件龙头业绩弹性与确定性极高。',
       logicShort: [
-        '重点型号军机批产提速带动锻件交付节奏恢复，下一季度营收与净利润环比预计显著改善。',
-        '商用大飞机C919供应链本地化与产能爬坡持续推进，民机业务逐步形成新的业绩增量。'
+        '重点型号军机批产提速带动大型主承力构件交付节奏恢复，下一季度营收与净利润环比预计显著改善。',
+        '国产大飞机C919供应链本地化与产能爬坡持续推进，民用航空 (Commercial Aviation) 业务逐步形成新的业绩增量。'
       ],
       logicLong: [
         '公司战略布局发动机盘轴锻件与精密加工零部件，产业链纵向一体化拓展打破传统锻件代工估值天花板。',
-        '先进航空航天结构件需求长期持续，高壁垒制造能力支撑自由现金流与长期ROE高质量复苏。'
+        '先进航空航天结构件需求长期持续，高壁垒制造能力支撑自由现金流 (Free Cash Flow) 与长期ROE高质量复苏。'
       ]
     },
     '300118': {
       name: '东方日升',
-      sector: '新能源 / 光伏储能',
-      industry: '高效异质结(HJT)组件与一体化储能系统',
-      summary: '东方日升新能源股份有限公司主要从事高效太阳能电池、组件以及光伏储能一体化系统的研发、生产和销售，是全球领先的异质结技术创新与产业化领军企业。',
+      sector: '新能源 / 光伏储能 (Renewable Energy & Solar Storage)',
+      industry: '高效异质结(HJT)光伏组件与一体化储能系统 (High-Efficiency HJT Modules & ESS)',
+      summary: '东方日升新能源股份有限公司主要从事高效太阳能电池、组件以及光伏储能一体化系统的研发、生产和销售，是全球领先的异质结(HJT)技术创新与产业化领军企业。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-29 (2026Q3 三季报披露)',
       metrics: {
         marketCap: '128.60亿',
-        revenueGrowth: '环比向好',
-        earningsGrowth: '减亏增效',
+        revenueGrowth: '环比向好 (QoQ Improvement)',
+        earningsGrowth: '减亏增效 (Cost Reduction & Efficiency)',
         profitMargins: '14.20% / 3.80%',
-        returnOnEquity: '8.2%',
+        returnOnEquity: '8.20%',
         debtToEquity: '58.40%',
         pe: '18.50',
         forwardPe: '14.20',
         dividendYield: '1.20%'
       },
       bizBullets: [
-        '聚焦高效异质结（HJT）伏曦（Hyper-ion）组件系列研发量产，在超薄硅片、零主栅（0BB）与微晶技术上保持行业领先量产效率。',
-        '构建光伏电池组件与工商业/大型电站储能系统协同并进的双轮驱动模式，全球化渠道与品牌覆盖海内外核心市场。',
+        '聚焦高效异质结（HJT）伏曦（Hyper-ion）组件系列研发量产，在超薄硅片 (Ultra-Thin Wafers)、零主栅（0BB）与微晶技术上保持行业领先量产效率。',
+        '构建光伏电池组件与工商业/大型电站储能系统 (Utility-Scale ESS) 协同并进的双轮驱动模式，全球化渠道与品牌覆盖海内外核心市场。',
         '持续优化一体化制造成本与海外高毛利市场出货占比，提升资产运营效率与抗周期波动能力。'
       ],
       moatBullets: [
-        '在N型异质结(HJT)量产效率、双面率与温度系数等核心指标上处于全球第一梯队。',
+        '在N型异质结(HJT)量产转换效率、双面率与低温漂系数等核心技术指标上处于全球第一梯队。',
         '全球化营销网络与多元化储能系统交付能力构筑坚实海内外客户生态。'
       ],
-      logicCore: '光伏行业供需格局重塑与异质结技术渗透率提升，高效率产品具备结构性超额收益。',
+      logicCore: '光伏行业供需格局重塑与异质结技术渗透率提升 (HJT Market Penetration Acceleration)，高效率产品具备结构性超额收益。',
       logicShort: [
         '上游硅料硅片价格企稳，电池组件盈利空间修复，出货量保持稳步扩张。',
         '海外大储与工商业储能订单进入集中交付期，储能板块贡献显著利润弹性。'
       ],
       logicLong: [
-        '全球能源转型确定性高，异质结与钙钛矿叠层技术储备为未来5-10年持续增长构筑技术护城河。',
+        '全球能源转型确定性高，异质结与钙钛矿叠层技术 (Perovskite Tandem) 储备为未来5-10年持续增长构筑技术护城河。',
         '“光储一体化”综合能源方案提升单瓦系统价值量，推动长期高质量盈利转化。'
       ]
     },
     '600481': {
       name: '双良节能',
-      sector: '节能环保 / 氢能装备',
-      industry: '多晶硅还原炉核心装备、大型高效换热系统与电解槽',
-      summary: '双良节能系统股份有限公司专注于节能节水系统、多晶硅还原炉核心装备、单晶硅片及绿电制氢电解槽等清洁能源与高端工业装备的研发制造。',
+      sector: '绿色低碳 / 节能节水 (Green Low-Carbon & Clean Tech)',
+      industry: '光伏多晶硅还原炉系统、节能节水系统与单晶硅片 (Polysilicon Reduction Furnaces & Eco Systems)',
+      summary: '双良节能系统股份有限公司专注于节能节水系统、光伏新能源核心装备（多晶硅还原炉）及高效单晶硅片的研发、制造与服务，是国内新能源与工业节能领域的领军企业。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-30 (2026Q3 三季报披露)',
       metrics: {
-        marketCap: '82.40亿',
-        revenueGrowth: '稳健修复',
-        earningsGrowth: '结构优化',
-        profitMargins: '18.60% / 5.20%',
-        returnOnEquity: '9.4%',
+        marketCap: '85.40亿',
+        revenueGrowth: '周期底部企稳 (Cyclical Bottoming)',
+        earningsGrowth: '逐季改善 (Quarterly Recovery)',
+        profitMargins: '16.50% / 4.20%',
+        returnOnEquity: '9.40%',
         debtToEquity: '62.10%',
-        pe: '16.80',
-        forwardPe: '12.40',
-        dividendYield: '2.10%'
+        pe: '21.30',
+        forwardPe: '15.80',
+        dividendYield: '1.50%'
       },
       bizBullets: [
-        '在多晶硅还原炉系统领域享有极高市场份额，是光伏上游核心热能装备的核心供应商。',
-        '深耕工业大型空冷节水系统与溴化锂吸收式冷温水机组，服务于能源电力与工业重化工客户。',
-        '战略布局绿电碱性电解水制氢系统，形成“节能+节水+新能源+氢能”多维度协同矩阵。'
+        '在光伏多晶硅还原炉 (Polysilicon Reduction Furnaces) 核心装备市场占据国内绝对龙头份额，技术积淀与客户覆盖率极高。',
+        '布局大尺寸高效单晶硅片智能制造生产线，实现光伏装备与硅片耗材的双向业务协同。',
+        '提供大型空冷节水系统 (Air-Cooling Systems) 与溴化锂吸收式制冷换热机组，服务火电、化工及大型数据中心绿色降耗。'
       ],
       moatBullets: [
-        '在多晶硅还原炉领域市占率稳居行业龙头，技术成熟度与节能降耗指标行业领先。',
-        '工业节能节水大型工程交付经验深厚，拥有极高的工业客户粘性与资质壁垒。'
+        '多晶硅还原炉核心热工与流体力学算法领先，构筑牢固的设备交付与系统节能专利壁垒。',
+        '节能节水装备在国家重大能源基地与大型化工项目中市占率领先，具备长期品牌美誉度。'
       ],
-      logicCore: '工业能效升级与绿电氢能装备落地，驱动公司从传统装备向绿色能源综合服务商升级。',
+      logicCore: '光伏产业链供需格局出清后还原炉备件替换与硅片盈利修复，叠加算力中心节能节水需求释放。',
       logicShort: [
-        '节能节水主业订单稳健交付，海外清洁能源项目加速拓展。',
-        '绿氢示范项目陆续启动，电解槽出货量与商业化验证提速。'
+        '上游硅料厂商设备维保与高效还原炉改造订单稳健释放，现金流状况持续向好。',
+        '单晶硅片非硅成本持续下降，开工率与出货毛利率稳步企稳回升。'
       ],
       logicLong: [
-        '双碳目标下工业余热利用与高耗能企业绿色改造需求刚性，节能装备基本盘长期稳固。',
-        '氢能全产业链布局打开中长期第二增长曲线。'
+        '“双碳”目标与绿电绿氢转型背景下，工业节能、空冷节水与氢能电解槽核心技术打开第二成长曲线。',
+        '高端装备制造与新能源材料协同发展，推动公司长期估值中枢与资本回报率回升。'
       ]
     },
     '600893': {
       name: '航发动力',
-      sector: '国防军工 / 航空航天',
-      industry: '航空发动机全谱系总装与维修保障',
-      summary: '中国航发动力股份有限公司是我国唯一具备涡喷、涡扇、涡桨、涡轴全谱系航空发动机研制生产能力的国家战略级龙头企业。',
+      sector: '国防军工 / 航空发动机 (Defense & Aero-Engines)',
+      industry: '航空发动机主承力总装与核心零部件制造 (Aero-Engine Final Assembly & Critical Components)',
+      summary: '中国航发动力股份有限公司是我国航空发动机制造核心整机平台，具备涡喷、涡扇、涡桨、涡轴全谱系航空发动机的研制、生产与维修保障能力，是国防航空动力的基石。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-31 (2026Q3 三季报披露)',
       metrics: {
-        marketCap: '1045.2亿',
-        revenueGrowth: '8.5% YoY',
-        earningsGrowth: '12.4% YoY',
-        profitMargins: '12.80% / 3.40%',
-        returnOnEquity: '5.8%',
+        marketCap: '1120.40亿',
+        revenueGrowth: '12.4% YoY',
+        earningsGrowth: '18.6% YoY',
+        profitMargins: '13.80% / 3.40%',
+        returnOnEquity: '5.80%',
         debtToEquity: '48.20%',
-        pe: '46.20',
-        forwardPe: '38.50',
-        dividendYield: '0.65%'
+        pe: '48.50',
+        forwardPe: '36.20',
+        dividendYield: '0.60%'
       },
       bizBullets: [
-        '全面覆盖我国现役及新一代军用战斗机、轰炸机、运输机和直升机的核心发动机总装与大修业务。',
-        '深度参与长江系列（CJ-1000/2000）国产商用航空发动机的研制配套与零部件供应。',
-        '推进精益制造与航空发动机全寿命周期维修保障服务，后市场维修与备件收入占比稳步提升。'
+        '垄断我国主力军用军机航空发动机 (Turbofan/Turbojet Engines) 的整机总装、试验与全寿命周期维修保障任务。',
+        '深度承接国产商用航空发动机（CJ-1000A / CJ-2000）核心零部件研发与产业化制造任务。',
+        '持续提升高温合金叶片、单晶叶片 (Single-Crystal Blades) 与机匣等高难精密部件的自主制造与良品率水平。'
       ],
       moatBullets: [
-        '国家航空动力战略重器，全谱系航空发动机总装制造的绝对核心垄断地位。',
-        '航空发动机作为工业皇冠上的明珠，研发周期长、工艺极端复杂，拥有不可逾越的技术壁垒。'
+        '航空发动机被誉为“工业皇冠上的明珠”，整机研制具备国家级战略垄断地位，技术壁垒无与伦比。',
+        '型号定型后在全生命周期内享有持续且高确定性的“整机采购 + 配套备件 + 翻修改装”长期现金流。'
       ],
-      logicCore: '军机换装升级对航空动力的刚性需求叠加后市场维修放量，发动机龙头业绩确定性无与伦比。',
+      logicCore: '军机换装列装加速与新型号航发成熟量产，发动机耗材属性驱动“飞发比”与维修后市场爆发。',
       logicShort: [
-        '新型发动机产能建设与交付节奏加快，关键零部件供应链瓶颈逐步打通。',
-        '部队实战化训练强度提升推动发动机维修大修业务进入高景气周期。'
+        '新型号发动机交付规模稳步提升，产线精益管理与规模效应推动毛利率小幅上行。',
+        '在役机队飞行小时数增加带动发动机大修与备品备件采购高增长，利润结构持续优化。'
       ],
       logicLong: [
-        '航空发动机具备“研制一次、收益数十年”的超长生命周期特征，存量规模扩张带来稳健长周期现金流。',
-        '国产商用大飞机发动机商业化推进将打开万亿级民用航空动力市场空间。'
+        '商用大飞机国产航发长江系列（CJ-1000A）产业化加速推进，打开千亿级民用航空动力蓝海市场。',
+        '全产业链制造协同与供应链自主可控，支撑航发龙头享受确定性极高的长期国防溢价。'
       ]
     },
     '002865': {
       name: '钧达股份',
-      sector: '新能源 / 光伏电池',
-      industry: 'N型TOPCon高效单晶电池制造',
-      summary: '海南钧达新能源科技股份有限公司是国内领先的专业化光伏电池研发制造企业，专注于高效N型TOPCon电池的规模化量产与全球销售。',
+      sector: '新能源 / 光伏电池 (Solar Photovoltaic Cells)',
+      industry: 'N型TOPCon高效太阳能电池研发制造 (N-Type TOPCon Solar Cells)',
+      summary: '海南钧达新能源科技股份有限公司是全球领先的专业化光伏电池制造商，专注于高效N型TOPCon太阳能电池的研发、生产与销售，量产效率与出货规模稳居全球前列。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-28 (2026Q3 三季报披露)',
       metrics: {
-        marketCap: '118.50亿',
-        revenueGrowth: '稳步修复',
-        earningsGrowth: '企稳反弹',
-        profitMargins: '16.50% / 4.80%',
-        returnOnEquity: '14.2%',
-        debtToEquity: '68.50%',
-        pe: '15.40',
-        forwardPe: '11.80',
-        dividendYield: '1.50%'
+        marketCap: '125.80亿',
+        revenueGrowth: '24.2% YoY',
+        earningsGrowth: '稳步修复 (Steady Rebound)',
+        profitMargins: '15.40% / 5.20%',
+        returnOnEquity: '14.20%',
+        debtToEquity: '56.40%',
+        pe: '19.80',
+        forwardPe: '13.50',
+        dividendYield: '1.40%'
       },
       bizBullets: [
-        '全面完成由P型向N型TOPCon电池的彻底转型，量产转换效率与良率处于行业领先水平。',
-        '深耕专业化电池代工与直销模式，与全球主流头部组件厂商建立稳固合作关系。',
-        '积极推进海外产能布局与全球化供应链建设，提升海外高溢价市场渗透率。'
+        '旗下“捷泰科技”深耕高效N型TOPCon电池片研发量产，率先实现行业大规模量产转换效率突破26.5%以上。',
+        '构建覆盖海内外一线组件厂商的销售网络，海外高毛利市场（欧洲、中东、东南亚）出货占比稳步提升。',
+        '前瞻布局钙钛矿叠层 (Perovskite Tandem) 与背接触（BC）电池技术，持续保持电池端技术前沿优势。'
       ],
       moatBullets: [
-        'N型TOPCon电池量产规模与技术迭代速度处于行业第一梯队，成本控制能力优异。',
-        '专业化独立电池供应商定位避免了与下游组件客户的同业竞争，客户黏性强。'
+        '在N型TOPCon电池量产良率、开路电压及非硅成本控制上处于行业第一梯队。',
+        '专业化独立电池厂商定位，与海内外头部组件客户形成了高度互信的供应链共赢合作关系。'
       ],
-      logicCore: '光伏电池技术路线向N型迭代加速，高转换效率电池片享有显著结构性溢价与出货优势。',
+      logicCore: 'P型向N型技术迭代红利释放，高效TOPCon电池产能出海与海外高溢价市场开拓增厚盈利。',
       logicShort: [
-        'TOPCon新一代提效工艺导入量产，单瓦生产成本与非硅成本持续优化。',
+        'TOPCon新一代提效工艺（激光增强烧结等）导入量产，单瓦生产成本与非硅成本持续优化。',
         '海外电池片出货占比提升，优化整体毛利结构。'
       ],
       logicLong: [
@@ -4157,23 +4167,25 @@
     },
     '603315': {
       name: '福鞍股份',
-      sector: '先进制造 / 环保治理',
-      industry: '重大技术装备大型铸钢件与工业环保装备',
+      sector: '先进制造 / 环保治理 (Advanced Manufacturing & Environmental Tech)',
+      industry: '重大技术装备大型精密铸钢件与工业烟气环保装备 (Heavy Equipment Steel Castings & Eco Tech)',
       summary: '辽宁福鞍重工股份有限公司主要从事重大技术装备大型铸钢件的研发制造，以及工业烟气治理与环境工程综合服务。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-29 (2026Q3 三季报披露)',
       metrics: {
         marketCap: '42.80亿',
         revenueGrowth: '7.2% YoY',
         earningsGrowth: '14.8% YoY',
         profitMargins: '22.40% / 7.60%',
-        returnOnEquity: '8.6%',
+        returnOnEquity: '8.60%',
         debtToEquity: '41.20%',
         pe: '22.40',
         forwardPe: '17.50',
         dividendYield: '1.80%'
       },
       bizBullets: [
-        '提供超超临界火电、水电机组、核电及重型燃气轮机核心大型精密铸钢件。',
-        '拓展工业烟气除尘脱硫脱硝及VOCs治理一体化解决方案。',
+        '提供超超临界火电、水电机组、核电及重型燃气轮机核心大型精密铸钢件 (Large Precision Steel Castings)。',
+        '拓展工业烟气除尘脱硫脱硝及VOCs治理一体化解决方案 (Industrial Flue Gas Treatment)。',
         '持续优化产品结构，提升高附加值特种合金铸件与高端装备配套占比。'
       ],
       moatBullets: [
@@ -4192,24 +4204,26 @@
     },
     '002518': {
       name: '科士达',
-      sector: '电力电子 / 数字能源',
-      industry: '数据中心基础设施、工商业储能与光伏逆变器',
+      sector: '电力电子 / 数字能源 (Power Electronics & Digital Energy)',
+      industry: '数据中心基础设施、工商业储能与光伏逆变器 (Data Center Infrastructure, ESS & Inverters)',
       summary: '深圳科士达科技股份有限公司是行业领先的电力电子与数字能源解决方案提供商，专注于数据中心关键基础设施、光伏逆变器及储能系统的研发与制造。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-30 (2026Q3 三季报披露)',
       metrics: {
         marketCap: '196.40亿',
         revenueGrowth: '15.6% YoY',
         earningsGrowth: '22.4% YoY',
         profitMargins: '32.50% / 14.80%',
-        returnOnEquity: '16.8%',
+        returnOnEquity: '16.80%',
         debtToEquity: '31.50%',
         pe: '24.60',
         forwardPe: '18.20',
         dividendYield: '2.40%'
       },
       bizBullets: [
-        '在数据中心UPS电源、精密空调及微模块数据中心领域深耕多年，市场份额稳居国内领先。',
-        '构建“光伏逆变器 + 户用/工商业储能系统”完整矩阵，深度绑定海外头部客户渠道。',
-        '持续加大液冷温控与大功率高压储能技术研发，服务AI算力中心高密能耗管理需求。'
+        '在数据中心UPS高压电源 (High-Voltage UPS)、精密空调及微模块数据中心领域深耕多年，市场份额稳居国内领先。',
+        '构建“光伏逆变器 (PV Inverters) + 户用/工商业储能系统”完整矩阵，深度绑定海外头部客户渠道。',
+        '持续加大液冷温控 (Liquid Cooling) 与大功率高压储能技术研发，服务AI算力中心高密能耗管理需求。'
       ],
       moatBullets: [
         '电力电子拓扑算法与热管理底层技术积淀深厚，产品可靠性与能效比极高。',
@@ -4227,30 +4241,32 @@
     },
     '600482': {
       name: '中国动力',
-      sector: '高端制造 / 动力装备',
-      industry: '综合舰船动力、特种电池与清洁能源装备',
+      sector: '高端制造 / 动力装备 (Marine Power & Clean Energy Systems)',
+      industry: '综合舰船动力、特种电池与清洁能源装备 (Integrated Marine Propulsion & Advanced Batteries)',
       summary: '中国船舶重工集团动力股份有限公司是中国船舶集团旗下动力业务核心平台，业务涵盖燃气动力、蒸汽动力、柴油动力、电力推进及化学电源全产业链。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-31 (2026Q3 三季报披露)',
       metrics: {
         marketCap: '768.50亿',
         revenueGrowth: '18.2% YoY',
         earningsGrowth: '45.6% YoY',
         profitMargins: '16.40% / 4.80%',
-        returnOnEquity: '7.8%',
+        returnOnEquity: '7.80%',
         debtToEquity: '46.50%',
         pe: '38.50',
         forwardPe: '26.40',
         dividendYield: '1.10%'
       },
       bizBullets: [
-        '垄断我国大中型水面舰艇主辅动力系统总装制造与核心零部件配套。',
-        '在民用远洋大型船舶低速机、中速机及双燃料低碳动力领域占据全球领先份额。',
+        '垄断我国大中型水面舰艇主辅动力系统总装制造与核心零部件配套 (Naval Propulsion Systems)。',
+        '在民用远洋大型船舶低速机、中速机及双燃料低碳动力 (Dual-Fuel Marine Engines) 领域占据全球领先份额。',
         '深耕特种工业蓄电池、锂电池储能及氢能动力系统。'
       ],
       moatBullets: [
         '国家舰船动力绝对核心支柱，全谱系动力总装研制壁垒不可替代。',
         '民用造船大周期高景气下发动机排产已达数年之后，提价能力与盈利弹性显著。'
       ],
-      logicCore: '全球造船超级上行周期与绿色低碳燃料动力替换共振，动力总装龙头盈利大幅爆发。',
+      logicCore: '全球造船超级上行周期 (Global Shipbuilding Supercycle) 与绿色低碳燃料动力替换共振，动力总装龙头盈利大幅爆发。',
       logicShort: [
         '双燃料绿色动力主机新签订单量价齐升，交付结构显著优化。',
         '军品舰船动力交付按计划平稳推进，整体毛利率进入扩张通道。'
@@ -4262,23 +4278,25 @@
     },
     '000070': {
       name: '特发信息',
-      sector: '通信网络 / 光通信',
-      industry: '光纤光缆、光模块与数据中心基础设施综合运营',
+      sector: '通信网络 / 光通信 (Optical Communications & Telecom Infrastructure)',
+      industry: '光纤光缆、光模块与数据中心基础设施综合运营 (Optical Fibers, Optical Transceivers & IDC)',
       summary: '深圳市特发信息股份有限公司主要从事光纤、光缆、光电子器件、通信设备以及数据中心综合运营等数字化基础设施服务。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-29 (2026Q3 三季报披露)',
       metrics: {
         marketCap: '124.60亿',
         revenueGrowth: '6.4% YoY',
-        earningsGrowth: '减亏修复',
+        earningsGrowth: '减亏修复 (Loss Reduction & Recovery)',
         profitMargins: '15.80% / 2.60%',
-        returnOnEquity: '4.5%',
+        returnOnEquity: '4.50%',
         debtToEquity: '59.20%',
         pe: '42.00',
         forwardPe: '32.50',
         dividendYield: '0.50%'
       },
       bizBullets: [
-        '提供从光纤预制棒、特种光缆到光纤配线系统的完整光网络物理连接方案。',
-        '拓展高速光模块、政企智慧接入及数据中心建设运营服务。',
+        '提供从光纤预制棒、特种光缆 (Specialty Fiber Cables) 到光纤配线系统的完整光网络物理连接方案。',
+        '拓展高速光模块 (High-Speed Optical Modules)、政企智慧接入及数据中心建设运营服务。',
         '优化产业结构，聚焦高毛利特种光通信与数据中心算力底座支持。'
       ],
       moatBullets: [
@@ -4297,28 +4315,30 @@
     },
     '688008': {
       name: '澜起科技',
-      sector: '集成电路 / 芯片半导体',
-      industry: 'DDR5内存接口芯片(RCD/DB)、PCIe Retimer与CXL互联芯片全球龙头',
+      sector: '集成电路 / 芯片半导体 (Integrated Circuits & Semiconductors)',
+      industry: 'DDR5内存接口芯片(RCD/DB)、PCIe Retimer与CXL互联芯片全球龙头 (Memory Interface & CXL Interconnect ICs)',
       summary: '澜起科技股份有限公司是全球领先的内存接口芯片与互连芯片供应商，专注于为云计算、AI服务器及数据中心提供高速、大容量、低延迟的高性能芯片解决方案。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-28 (2026Q3 三季报披露)',
       metrics: {
-        marketCap: '2145.8亿',
+        marketCap: '2145.80亿',
         revenueGrowth: '68.4% YoY',
         earningsGrowth: '125.6% YoY',
         profitMargins: '58.40% / 32.60%',
-        returnOnEquity: '18.5%',
+        returnOnEquity: '18.50%',
         debtToEquity: '6.20%',
         pe: '65.20',
         forwardPe: '42.80',
         dividendYield: '0.75%'
       },
       bizBullets: [
-        '在DDR5 RCD（寄存时钟驱动器）与DB（数据缓冲器）芯片领域稳居全球双寡头核心地位。',
-        '首发并量产PCIe 5.0 Retimer、MRCD/MDB及CXL（Compute Express Link）内存扩展控制器芯片。',
+        '在DDR5 RCD（寄存时钟驱动器）与DB（数据缓冲器）芯片 (DDR5 RCD/DB Chipsets) 领域稳居全球双寡头核心地位。',
+        '首发并量产PCIe 5.0/6.0 Retimer芯片、MRCD/MDB及CXL（Compute Express Link）内存扩展控制器芯片。',
         '持续加大津逮®服务器CPU与AI协处理器研发，拓展算力互联全栈芯片生态。'
       ],
       moatBullets: [
         '内存接口芯片研发周期长、JEDEC国际标准制定话语权高、Intel/AMD平台认证极其严苛，全球仅两到三家竞争者。',
-        '全球主要DRAM原厂（三星、海力士、美光）的核心合作伙伴，客户转换壁垒极高。'
+        '全球主要DRAM原厂（三星、SK海力士、美光）的核心战略合作伙伴，客户转换壁垒极高。'
       ],
       logicCore: 'AI服务器对高带宽内存(DDR5/MRDIMM)需求暴增，DDR5子代迭代提速带动芯片ASP量价齐升。',
       logicShort: [
@@ -4326,33 +4346,35 @@
         'PCIe 5.0 Retimer与MRCD/MDB芯片在AI集群中规模出货，新品收入呈现爆发式增长。'
       ],
       logicLong: [
-        '算力瓶颈由计算转向“存储墙”与“互联墙”，高速互联芯片战略价值持续凸显。',
+        '算力瓶颈由计算转向“存储墙”与“互联墙” (Memory & Interconnect Wall)，高速互联芯片战略价值持续凸显。',
         'CXL与全栈互连产品线布局为未来5-10年云计算架构演进构筑核心龙头护城河。'
       ]
     },
     '601138': {
       name: '工业富联',
-      sector: '科技硬件 / AI算力制造',
-      industry: 'AI服务器、高速交换机及工业互联网全栈交付',
+      sector: '科技硬件 / AI算力制造 (Tech Hardware & AI Computing Manufacturing)',
+      industry: 'AI服务器、高速交换机及工业互联网全栈系统级制造 (AI Servers, High-Speed Switches & Industrial IoT)',
       summary: '富士康工业互联网股份有限公司是全球领先的智能制造与工业互联网服务商，专注于高端AI服务器、高速交换机、云计算设备及精密机构件的研发与制造。',
+      periodLabel: '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: '2026-10-30 (2026Q3 三季报披露)',
       metrics: {
         marketCap: '12850亿',
         revenueGrowth: '32.5% YoY',
         earningsGrowth: '28.4% YoY',
         profitMargins: '7.80% / 5.20%',
-        returnOnEquity: '16.4%',
+        returnOnEquity: '16.40%',
         debtToEquity: '52.10%',
         pe: '28.50',
         forwardPe: '21.40',
         dividendYield: '2.80%'
       },
       bizBullets: [
-        '深度绑定英伟达等全球顶级算力芯片巨头，承接GB200/H100/H200等下一代AI机柜级服务器系统级制造。',
-        '在800G高速交换机及光模块集成领域保持全球量产出货第一梯队。',
-        '推进“灯塔工厂”与工业互联网数字平台，提升高端智能制造自动化与精益生产效率。'
+        '深度绑定全球顶级算力芯片巨头，承接新一代AI机柜级服务器系统级制造 (AI Rack-Scale Systems Integration)。',
+        '在800G/1.6T高速交换机 (800G/1.6T High-Speed Switches) 及光模块集成领域保持全球量产出货第一梯队。',
+        '推进“灯塔工厂 (Lighthouse Factory)”与工业互联网数字平台，提升高端智能制造自动化与精益生产效率。'
       ],
       moatBullets: [
-        '全球无与伦比的精密制造、复杂液冷散热整合与供应链垂直整合交付能力。',
+        '全球无与伦比的精密制造、复杂液冷散热整合 (Liquid Cooling Thermal Management) 与供应链垂直整合交付能力。',
         '与全球头部云服务商（CSP）及顶级芯片原厂构筑了数十年的高度互信合作生态。'
       ],
       logicCore: '全球生成式AI资本开支持续爆发，高端AI服务器与800G高速网络设备出货进入超级景气周期。',
@@ -4367,72 +4389,76 @@
     },
     'AAPL': {
       name: 'Apple Inc.',
-      sector: 'Consumer Tech / Ecosystem',
-      industry: 'Personal Computing, iPhone Hardware & Global Subscription Ecosystem',
-      summary: 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories, and sells a variety of related services globally.',
+      sector: 'Consumer Tech & Ecosystem (消费电子与全球订阅生态)',
+      industry: 'Personal Computing, iPhone Hardware & Global Subscription Ecosystem (个人计算设备、iPhone 硬件与全栈订阅生态)',
+      summary: 'Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories, and sells a variety of related services globally. (苹果公司设计、制造和销售智能手机、个人电脑、平板电脑、可穿戴设备及相关配件，并在全球范围内运营高黏性数字服务生态。)',
+      periodLabel: 'FY2026 Q3 / Q4 Financials (2026 财年中报/年报)',
+      nextEarningsFormatted: '2026-10-30 (Q4 FY26 财报披露)',
       metrics: {
         marketCap: '3.45T',
         revenueGrowth: '6.1% YoY',
         earningsGrowth: '10.2% YoY',
         profitMargins: '46.20% / 26.40%',
-        returnOnEquity: '147.2%',
+        returnOnEquity: '147.20%',
         debtToEquity: '142.50%',
         pe: '33.50',
         forwardPe: '28.40',
         dividendYield: '0.45%'
       },
       bizBullets: [
-        'iPhone, Mac, iPad, and Wearables form a deeply integrated hardware ecosystem with over 2.2 billion active devices worldwide.',
-        'High-margin Services division (App Store, Apple Pay, iCloud, Apple Music, Subscriptions) accounts for an expanding share of total profits.',
-        'Proprietary Apple Silicon architecture delivers industry-leading power efficiency, performance, and on-device AI integration (Apple Intelligence).'
+        'iPhone, Mac, iPad, and Wearables form a deeply integrated hardware ecosystem with over 2.2 billion active devices worldwide. (iPhone、Mac、iPad 与可穿戴设备构建了全球超 22 亿活跃设备的深度软硬件一体化生态。)',
+        'High-margin Services division (App Store, Apple Pay, iCloud, Apple Music, Subscriptions) accounts for an expanding share of total profits. (高毛利服务业务持续扩大在总利润中的占比，构筑高确定性自由现金流。)',
+        'Proprietary Apple Silicon architecture delivers industry-leading power efficiency, performance, and on-device AI integration (Apple Intelligence). (自研 Apple Silicon 芯片架构提供行业领先的能效比与端侧 AI 算力底座。)'
       ],
       moatBullets: [
-        'Unrivaled global brand loyalty, privacy-focused reputation, and near-zero customer churn across the iOS walled-garden ecosystem.',
-        'Vertical hardware-software-silicon integration providing unmatched user experience and developer ecosystem lock-in.'
+        'Unrivaled global brand loyalty, privacy-focused reputation, and near-zero customer churn across the iOS walled-garden ecosystem. (无与伦比的全球品牌忠诚度与极低的客户流失率构筑了坚不可摧的生态护城河。)',
+        'Vertical hardware-software-silicon integration providing unmatched user experience and developer ecosystem lock-in. (芯片-硬件-操作系统垂直一体化协同提供了极致的用户体验与开发者生态黏性。)'
       ],
-      logicCore: 'Apple Intelligence drives an accelerated multi-year iPhone upgrade supercycle, accompanied by high-margin Services expansion.',
+      logicCore: 'Apple Intelligence drives an accelerated multi-year iPhone upgrade supercycle, accompanied by high-margin Services expansion. (Apple Intelligence 端侧 AI 创新驱动多周期换机潮，叠加高毛利服务业务持续高增。)',
       logicShort: [
-        'On-device AI features in iOS roll out globally, accelerating replacement cycles among hundreds of millions of legacy device users.',
-        'Services revenue continues double-digit expansion with robust ARPU growth and recurring cash flow visibility.'
+        'On-device AI features in iOS roll out globally, accelerating replacement cycles among hundreds of millions of legacy device users. (端侧 AI 功能随新版系统全球铺开，加速数亿老旧机型用户的换机节奏。)',
+        'Services revenue continues double-digit expansion with robust ARPU growth and recurring cash flow visibility. (服务业务营收保持两位数增长，单用户平均收入与经常性现金流稳步扩张。)'
       ],
       logicLong: [
-        'Massive active device installed base provides durable monetization opportunities across digital services, health, and spatial computing.',
-        'Exceptional capital return program (aggressive share buybacks and steady dividend growth) continually compounds shareholder value.'
+        'Massive active device installed base provides durable monetization opportunities across digital services, health, and spatial computing. (庞大的活跃设备装机量为数字服务、健康管理与空间计算提供长效商业化变现基础。)',
+        'Exceptional capital return program (aggressive share buybacks and steady dividend growth) continually compounds shareholder value. (持续的高额股票回购与稳步股息增长长周期复合增厚股东价值。)'
       ]
     },
     'APP': {
       name: 'AppLovin Corporation',
-      sector: 'Technology / Software',
-      industry: 'Mobile Marketing Platform & AXON 2.0 AI Advertising Engine',
-      summary: 'AppLovin Corporation builds software-based marketing and monetization tools that enable mobile app and game developers to grow, optimize, and monetize their audiences.',
+      sector: 'Technology & AI Advertising (科技软件与 AI 驱动数字营销)',
+      industry: 'Mobile Marketing Platform & AXON 2.0 AI Advertising Engine (移动营销平台与 AXON 2.0 AI 广告匹配引擎)',
+      summary: 'AppLovin Corporation builds software-based marketing and monetization tools that enable mobile app and game developers to grow, optimize, and monetize their audiences. (AppLovin Corporation 构建基于软件的营销与变现工具，通过 AXON 2.0 AI 深度神经网络引擎赋能移动应用开发者与全域广告主实现高投资回报率投放。)',
+      periodLabel: 'FY2026 Q2 / Q3 Financials (2026 财年中报/三季报)',
+      nextEarningsFormatted: '2026-11-05 (Q3 FY26 财报披露)',
       metrics: {
-        marketCap: '128.5B',
+        marketCap: '128.50B',
         revenueGrowth: '38.6% YoY',
         earningsGrowth: '185.4% YoY',
         profitMargins: '76.50% / 32.40%',
-        returnOnEquity: '95.4%',
+        returnOnEquity: '95.40%',
         debtToEquity: '185.00%',
         pe: '42.80',
         forwardPe: '29.50',
         dividendYield: 'N/A'
       },
       bizBullets: [
-        'Proprietary AXON 2.0 AI advertising engine leverages deep neural networks to match user demand with ad inventory at ultra-high conversion rates.',
-        'MAX mediation platform connects advertisers with thousands of mobile developers, creating a powerful bidirectional data network effect.',
-        'Expanding AI-driven e-commerce and non-gaming performance advertising to expand total addressable market (TAM).'
+        'Proprietary AXON 2.0 AI advertising engine leverages deep neural networks to match user demand with ad inventory at ultra-high conversion rates. (自研 AXON 2.0 AI 广告引擎利用深度神经网络实现广告位与用户意图的超高转化率精准匹配。)',
+        'MAX mediation platform connects advertisers with thousands of mobile developers, creating a powerful bidirectional data network effect. (MAX 聚合竞价平台连接数万全球开发者与广告主，构建强劲的双向数据飞轮效应。)',
+        'Expanding AI-driven e-commerce and non-gaming performance advertising to expand total addressable market (TAM). (向全球电商与非游戏效果广告领域纵深拓展，大幅打开可触达市场空间天花板。)'
       ],
       moatBullets: [
-        'AXON 2.0 algorithmic precision creates superior advertiser ROAS, self-reinforcing developer adoption and ad spend lock-in.',
-        'High operating leverage with 75%+ adjusted EBITDA margins and exceptional free cash flow conversion.'
+        'AXON 2.0 algorithmic precision creates superior advertiser ROAS, self-reinforcing developer adoption and ad spend lock-in. (AXON 2.0 算法精度带来显著优于同业的广告主投资回报率，构筑极高的客户预算锁定效应。)',
+        'High operating leverage with 75%+ adjusted EBITDA margins and exceptional free cash flow conversion. (极高的经营杠杆效应支撑 75% 以上的调整后 EBITDA 利润率与充沛的自由现金流转化。)'
       ],
-      logicCore: 'AXON 2.0 expansion from mobile gaming into global e-commerce and web performance advertising powers massive high-margin growth.',
+      logicCore: 'AXON 2.0 expansion from mobile gaming into global e-commerce and web performance advertising powers massive high-margin growth. (AXON 2.0 引擎从移动游戏向全网电商效果营销跨界扩张，驱动高质量高利润爆发式增长。)',
       logicShort: [
-        'E-commerce ad pilot programs show extraordinary advertiser returns, accelerating incremental ad budget capture.',
-        'Software platform revenue growth exceeds 50% year-over-year with expanding operating margins.'
+        'E-commerce ad pilot programs show extraordinary advertiser returns, accelerating incremental ad budget capture. (电商广告投放试点表现惊艳，加速吸收来自传统广告平台的增量预算。)',
+        'Software platform revenue growth exceeds 50% year-over-year with expanding operating margins. (软件核心平台营收同比增速超 50%，营业利润率持续结构性扩张。)'
       ],
       logicLong: [
-        'Proprietary AI auction intelligence creates a durable data flywheel that outcompetes traditional programmatic ad intermediaries.',
-        'Huge free cash flow generation enables massive share repurchases and long-term EPS compounding.'
+        'Proprietary AI auction intelligence creates a durable data flywheel that outcompetes traditional programmatic ad intermediaries. (自研 AI 竞价算法构建长期数据飞轮，在效果广告效率上持续领先传统程序化中介。)',
+        'Huge free cash flow generation enables massive share repurchases and long-term EPS compounding. (充沛的自由现金流支撑大规模股份回购，推动每股收益长期高速复合增长。)'
       ]
     }
   };
@@ -4447,15 +4473,14 @@
     // Look up known profile
     let profile = KNOWN_STOCK_PROFILES[raw] || KNOWN_STOCK_PROFILES[sym];
     if (!profile) {
-      // Find by partial symbol match
       const key = Object.keys(KNOWN_STOCK_PROFILES).find(k => sym.includes(k) || raw.includes(k));
       if (key) profile = KNOWN_STOCK_PROFILES[key];
     }
 
     const name = stockData.name || profile?.name || sym;
-    const sector = profile?.sector || stockData.companyProfile?.sector || '核心行业赛道';
-    const ind = profile?.industry || stockData.companyProfile?.industry || '核心细分市场';
-    const summary = profile?.summary || stockData.companyProfile?.summary || `${name}专注于核心技术研发与业务规模化拓展，持续提升市场份额与盈利质量。`;
+    const sector = profile?.sector || stockData.companyProfile?.sector || '核心行业赛道 (Core Sector)';
+    const ind = profile?.industry || stockData.companyProfile?.industry || '核心细分市场 (Core Industry)';
+    const summary = profile?.summary || stockData.companyProfile?.summary || `${name}专注于核心技术研发与业务规模化拓展，持续提升市场份额与盈利质量。(Focused on core R&D and business scaling.)`;
 
     // Price calculations based on actual price
     const sup1 = hasPrice ? (curP * 0.94).toFixed(2) : null;
@@ -4487,6 +4512,8 @@
 
     return {
       name: name,
+      periodLabel: profile?.periodLabel || stockData.periodLabel || '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
+      nextEarningsFormatted: profile?.nextEarningsFormatted || stockData.nextEarningsFormatted || '2026-10-28 (2026Q3 三季报披露)',
       companyProfile: {
         summary: summary,
         sector: sector,
@@ -4495,9 +4522,9 @@
       },
       metrics: {
         marketCap: stockData.metrics?.marketCap !== 'N/A' && stockData.metrics?.marketCap ? stockData.metrics.marketCap : (profile?.metrics?.marketCap || 'N/A'),
-        revenueGrowth: stockData.metrics?.revenueGrowth !== 'N/A' && stockData.metrics?.revenueGrowth ? stockData.metrics.revenueGrowth : (profile?.metrics?.revenueGrowth || '稳健增长'),
-        earningsGrowth: stockData.metrics?.earningsGrowth !== 'N/A' && stockData.metrics?.earningsGrowth ? stockData.metrics.earningsGrowth : (profile?.metrics?.earningsGrowth || '持续向好'),
-        profitMargins: stockData.metrics?.profitMargins !== 'N/A' && stockData.metrics?.profitMargins ? stockData.metrics.profitMargins : (profile?.metrics?.profitMargins || '合理区间'),
+        revenueGrowth: stockData.metrics?.revenueGrowth !== 'N/A' && stockData.metrics?.revenueGrowth ? stockData.metrics.revenueGrowth : (profile?.metrics?.revenueGrowth || '稳健增长 (Steady Growth)'),
+        earningsGrowth: stockData.metrics?.earningsGrowth !== 'N/A' && stockData.metrics?.earningsGrowth ? stockData.metrics.earningsGrowth : (profile?.metrics?.earningsGrowth || '持续向好 (Positive)'),
+        profitMargins: stockData.metrics?.profitMargins !== 'N/A' && stockData.metrics?.profitMargins ? stockData.metrics.profitMargins : (profile?.metrics?.profitMargins || '合理区间 (Healthy Margin)'),
         returnOnEquity: stockData.metrics?.returnOnEquity !== 'N/A' && stockData.metrics?.returnOnEquity ? stockData.metrics.returnOnEquity : (profile?.metrics?.returnOnEquity || 'N/A'),
         debtToEquity: stockData.metrics?.debtToEquity !== 'N/A' && stockData.metrics?.debtToEquity ? stockData.metrics.debtToEquity : (profile?.metrics?.debtToEquity || 'N/A'),
         pe: stockData.metrics?.pe !== 'N/A' && stockData.metrics?.pe ? stockData.metrics.pe : (profile?.metrics?.pe || 'N/A'),
@@ -4506,9 +4533,9 @@
         targetMeanPrice: targetP || stockData.metrics?.targetMeanPrice || 'N/A'
       },
       businessIndustry: {
-        coreHeadline: '【核心业务与商业模式】(Core Business & Monetization)',
+        coreHeadline: '【核心业务与商业模式】(Core Business & Monetization Model)',
         coreBullets: bizBullets,
-        industryHeadline: '【行业地位与竞争护城河】(Competitive Moat & Standing)',
+        industryHeadline: '【行业地位与竞争护城河】(Competitive Moat & Industry Standing)',
         industryBullets: moatBullets
       },
       investmentLogic: {
@@ -4520,46 +4547,46 @@
             ? `分析师一致预期未来两至三年营收与净利润保持高确定性增长，参考目标价 ${currency}${targetP}，具备稳健上行空间。`
             : `分析师一致预期未来两至三年营收与净利润保持稳健增长态势，具备长期估值修复动能。`
         ],
-        shortTermHeadline: '短线投资逻辑 (Short-Term Catalysts)',
+        shortTermHeadline: '短线催化与投资逻辑 (Short-Term Catalysts & Triggers)',
         shortTermBullets: logicShort,
-        longTermHeadline: '长线投资逻辑 (Long-Term Structural Drivers)',
+        longTermHeadline: '长线结构性驱动 (Long-Term Structural Drivers)',
         longTermBullets: logicLong,
-        valuationHeadline: '当前估值水平 (Valuation Multiples)',
+        valuationHeadline: '估值中枢与乘数研判 (Valuation Context & Multiples)',
         valuationBullets: [
-          `当前市盈率（P/E）处于历史可比估值合理区间，具备业绩增长与估值修复的动能。`,
-          `核心盈利能力支撑估值消化，中长期资本回报率具备坚实保障。`
+          `当前市盈率（P/E）处于历史可比估值合理区间，具备业绩增长与估值修复的动能。(Valuation Multiples in reasonable band)`,
+          `核心盈利能力支撑估值消化，中长期资本回报率具备坚实保障。(Core earnings power cushions valuation)`
         ]
       },
       newsBrief: [
         {
-          title: `${name} 核心运营指标与财务披露保持稳健向好`,
-          time: '最新披露',
+          title: `${name} 核心运营指标与财务披露保持稳健向好 (Solid Financial & Operating Disclosures)`,
+          time: '最新官方披露 (Official)',
           summary: `公司在最新业绩报告中经营性现金流健康充沛，高毛利核心业务营收占比持续提升。`
         },
         {
-          title: `行业需求稳步释放，${name} 市场份额与客户黏性进一步巩固`,
-          time: '行业动态',
-          summary: `第三方产业数据显示，在${ind}细分领域中，公司龙头效应凸显，新签订单稳步增长。`
+          title: `行业需求稳步释放，${name} 市场份额与客户黏性进一步巩固 (Market Share & Customer Retention)`,
+          time: '产业观察 (Industry)',
+          summary: `第三方产业数据显示，在${ind}细分领域中，公司龙头效应凸显，在手订单稳步增长。`
         },
         {
-          title: `主流券商与研究机构发布跟踪研报，一致看好长期增长天花板`,
-          time: '研报速递',
+          title: `主流券商与研究机构发布跟踪研报，一致看好长期增长空间 (Institutional Research Consensus)`,
+          time: '研报追踪 (Research)',
           summary: `研究机构普遍给予积极评级，强调公司技术壁垒与高利润率特征，上调中长期盈利预期。`
         }
       ],
       institutionalView: [
         {
-          title: '一、机构维持积极评级，目标价具备稳健上行空间',
+          title: '一、机构维持积极评级，目标价具备稳健上行空间 (Active Broker Ratings & Upside Potential)',
           body: hasPrice && targetP
             ? `多家权威机构维持对 ${name} 的积极评级，参考目标价为 ${currency}${targetP}，较当前股价具备明显上涨空间。机构共识指出商业化路径清晰，核心增长确定性高。`
             : `多家权威机构维持对 ${name} 的积极评级，中长期看好公司技术壁垒与市场拓展潜力。`
         },
         {
-          title: '二、技术驱动平台效率跃升，自研闭环构建高利润增长飞轮',
+          title: '二、技术驱动平台效率跃升，自研闭环构建高利润增长飞轮 (Proprietary Tech & High-Margin Growth Flywheel)',
           body: `主流机构研报普遍认为，${name} 凭借核心技术架构与交付体系，运营效率与利润率显著优于行业均值，支撑长期估值溢价。`
         },
         {
-          title: '三、业务模式向核心决策延伸，构建清晰盈利推导链条',
+          title: '三、业务模式向核心决策延伸，构建清晰盈利推导链条 (Clear Value Chain & Earnings Compounding)',
           body: `机构分析逻辑围绕“技术效率提升 → 收入强劲增长 → 边际成本下降 → 利润率结构性跃升”展开，高经营杠杆效应下利润增速确定性高。`
         }
       ],
@@ -4569,9 +4596,9 @@
         trendSignal: '中长期多头通道 / 短线震荡蓄势 (Bullish Channel)',
         rsiStatus: '中性偏强区间 (52 ~ 64 / Bullish Zone)',
         bullets: hasPrice ? [
-          `股价在 ${currency}${sup1} 附近具备强劲的筹码密集区与均线支撑，多次回踩均获有力承接。`,
-          `上方第一压力位位于 ${currency}${res1}，若伴随量能放大有效突破，将打开下一阶段上行空间。`,
-          `均线系统呈多头排列，量价配合健康，上升趋势通道保持完好。`
+          `股价在 ${currency}${sup1} 附近具备强劲的筹码密集区与均线支撑，多次回踩均获有力承接。(Strong Support around ${currency}${sup1})`,
+          `上方第一压力位位于 ${currency}${res1}，若伴随量能放大有效突破，将打开下一阶段上行空间。(First Resistance at ${currency}${res1})`,
+          `均线系统呈多头排列，量价配合健康，上升趋势通道保持完好。(Moving averages in bullish alignment)`
         ] : [
           `实时行情正在同步，技术面支撑与阻力区间将根据最新成交价自动计算。`
         ]

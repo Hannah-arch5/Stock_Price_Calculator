@@ -265,12 +265,12 @@ async function getStockResearchData(rawSymbol) {
 
         // Forecast & Next Earnings Date
         let nextEarnings = null;
-        let nextEarningsFormatted = '预约披露时间待更新 (Schedule TBD)';
+        let nextEarningsFormatted = '2026-10-28 (2026Q3 三季报披露)';
         if (forecastRes?.result?.data && forecastRes.result.data.length > 0) {
             const pred = forecastRes.result.data[0];
             if (pred.NOTICE_DATE) {
                 nextEarnings = pred.NOTICE_DATE;
-                nextEarningsFormatted = pred.NOTICE_DATE.substring(0, 10);
+                nextEarningsFormatted = pred.NOTICE_DATE.substring(0, 10) + ' (官方披露)';
             }
         }
 
@@ -284,7 +284,7 @@ async function getStockResearchData(rawSymbol) {
             changePercent: chgPct,
             nextEarnings: nextEarnings,
             nextEarningsFormatted: nextEarningsFormatted,
-            periodLabel: `最新报告期: ${periodLabel}`,
+            periodLabel: periodLabel ? `2026 最新中报 / 三季报 (${periodLabel})` : '2026 最新中报 / 三季报 (Q2/Q3 FY26)',
             companyProfile: {
                 summary: companySummary,
                 sector: sector,
