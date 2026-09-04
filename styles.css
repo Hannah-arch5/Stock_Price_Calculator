@@ -259,12 +259,12 @@ body.large-size .nav-settings-btn {
   position: relative;
 }
 
-#move-up:checked + .up-btn { color: var(--up-color); }
-#move-up:checked + .up-btn::after {
+.direction-toggle.has-data #move-up:checked + .up-btn { color: var(--up-color); }
+.direction-toggle.has-data #move-up:checked + .up-btn::after {
   content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--up-color);
 }
-#move-down:checked + .down-btn { color: var(--down-color); }
-#move-down:checked + .down-btn::after {
+.direction-toggle.has-data #move-down:checked + .down-btn { color: var(--down-color); }
+.direction-toggle.has-data #move-down:checked + .down-btn::after {
   content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--down-color);
 }
 

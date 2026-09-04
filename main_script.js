@@ -209,6 +209,12 @@ function calculateTargetPrice() {
 
     currentTargetIsUp = isUp;
 
+    const dirToggle = document.querySelector('.direction-toggle');
+    const hasData = (!isNaN(basePrice) && basePrice > 0) || (!isNaN(percentage) && percentage > 0) || (stockSymbol1Input && stockSymbol1Input.value.trim() !== '');
+    if (dirToggle) {
+        dirToggle.classList.toggle('has-data', hasData);
+    }
+
     if (isNaN(basePrice) || isNaN(percentage)) {
         targetResultEl.innerHTML = `<span class="currency-symbol">${currentCurrency}</span>0.00`;
         targetResultEl.className = 'result-value mono';

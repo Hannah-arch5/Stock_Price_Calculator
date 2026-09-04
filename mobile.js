@@ -2951,6 +2951,10 @@
         if (deltaResEl) deltaResEl.textContent = '0.00%';
       };
     }
+
+    // Initial evaluation of calculators state
+    calcTargetLive();
+    calcDeltaLive();
   }
 
   // ─── Extract Record Values Accurately (Universal Schema Parser) ─
