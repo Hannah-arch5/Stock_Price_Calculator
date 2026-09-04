@@ -20,6 +20,9 @@ const FILE_NAME = "ticker-data.json";
 
 function doGet(e) {
   try {
+    if (e && e.parameter && e.parameter.action === "quote") {
+      return getStockQuote_(e.parameter.symbol || "");
+    }
     const files = DriveApp.getFilesByName(FILE_NAME);
     let content = '{"historyRecords":[],"customLabels":[]}';
     if (files.hasNext()) {
@@ -32,6 +35,59 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({ error: err.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+/**
+ * 手机网页行情代理。只转发已校验的 A 股 / 港股证券代码，绝不读取持仓价格代替行情。
+ */
+function getStockQuote_(rawSymbol) {
+  try {
+    const input = String(rawSymbol || "").trim().toUpperCase();
+    let rawCode = "";
+    let secid = "";
+    let match = input.match(/^(?:(SH|SZ|BJ))?(\d{6})(?:\.(SH|SS|SZ|BJ))?$/);
+    if (match) {
+      rawCode = match[2];
+      const inferred = rawCode.indexOf("6") === 0 ? "SH" : /^[489]/.test(rawCode) ? "BJ" : "SZ";
+      const explicit = (match[1] || match[3] || inferred).replace("SS", "SH");
+      if (explicit !== inferred) throw new Error("股票代码与交易所不匹配");
+      secid = (explicit === "SH" ? "1." : "0.") + rawCode;
+    } else {
+      match = input.match(/^(?:HK)?(\d{5})$/) || input.match(/^(\d{1,5})\.HK$/);
+      if (!match) throw new Error("仅支持 A 股或港股证券代码");
+      rawCode = ("00000" + match[1]).slice(-5);
+      secid = "116." + rawCode;
+    }
+
+    const fields = "f57,f58,f43,f170,f59,f86";
+    const url = "https://push2.eastmoney.com/api/qt/stock/get?secid=" + encodeURIComponent(secid) +
+      "&fltt=2&invt=2&fields=" + encodeURIComponent(fields) + "&_=" + Date.now();
+    const response = UrlFetchApp.fetch(url, {
+      method: "get",
+      muteHttpExceptions: true,
+      followRedirects: true,
+      headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://quote.eastmoney.com/" }
+    });
+    if (response.getResponseCode() !== 200) throw new Error("行情服务返回 HTTP " + response.getResponseCode());
+    const payload = JSON.parse(response.getContentText("UTF-8"));
+    const data = payload && payload.data;
+    if (!data || String(data.f57) !== rawCode || !isFinite(Number(data.f43)) || Number(data.f43) <= 0 ||
+        !isFinite(Number(data.f86)) || Number(data.f86) <= 0) {
+      throw new Error("行情响应无效");
+    }
+    return jsonOutput_({ rc: 0, data: {
+      f57: String(data.f57), f58: String(data.f58 || ""), f43: Number(data.f43),
+      f170: data.f170 == null || data.f170 === "-" ? null : Number(data.f170),
+      f59: Number(data.f59), f86: Number(data.f86)
+    }});
+  } catch (err) {
+    return jsonOutput_({ rc: 1, error: err.toString() });
+  }
+}
+
+function jsonOutput_(value) {
+  return ContentService.createTextOutput(JSON.stringify(value))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
