@@ -3962,6 +3962,9 @@
       });
     }
 
+    await performGlobalStockResearch(symbolOrQuery);
+  }
+
   // ==========================================================================
   // Client-Side Offline Engine: Wind Research, Calendar & AI Fallback
   // ==========================================================================
