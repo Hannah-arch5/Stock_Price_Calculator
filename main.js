@@ -48,6 +48,52 @@ async function syncToGDrive(dataStr) {
     }
 }
 
+async function pullFromGDrive() {
+    const url = getGDriveSyncUrl();
+    if (!url) return null;
+    try {
+        console.log('[GDrive] Checking for newer data on Google Drive...');
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) {
+            const remoteData = await res.json();
+            if (remoteData && remoteData.historyRecords !== undefined) {
+                let shouldUpdate = false;
+                if (!fs.existsSync(DATA_FILE)) {
+                    shouldUpdate = true;
+                } else {
+                    try {
+                        const localContent = fs.readFileSync(DATA_FILE, 'utf8');
+                        const localData = JSON.parse(localContent);
+                        const remoteTime = new Date(remoteData.lastUpdated || 0).getTime();
+                        const localTime = new Date(localData.lastUpdated || 0).getTime();
+                        if (remoteTime > localTime) {
+                            shouldUpdate = true;
+                            console.log(`[GDrive] Remote cloud data is newer (${remoteTime} > ${localTime})`);
+                        }
+                    } catch (e) {
+                        shouldUpdate = true;
+                    }
+                }
+
+                if (shouldUpdate) {
+                    console.log('[GDrive] Updating local file with Google Drive data...');
+                    fs.writeFileSync(DATA_FILE, JSON.stringify(remoteData, null, 2));
+                    if (mainWindow && !mainWindow.isDestroyed()) {
+                        mainWindow.webContents.send('sync-data-updated', remoteData);
+                    }
+                    broadcastSyncData(remoteData);
+                    return remoteData;
+                } else {
+                    console.log('[GDrive] Local data is already up to date.');
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('[GDrive] Pull error:', e.message);
+    }
+    return null;
+}
+
 // --- Real-time Sync Server for iPhone (PWA) ---
 const SYNC_PORT = 7321;
 let mainWindow = null;
@@ -671,6 +717,9 @@ function startSyncServer() {
             } else if (pathname === '/mobile.js') {
                 filePath = path.join(__dirname, 'mobile.js');
                 contentType = 'application/javascript; charset=utf-8';
+            } else if (pathname === '/sw.js') {
+                filePath = path.join(__dirname, 'sw.js');
+                contentType = 'application/javascript; charset=utf-8';
             } else if (pathname === '/manifest.json') {
                 filePath = path.join(__dirname, 'manifest.json');
                 contentType = 'application/manifest+json; charset=utf-8';
@@ -1046,10 +1095,23 @@ app.whenReady().then(() => {
     startCloudflareTunnel();
     createWindow();
 
+    // Pull latest data from Google Drive on startup
+    pullFromGDrive();
+
+    // Periodic check every 3 minutes while running
+    setInterval(() => {
+        pullFromGDrive();
+    }, 180000);
+
+    app.on('browser-window-focus', () => {
+        pullFromGDrive();
+    });
+
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
         }
+        pullFromGDrive();
     });
 });
 
