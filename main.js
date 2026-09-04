@@ -1031,6 +1031,7 @@ function createWindow() {
         titleBarStyle: 'hiddenInset',
         alwaysOnTop: true,
         backgroundColor: '#030303',
+        show: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
@@ -1039,6 +1040,10 @@ function createWindow() {
             plugins: true,
             webviewTag: true
         }
+    });
+
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
     });
 
     mainWindow.loadFile('index.html');
