@@ -3404,6 +3404,23 @@ html, body {
     <script src="mobile-quotes.js?v=6.0.3"></script>
     <script src="mobile.js?v=6.0.3"></script>
     <script>
+      (function() {
+        const CURRENT_VER = '6.0.3';
+        fetch('./version.json?_t=' + Date.now(), { cache: 'no-store' })
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.version && data.version !== CURRENT_VER) {
+              if ('caches' in window) {
+                caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+                  window.location.replace('./mobile.html?_v=' + Date.now());
+                });
+              } else {
+                window.location.replace('./mobile.html?_v=' + Date.now());
+              }
+            }
+          }).catch(() => {});
+      })();
+
       // Extra safety: unregister any legacy service workers and clear caches
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {

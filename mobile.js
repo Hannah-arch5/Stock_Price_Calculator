@@ -1374,6 +1374,10 @@
 
   function openExportSheet(context = 'all') {
     currentExportContext = context;
+    // Safety check: remove Word button dynamically in case old HTML was cached
+    const wordBtn = document.querySelector('[data-export-type="word"]');
+    if (wordBtn) wordBtn.remove();
+
     const sheet = document.getElementById('export-options-sheet');
     const backdrop = document.getElementById('edit-sheet-backdrop');
     const subtitle = document.getElementById('export-sheet-subtitle');
