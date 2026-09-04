@@ -1765,9 +1765,21 @@
       const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed && parsed.historyRecords) {
+        if (parsed && Array.isArray(parsed.historyRecords) && parsed.historyRecords.length > 0) {
           appState = parsed;
           renderApp();
+          return;
+        }
+      }
+      // Read inline initial data payload if localStorage cache is empty
+      const initEl = document.getElementById('initial-ticker-data');
+      if (initEl && initEl.textContent.trim()) {
+        const parsed = JSON.parse(initEl.textContent.trim());
+        if (parsed && Array.isArray(parsed.historyRecords) && parsed.historyRecords.length > 0) {
+          appState = parsed;
+          saveToCache(parsed);
+          renderApp();
+          return;
         }
       }
     } catch (e) {
@@ -1794,17 +1806,22 @@
   }
 
   async function fetchFromTickerData() {
-    try {
-      const res = await fetch('./ticker-data.json?_ts=' + Date.now());
-      if (res.ok) {
-        const json = await res.json();
-        if (json && Array.isArray(json.historyRecords) && json.historyRecords.length > 0) {
-          saveToCache(json);
-          return true;
+    const candidatePaths = [
+      './ticker-data.json?_ts=' + Date.now(),
+      '/Stock_Price_Calculator_Ticker/ticker-data.json?_ts=' + Date.now(),
+      'ticker-data.json?_ts=' + Date.now()
+    ];
+    for (const p of candidatePaths) {
+      try {
+        const res = await fetch(p);
+        if (res.ok) {
+          const json = await res.json();
+          if (json && Array.isArray(json.historyRecords) && json.historyRecords.length > 0) {
+            saveToCache(json);
+            return true;
+          }
         }
-      }
-    } catch (e) {
-      console.warn('[TickerData] fetch error:', e);
+      } catch (e) {}
     }
     return false;
   }
@@ -1838,25 +1855,40 @@
     const syncText = document.getElementById('sync-text');
 
     if (isManual) {
-      showToast('正在同步最新标的数据...');
       if (syncText) syncText.textContent = 'SYNCING';
+    }
+
+    // Immediately mark LIVE if we already have records from cache or inline
+    if (appState.historyRecords && appState.historyRecords.length > 0) {
+      if (indicator) indicator.className = 'status-pill status-live';
+      if (syncText) syncText.textContent = 'LIVE';
     }
 
     const isGitHubPages = window.location.hostname.includes('github.io');
 
-    // 1. If on GitHub Pages, load same-origin ./ticker-data.json immediately (50ms, zero lag, no VPN needed!)
+    // 1. If on GitHub Pages, load same-origin ticker-data.json immediately (50ms, zero lag, no VPN needed!)
     if (isGitHubPages) {
       const cdnOk = await fetchFromTickerData();
-      if (cdnOk) {
+      if (cdnOk || (appState.historyRecords && appState.historyRecords.length > 0)) {
         if (indicator) indicator.className = 'status-pill status-live';
         if (syncText) syncText.textContent = 'LIVE';
-        if (isManual) showToast(`已加载 ${appState.historyRecords.length} 只标的`);
+        // Non-blocking background GDrive check
+        const gdriveUrl = getGDriveUrl();
+        if (gdriveUrl) {
+          fetchFromGDrive(gdriveUrl).then(ok => {
+            if (ok) {
+              if (indicator) indicator.className = 'status-pill status-live';
+              if (syncText) syncText.textContent = 'LIVE';
+            }
+          }).catch(() => {});
+        }
+        return;
       }
     } else {
       // If on home LAN, try local Mac server first
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const timeoutId = setTimeout(() => controller.abort(), 1200);
         const res = await fetch('/api/data', { signal: controller.signal });
         clearTimeout(timeoutId);
         if (res.ok) {
@@ -1864,7 +1896,6 @@
           saveToCache(json);
           if (indicator) indicator.className = 'status-pill status-live';
           if (syncText) syncText.textContent = 'LIVE';
-          if (isManual) showToast(`已从电脑同步 ${json.historyRecords.length} 只标的`);
           try {
             const infoRes = await fetch('/api/server-info', { signal: AbortSignal.timeout(1000) });
             if (infoRes.ok) {
@@ -1879,14 +1910,13 @@
       }
     }
 
-    // 2. Fetch directly from Google Drive Web App (works on 5G / Mac off!)
+    // 2. Fetch from Google Drive Web App (works on 5G / Mac off)
     const gdriveUrl = getGDriveUrl();
     if (gdriveUrl) {
       const ok = await fetchFromGDrive(gdriveUrl);
       if (ok) {
         if (indicator) indicator.className = 'status-pill status-live';
         if (syncText) syncText.textContent = 'LIVE';
-        if (isManual) showToast(`云端最新同步: ${appState.historyRecords.length} 只标的`);
         return;
       }
     }
@@ -1896,7 +1926,6 @@
       if (indicator) indicator.className = 'status-pill status-live';
       if (syncText) syncText.textContent = 'LIVE';
     } else {
-      // Last resort fallback
       const fallbackOk = await fetchFromTickerData();
       if (fallbackOk) {
         if (indicator) indicator.className = 'status-pill status-live';
@@ -1904,7 +1933,6 @@
       } else {
         if (indicator) indicator.className = 'status-pill status-offline';
         if (syncText) syncText.textContent = 'OFFLINE';
-        if (isManual) showToast('连接超时，请检查网络');
       }
     }
   }

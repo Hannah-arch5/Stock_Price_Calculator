@@ -14,6 +14,13 @@
         padding: 0;
       }
     </style>
+    <script>
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768) {
+        if (!window.location.pathname.endsWith('mobile.html')) {
+          window.location.replace('./mobile.html' + window.location.search);
+        }
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;500;700;900&family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
