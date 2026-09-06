@@ -155,6 +155,19 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
+### v6.0.8: iOS Lifecycle Instant Wakeup Sync & Resilient Cloud Polling [LOCKED & TAGGED: v6.0.8]
+- **Official Version Name**: `Ticker Pocket v6.0.8` (Mobile Edition).
+- **Tag**: `v6.0.8` | **Commit**: `c662783` | **Date**: `2026-09-06`
+- **iOS Lifecycle Instant Wakeup Sync (手机唤醒即刻自动同步)**:
+  - 增加 `visibilitychange`、`pageshow` 与 `focus` 手机生命周期唤醒监听。当用户解锁手机或从后台切换回 Ticker PWA / Safari 时，立即在后台自动从云端静默拉取电脑端的最新修改数据。
+  - 将 GitHub Pages 独立端自动轮询周期缩短至 20 秒，Google Apps Script 容错超时提升至 15 秒以应对冷启动。
+- **Desktop & Workspace Data Harmonization (桌面与仓库数据自动同步)**:
+  - 桌面端保存（`save-data`）时，自动注入最新修改毫秒级时间戳，并同步更新工作区 `ticker-data.json`。
+  - 更新钓达股份（`002865`）、特发信息（`000070`）、澜起科技（`688008`）、工业富联（`601138`）等全量最新策略笔记。
+- **Version Indicator & Script Bumping**:
+  - 主页最下方右下角版本升级为 `TICKER POCKET v6.0.8`。
+  - 脚本与缓存引用升级为 `mobile.js?v=6.0.8` 与 `mobile-quotes.js?v=6.0.8`。
+
 ### v6.0.7: Timestamp-Aware Cloud Sync Engine & Real-Time Desktop Data Alignment [LOCKED & TAGGED: v6.0.7]
 - **Official Version Name**: `Ticker Pocket v6.0.7` (Mobile Edition).
 - **Tag**: `v6.0.7` | **Commit**: `da95027` | **Date**: `2026-09-06`
@@ -239,7 +252,8 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 ## 5. Locked Version Archive & Rollback Guide (锁定版本归档与回退索引)
 
 | 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
-| **`v6.0.7`** | `da95027` | 2026-09-06 | **当前最新稳定版**：时间戳防回退同步引擎、桌面与仓库数据自动同步、版本号 `v6.0.7`。 | `git checkout v6.0.7` |
+| **`v6.0.8`** | `c662783` | 2026-09-06 | **当前最新稳定版**：iOS 生命周期即刻唤醒同步、20s 云端轮询、版本号 `v6.0.8`。 | `git checkout v6.0.8` |
+| **`v6.0.7`** | `da95027` | 2026-09-06 | **时间戳防回退版**：时间戳防回退同步引擎、桌面与仓库数据自动同步、版本号 `v6.0.7`。 | `git checkout v6.0.7` |
 | **`v6.0.6`** | `aa39a87` | 2026-09-05 | **全美股行情版**：美股全实时行情接入（AAPL、APP、NVDA 等）、版本号 `v6.0.6`。 | `git checkout v6.0.6` |
 | **`v6.0.5`** | `7545114` | 2026-09-05 | **静默导出版**：静默 PDF 导出（彻底去除顶部绿色横幅）。 | `git checkout v6.0.5` |
 | **`v6.0.4`** | `d3b74b5` | 2026-09-05 | **纯净标题版**：去除备忘录大标题多余括号。 | `git checkout v6.0.4` |

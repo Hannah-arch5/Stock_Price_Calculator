@@ -2050,7 +2050,7 @@
   async function fetchFromGDrive(gdriveUrl) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       const fetchUrl = gdriveUrl + (gdriveUrl.includes('?') ? '&' : '?') + '_ts=' + Date.now();
       const res = await fetch(fetchUrl, {
         method: 'GET',
@@ -2061,6 +2061,7 @@
       if (res.ok) {
         const json = await res.json();
         if (json && Array.isArray(json.historyRecords) && json.historyRecords.length > 0) {
+          if (!json.lastUpdated) json.lastUpdated = Date.now();
           saveToCache(json, true);
           return true;
         }
@@ -2096,7 +2097,7 @@
       } catch (_) {}
     }
 
-    // 2. If on local LAN, check local Mac server
+    // 2. If on local LAN and cloud sync didn't run, check local Mac server
     if (!isGitHubPages && !cloudSynced) {
       try {
         const controller = new AbortController();
@@ -2123,8 +2124,11 @@
       }
     }
 
-    // 3. Same-origin static ticker-data.json fallback
-    const cdnOk = await fetchFromTickerData();
+    // 3. Same-origin static ticker-data.json fallback if cloud sync was not successful
+    let cdnOk = false;
+    if (!cloudSynced) {
+      cdnOk = await fetchFromTickerData();
+    }
 
     if (cloudSynced || cdnOk || (appState.historyRecords && appState.historyRecords.length > 0)) {
       if (indicator) indicator.className = 'status-pill status-live';
@@ -2139,13 +2143,32 @@
 
   // Setup Real-Time Sync & Background Polling
   function setupEventStream() {
+    // Add visibilitychange / pageshow / focus event listeners for mobile instant wakeup
+    if (!window._syncListenersAttached) {
+      window._syncListenersAttached = true;
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          console.log('[Mobile] App became visible, triggering immediate sync...');
+          fetchLatestData(false);
+        }
+      });
+      window.addEventListener('pageshow', () => {
+        console.log('[Mobile] Page show event, triggering immediate sync...');
+        fetchLatestData(false);
+      });
+      window.addEventListener('focus', () => {
+        fetchLatestData(false);
+      });
+    }
+
     const isGitHubPages = window.location.hostname.includes('github.io');
 
     if (isGitHubPages) {
-      // On GitHub Pages, periodically refresh from Google Drive every 45s
-      setInterval(() => {
+      // On GitHub Pages / standalone mobile, periodically refresh from Google Drive every 20s
+      if (window._ghSyncInterval) clearInterval(window._ghSyncInterval);
+      window._ghSyncInterval = setInterval(() => {
         fetchLatestData(false);
-      }, 45000);
+      }, 20000);
       return;
     }
 
