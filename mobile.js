@@ -1998,10 +1998,20 @@
     }
   }
 
-  // Save to local storage cache
-  function saveToCache(data) {
+  // Save to local storage cache with timestamp comparison
+  function saveToCache(data, force = false) {
     try {
-      data.lastUpdated = Date.now();
+      if (!data || !Array.isArray(data.historyRecords) || data.historyRecords.length === 0) return;
+      const localUpdated = appState?.lastUpdated ? Number(appState.lastUpdated) : 0;
+      const remoteUpdated = data.lastUpdated ? Number(data.lastUpdated) : Date.now();
+      
+      // If not forced, never let older data overwrite newer data
+      if (!force && localUpdated > 0 && remoteUpdated < localUpdated) {
+        console.log(`[Cache] Preserved newer local state (${localUpdated} > ${remoteUpdated})`);
+        return;
+      }
+      
+      data.lastUpdated = remoteUpdated;
       localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       appState = data;
       renderApp();
@@ -2028,7 +2038,7 @@
         if (res.ok) {
           const json = await res.json();
           if (json && Array.isArray(json.historyRecords) && json.historyRecords.length > 0) {
-            saveToCache(json);
+            saveToCache(json, false);
             return true;
           }
         }
@@ -2040,7 +2050,7 @@
   async function fetchFromGDrive(gdriveUrl) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4500); // 4.5s max timeout
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
       const fetchUrl = gdriveUrl + (gdriveUrl.includes('?') ? '&' : '?') + '_ts=' + Date.now();
       const res = await fetch(fetchUrl, {
         method: 'GET',
@@ -2051,7 +2061,7 @@
       if (res.ok) {
         const json = await res.json();
         if (json && Array.isArray(json.historyRecords) && json.historyRecords.length > 0) {
-          saveToCache(json);
+          saveToCache(json, true);
           return true;
         }
       }
@@ -2077,26 +2087,17 @@
 
     const isGitHubPages = window.location.hostname.includes('github.io');
 
-    // 1. If on GitHub Pages, load same-origin ticker-data.json immediately (50ms, zero lag, no VPN needed!)
-    if (isGitHubPages) {
-      const cdnOk = await fetchFromTickerData();
-      if (cdnOk || (appState.historyRecords && appState.historyRecords.length > 0)) {
-        if (indicator) indicator.className = 'status-pill status-live';
-        if (syncText) syncText.textContent = 'LIVE';
-        // Non-blocking background GDrive check
-        const gdriveUrl = getGDriveUrl();
-        if (gdriveUrl) {
-          fetchFromGDrive(gdriveUrl).then(ok => {
-            if (ok) {
-              if (indicator) indicator.className = 'status-pill status-live';
-              if (syncText) syncText.textContent = 'LIVE';
-            }
-          }).catch(() => {});
-        }
-        return;
-      }
-    } else {
-      // If on home LAN, try local Mac server first
+    // 1. Prioritize Google Drive Cloud Sync (works across all 5G / Wi-Fi networks)
+    const gdriveUrl = getGDriveUrl();
+    let cloudSynced = false;
+    if (gdriveUrl) {
+      try {
+        cloudSynced = await fetchFromGDrive(gdriveUrl);
+      } catch (_) {}
+    }
+
+    // 2. If on local LAN, check local Mac server
+    if (!isGitHubPages && !cloudSynced) {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 1200);
@@ -2104,7 +2105,7 @@
         clearTimeout(timeoutId);
         if (res.ok) {
           const json = await res.json();
-          saveToCache(json);
+          saveToCache(json, true);
           if (indicator) indicator.className = 'status-pill status-live';
           if (syncText) syncText.textContent = 'LIVE';
           try {
@@ -2114,37 +2115,25 @@
               if (info.gdriveUrl) localStorage.setItem(GDRIVE_CACHE_KEY, info.gdriveUrl);
             }
           } catch(_) {}
+          if (isManual) showAlert('已从电脑端同步最新数据', 'success', 2000);
           return;
         }
       } catch (e) {
-        console.log('[Mobile] Mac server unreachable, trying cloud...');
+        console.log('[Mobile] Mac server unreachable, trying cloud/cdn...');
       }
     }
 
-    // 2. Fetch from Google Drive Web App (works on 5G / Mac off)
-    const gdriveUrl = getGDriveUrl();
-    if (gdriveUrl) {
-      const ok = await fetchFromGDrive(gdriveUrl);
-      if (ok) {
-        if (indicator) indicator.className = 'status-pill status-live';
-        if (syncText) syncText.textContent = 'LIVE';
-        return;
-      }
-    }
+    // 3. Same-origin static ticker-data.json fallback
+    const cdnOk = await fetchFromTickerData();
 
-    // 3. Fallback: If cache has records, display them and mark status
-    if (appState.historyRecords && appState.historyRecords.length > 0) {
+    if (cloudSynced || cdnOk || (appState.historyRecords && appState.historyRecords.length > 0)) {
       if (indicator) indicator.className = 'status-pill status-live';
       if (syncText) syncText.textContent = 'LIVE';
+      if (isManual) showAlert('数据已同步至最新状态', 'success', 2000);
     } else {
-      const fallbackOk = await fetchFromTickerData();
-      if (fallbackOk) {
-        if (indicator) indicator.className = 'status-pill status-live';
-        if (syncText) syncText.textContent = 'LIVE';
-      } else {
-        if (indicator) indicator.className = 'status-pill status-offline';
-        if (syncText) syncText.textContent = 'OFFLINE';
-      }
+      if (indicator) indicator.className = 'status-pill status-offline';
+      if (syncText) syncText.textContent = 'OFFLINE';
+      if (isManual) showAlert('网络连接异常，未能拉取到最新数据', 'warning', 2500);
     }
   }
 

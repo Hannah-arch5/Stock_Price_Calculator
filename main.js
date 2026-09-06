@@ -863,6 +863,13 @@ ipcMain.on('save-data', (event, dataStr) => {
         const tempFile = `${DATA_FILE}.tmp`;
         const backupFile = `${DATA_FILE}.bak`;
         
+        let parsed = null;
+        try {
+            parsed = JSON.parse(dataStr);
+            parsed.lastUpdated = Date.now();
+            dataStr = JSON.stringify(parsed, null, 2);
+        } catch(e) {}
+
         // 1. Write to a temporary file (atomic write)
         fs.writeFileSync(tempFile, dataStr, 'utf8');
         
@@ -874,13 +881,18 @@ ipcMain.on('save-data', (event, dataStr) => {
         // 3. Atomically replace the old file with the new file
         fs.renameSync(tempFile, DATA_FILE);
 
-        // 4. Broadcast live update to mobile clients
+        // 4. Update local workspace ticker-data.json if present
         try {
-            const parsed = JSON.parse(dataStr);
-            broadcastSyncData(parsed);
+            const wsTickerData = path.join(__dirname, 'ticker-data.json');
+            fs.writeFileSync(wsTickerData, dataStr, 'utf8');
         } catch(e) {}
 
-        // 5. Asynchronously push to Google Drive
+        // 5. Broadcast live update to mobile clients
+        if (parsed) {
+            broadcastSyncData(parsed);
+        }
+
+        // 6. Asynchronously push to Google Drive
         syncToGDrive(dataStr);
     } catch(e) {
         console.error('[main] save-data error:', e);

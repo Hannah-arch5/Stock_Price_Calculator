@@ -155,6 +155,19 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
   - Embedded Studio Noir AI chat dialog pre-loaded with current stock's financial fundamentals and business background.
   - Quick-prompt chips: 核心护城河分析、财报风险评估、估值深度评估.
 
+### v6.0.7: Timestamp-Aware Cloud Sync Engine & Real-Time Desktop Data Alignment [LOCKED & TAGGED: v6.0.7]
+- **Official Version Name**: `Ticker Pocket v6.0.7` (Mobile Edition).
+- **Tag**: `v6.0.7` | **Commit**: `da95027` | **Date**: `2026-09-06`
+- **Timestamp-Aware Dynamic Cache Synchronization (时间戳防回退同步引擎)**:
+  - 手机端 `saveToCache()` 引入基于时间戳的动态保护机制，杜绝静态文件覆盖云端/本地最新修改数据。
+  - 手机主页下拉或手动点击同步时，优先拉取 Google Drive / 局域网最新数据，并提示明确同步状态反馈。
+- **Desktop & Workspace Data Harmonization (桌面与仓库数据自动同步)**:
+  - 桌面端保存（`save-data`）时，自动注入最新修改毫秒级时间戳，并同步更新工作区 `ticker-data.json`。
+  - 更新三角防务（`300775`）与工业富联（`601138`）等全量13条标的最新交易笔录。
+- **Version Indicator & Script Bumping**:
+  - 主页最下方右下角版本升级为 `TICKER POCKET v6.0.7`。
+  - 脚本与缓存引用升级为 `mobile.js?v=6.0.7` 与 `mobile-quotes.js?v=6.0.7`。
+
 ### v6.0.6: US Market Full Real-time Quotes Integration [LOCKED & TAGGED: v6.0.6]
 - **Official Version Name**: `Ticker Pocket v6.0.6` (Mobile Edition).
 - **Tag**: `v6.0.6` | **Commit**: `aa39a87` | **Date**: `2026-09-05`
@@ -226,8 +239,8 @@ The app features intelligent automatic market detection via `getMarketInfo(symbo
 ## 5. Locked Version Archive & Rollback Guide (锁定版本归档与回退索引)
 
 | 锁定版本 Tag | 对应 Commit | 发布日期 | 核心功能与主要改动说明 | 回退切换命令 |
-| :--- | :--- | :--- | :--- | :--- |
-| **`v6.0.6`** | `aa39a87` | 2026-09-05 | **当前最新稳定版**：美股全实时行情接入（AAPL、APP、NVDA 等）、版本号 `v6.0.6`。 | `git checkout v6.0.6` |
+| **`v6.0.7`** | `da95027` | 2026-09-06 | **当前最新稳定版**：时间戳防回退同步引擎、桌面与仓库数据自动同步、版本号 `v6.0.7`。 | `git checkout v6.0.7` |
+| **`v6.0.6`** | `aa39a87` | 2026-09-05 | **全美股行情版**：美股全实时行情接入（AAPL、APP、NVDA 等）、版本号 `v6.0.6`。 | `git checkout v6.0.6` |
 | **`v6.0.5`** | `7545114` | 2026-09-05 | **静默导出版**：静默 PDF 导出（彻底去除顶部绿色横幅）。 | `git checkout v6.0.5` |
 | **`v6.0.4`** | `d3b74b5` | 2026-09-05 | **纯净标题版**：去除备忘录大标题多余括号。 | `git checkout v6.0.4` |
 | **`v6.0.3`** | `8bff239` | 2026-09-05 | **导出精简版**：精简导出菜单（保留备忘录与 PDF）、纯净 PDF 打印预览（去除顶部悬浮黑框）。 | `git checkout v6.0.3` |
